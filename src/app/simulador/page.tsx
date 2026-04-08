@@ -129,30 +129,43 @@ export default function SimuladorPage() {
   };
 
   const avanzarSiguientePregunta = () => {
-    const nuevaPreguntaGlobal = preguntaActualGlobal + 1;
-    const nuevasRespondidasDeMateria = preguntasRespondidasDeMateriaActual + 1;
-
-    // 1. Verificar si llegamos al final del examen global
-    if (nuevaPreguntaGlobal > TOTAL_PREGUNTAS) {
-      setEstado('finalizado');
-      return;
-    }
-
-    setPreguntaActualGlobal(nuevaPreguntaGlobal);
     setEstado('cargando');
 
-    // 2. Verificar si cambiamos de materia
-    if (nuevasRespondidasDeMateria >= ESTRUCTURA_EXAMEN[materiaActualIndex].cantidad) {
-      // Avanzar a la siguiente materia
-      const siguienteMateriaIndex = materiaActualIndex + 1;
-      setMateriaActualIndex(siguienteMateriaIndex);
-      setPreguntasRespondidasDeMateriaActual(0);
-      obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
-    } else {
-      // Seguir en la misma materia
-      setPreguntasRespondidasDeMateriaActual(nuevasRespondidasDeMateria);
-      obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id);
-    }
+    setPreguntasRespondidasDeMateriaActual(prevRespondidas => {
+      const nuevasRespondidas = prevRespondidas + 1;
+      
+      setMateriaActualIndex(prevMateriaIndex => {
+        let siguienteMateriaIndex = prevMateriaIndex;
+        let buscarSiguienteMateria = false;
+
+        if (nuevasRespondidas >= ESTRUCTURA_EXAMEN[prevMateriaIndex].cantidad) {
+          siguienteMateriaIndex = prevMateriaIndex + 1;
+          buscarSiguienteMateria = true;
+        }
+
+        setPreguntaActualGlobal(prevGlobal => {
+          const nuevaGlobal = prevGlobal + 1;
+          
+          if (nuevaGlobal > TOTAL_PREGUNTAS) {
+            setEstado('finalizado');
+            return prevGlobal;
+          }
+
+          if (buscarSiguienteMateria) {
+             setTimeout(() => setPreguntasRespondidasDeMateriaActual(0), 0);
+             obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
+          } else {
+             obtenerPregunta(ESTRUCTURA_EXAMEN[prevMateriaIndex].id);
+          }
+
+          return nuevaGlobal;
+        });
+
+        return siguienteMateriaIndex;
+      });
+
+      return nuevasRespondidas;
+    });
   };
 
   const continuarDespuesRetroalimentacion = () => {
