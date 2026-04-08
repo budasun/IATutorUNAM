@@ -60,7 +60,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   "pregunta": "Texto de la pregunta",
   "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
   "respuestaCorrecta": "Opción correcta exacta",
-  "justificacionDescarte": "Explicación de por qué las otras 3 opciones son incorrectas"
+  "justificacionDescarte": "La propiedad 'justificacionDescarte' debe ser una explicación exhaustiva y educativa. Si la materia es Matemáticas, Física o Química, DEBES mostrar el procedimiento paso a paso para llegar a la respuesta correcta y explicar brevemente por qué los otros incisos son errores comunes. Para las demás materias, aporta un dato complementario o contexto histórico/científico que amplíe el conocimiento del alumno sobre el tema."
 }`;
 
     const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
