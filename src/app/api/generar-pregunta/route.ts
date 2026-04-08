@@ -35,6 +35,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 
 Tu tarea es generar UNA pregunta de opción múltiple para un examen de admisión UNAM (Área 3: Ciencias Sociales).
 
+REGLA DE FORMATO MATEMÁTICO: Para Matemáticas, Física y Química, está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes. Debes usar caracteres Unicode para superíndices (ejemplo: x², x³, x⁴, y⁵) o subíndices químicos (ejemplo: H₂O, CO₂). El texto debe verse idéntico a un libro de texto académico.
+
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
   "pregunta": "Texto de la pregunta",
