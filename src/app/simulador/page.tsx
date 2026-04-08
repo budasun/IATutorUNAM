@@ -129,22 +129,10 @@ export default function SimuladorPage() {
   };
 
   const avanzarSiguientePregunta = () => {
-    const nuevasRespondidasDeMateria = preguntasRespondidasDeMateriaActual + 1;
     const nuevaPreguntaGlobal = preguntaActualGlobal + 1;
-    let siguienteMateriaIndex: number | undefined;
+    const nuevasRespondidasDeMateria = preguntasRespondidasDeMateriaActual + 1;
 
-    if (nuevasRespondidasDeMateria >= materiaActual.cantidad) {
-      siguienteMateriaIndex = materiaActualIndex + 1;
-      if (siguienteMateriaIndex >= ESTRUCTURA_EXAMEN.length) {
-        setEstado('finalizado');
-        return;
-      }
-      setMateriaActualIndex(siguienteMateriaIndex);
-      setPreguntasRespondidasDeMateriaActual(0);
-    } else {
-      setPreguntasRespondidasDeMateriaActual(nuevasRespondidasDeMateria);
-    }
-
+    // 1. Verificar si llegamos al final del examen global
     if (nuevaPreguntaGlobal > TOTAL_PREGUNTAS) {
       setEstado('finalizado');
       return;
@@ -152,10 +140,19 @@ export default function SimuladorPage() {
 
     setPreguntaActualGlobal(nuevaPreguntaGlobal);
     setEstado('cargando');
-    const materiaParaSiguiente = siguienteMateriaIndex !== undefined
-      ? ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id
-      : materiaActual.id;
-    obtenerPregunta(materiaParaSiguiente);
+
+    // 2. Verificar si cambiamos de materia
+    if (nuevasRespondidasDeMateria >= ESTRUCTURA_EXAMEN[materiaActualIndex].cantidad) {
+      // Avanzar a la siguiente materia
+      const siguienteMateriaIndex = materiaActualIndex + 1;
+      setMateriaActualIndex(siguienteMateriaIndex);
+      setPreguntasRespondidasDeMateriaActual(0);
+      obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
+    } else {
+      // Seguir en la misma materia
+      setPreguntasRespondidasDeMateriaActual(nuevasRespondidasDeMateria);
+      obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id);
+    }
   };
 
   const continuarDespuesRetroalimentacion = () => {
