@@ -28,41 +28,66 @@ export default function Home() {
         </header>
 
         <section className="mb-12">
-          <h2 className="text-xl font-semibold text-[#D4AF37] mb-4">Acceso Rápido</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 className="text-xl font-semibold text-[#D4AF37] mb-6 text-center">Elige tu modalidad</h2>
+          <div className="flex flex-col gap-4">
             <Link
-              href="/simulador"
-              className="group bg-[#002B5C] hover:bg-[#003d7a] border-2 border-[#D4AF37] rounded-2xl p-8 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-[#D4AF37]/20"
+              href="/diagnostico"
+              className="group bg-gradient-to-r from-[#D4AF37] to-[#c9a432] hover:from-[#e5c349] hover:to-[#D4AF37] rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-[#D4AF37]/30"
             >
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-3xl">📝</span>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-3xl">🎯</span>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Iniciar Simulador</h3>
-                  <p className="text-gray-300 text-sm">Pon a prueba tus conocimientos</p>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-[#002B5C] mb-1">Examen Diagnóstico</h3>
+                  <p className="text-[#002B5C]/80 text-sm">
+                    Prueba rápida de 9 materias para detectar debilidades
+                  </p>
                 </div>
+                <span className="text-2xl text-[#002B5C]">→</span>
               </div>
             </Link>
 
-            <div className="bg-[#002B5C]/50 border border-[#D4AF37]/30 rounded-2xl p-8">
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="w-16 h-16 bg-[#D4AF37]/20 rounded-full flex items-center justify-center">
+            <Link
+              href="/simulador"
+              className="group bg-gradient-to-r from-[#002B5C] to-[#003d7a] hover:from-[#003d7a] hover:to-[#004a94] border-2 border-[#D4AF37] rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-[#002B5C]/30"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-[#D4AF37] rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-3xl">🏆</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-white mb-1">Mega-Simulacro 120</h3>
+                  <p className="text-gray-300 text-sm">
+                    Examen completo con estructura oficial UNAM (3 horas)
+                  </p>
+                </div>
+                <span className="text-2xl text-[#D4AF37]">→</span>
+              </div>
+            </Link>
+
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-3xl">📚</span>
                 </div>
-                <div className="w-full">
-                  <h3 className="text-2xl font-bold text-white mb-3">Explorar Temario</h3>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {materias.map((materia) => (
-                      <span
-                        key={materia}
-                        className="px-3 py-1 bg-[#D4AF37]/20 text-[#D4AF37] text-xs rounded-full border border-[#D4AF37]/30"
-                      >
-                        {materia}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-white mb-1">Temario y Guías</h3>
+                  <p className="text-gray-400 text-sm">
+                    Consulta los temas oficiales de Área 3
+                  </p>
                 </div>
+                <span className="text-xl text-gray-500">Próximamente</span>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {materias.map((materia) => (
+                  <span
+                    key={materia}
+                    className="px-3 py-1 bg-white/10 text-gray-300 text-xs rounded-full border border-white/20"
+                  >
+                    {materia}
+                  </span>
+                ))}
               </div>
             </div>
           </div>

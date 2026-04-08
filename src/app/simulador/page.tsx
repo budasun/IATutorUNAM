@@ -6,7 +6,7 @@ import { getSupabase } from '@/lib/supabase/client';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
 
-type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'finalizado';
+type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion' | 'finalizado';
 
 const TIEMPO_EXAMEN = 3 * 60 * 60;
 
@@ -24,8 +24,17 @@ const ESTRUCTURA_EXAMEN = [
 
 const TOTAL_PREGUNTAS = ESTRUCTURA_EXAMEN.reduce((acc, item) => acc + item.cantidad, 0);
 
+const MATERIAS_EXACTAS = ['matematicas', 'fisica', 'quimica'];
+
+interface ResultadoMateria {
+  aciertos: number;
+  errores: number;
+  total: number;
+}
+
 export default function SimuladorPage() {
   const [estado, setEstado] = useState<EstadoExamen>('configuracion');
+  const [pausado, setPausado] = useState(false);
   const [pregunta, setPregunta] = useState<PreguntaGenerada | null>(null);
   const [tiempoRestante, setTiempoRestante] = useState(TIEMPO_EXAMEN);
   const [aciertos, setAciertos] = useState(0);
@@ -34,9 +43,18 @@ export default function SimuladorPage() {
   const [materiaActualIndex, setMateriaActualIndex] = useState(0);
   const [preguntasRespondidasDeMateriaActual, setPreguntasRespondidasDeMateriaActual] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
   const nombreMateriaActual = TEMARIO_UNAM.materias.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
+
+  const inicializarResultadosPorMateria = () => {
+    const resultados: Record<string, ResultadoMateria> = {};
+    ESTRUCTURA_EXAMEN.forEach(item => {
+      resultados[item.id] = { aciertos: 0, errores: 0, total: item.cantidad };
+    });
+    return resultados;
+  };
 
   const obtenerPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
@@ -67,12 +85,15 @@ export default function SimuladorPage() {
     setMateriaActualIndex(0);
     setPreguntasRespondidasDeMateriaActual(0);
     setTiempoRestante(TIEMPO_EXAMEN);
+    setPausado(false);
+    setResultadosPorMateria(inicializarResultadosPorMateria());
     setEstado('cargando');
     obtenerPregunta(ESTRUCTURA_EXAMEN[0].id);
   };
 
   useEffect(() => {
     if (estado !== 'activo') return;
+    if (pausado) return;
     if (tiempoRestante <= 0) {
       setEstado('finalizado');
       return;
@@ -81,20 +102,35 @@ export default function SimuladorPage() {
       setTiempoRestante((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [estado, tiempoRestante]);
+  }, [estado, pausado, tiempoRestante]);
 
   const handleRespuesta = (opcion: string) => {
     if (estado !== 'activo' || !pregunta) return;
 
-    if (opcion === pregunta.respuestaCorrecta) {
+    const esCorrecta = opcion === pregunta.respuestaCorrecta;
+    const materiaId = materiaActual.id;
+
+    if (esCorrecta) {
       setAciertos((prev) => prev + 1);
+      setResultadosPorMateria(prev => ({
+        ...prev,
+        [materiaId]: { ...prev[materiaId], aciertos: prev[materiaId].aciertos + 1 }
+      }));
+      avanzarSiguientePregunta();
     } else {
       setErrores((prev) => prev + 1);
+      setResultadosPorMateria(prev => ({
+        ...prev,
+        [materiaId]: { ...prev[materiaId], errores: prev[materiaId].errores + 1 }
+      }));
+      setPausado(true);
+      setEstado('retroalimentacion');
     }
+  };
 
+  const avanzarSiguientePregunta = () => {
     const nuevasRespondidasDeMateria = preguntasRespondidasDeMateriaActual + 1;
     const nuevaPreguntaGlobal = preguntaActualGlobal + 1;
-
     let siguienteMateriaIndex: number | undefined;
 
     if (nuevasRespondidasDeMateria >= materiaActual.cantidad) {
@@ -116,10 +152,15 @@ export default function SimuladorPage() {
 
     setPreguntaActualGlobal(nuevaPreguntaGlobal);
     setEstado('cargando');
-    const materiaParaSiguiente = siguienteMateriaIndex !== undefined 
-      ? ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id 
+    const materiaParaSiguiente = siguienteMateriaIndex !== undefined
+      ? ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id
       : materiaActual.id;
     obtenerPregunta(materiaParaSiguiente);
+  };
+
+  const continuarDespuesRetroalimentacion = () => {
+    setPausado(false);
+    avanzarSiguientePregunta();
   };
 
   const guardarProgreso = async () => {
@@ -155,10 +196,6 @@ export default function SimuladorPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const calcularPorcentaje = (aciertos: number, total: number) => {
-    return total > 0 ? Math.round((aciertos / total) * 100) : 0;
-  };
-
   if (estado === 'configuracion') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4">
@@ -170,7 +207,7 @@ export default function SimuladorPage() {
             Mega-Simulador UNAM
           </h1>
           <p className="text-gray-300 text-center mb-8">{TEMARIO_UNAM.area}</p>
-          
+
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-md border border-[#D4AF37]/30 mb-6">
             <h2 className="font-semibold text-lg mb-4 text-[#D4AF37] text-center">Estructura del Examen</h2>
             <div className="space-y-2 text-sm">
@@ -199,10 +236,10 @@ export default function SimuladorPage() {
                 <span>📋</span> {TOTAL_PREGUNTAS} preguntas de opción múltiple
               </li>
               <li className="flex items-center gap-2">
-                <span>🎯</span> Sin retroalimentación inmediata
+                <span>🎯</span> Retroalimentación al instante si fallas
               </li>
               <li className="flex items-center gap-2">
-                <span>📊</span> Resultados al finalizar
+                <span>📊</span> Resultados detallados por materia
               </li>
             </ul>
             <button
@@ -236,17 +273,52 @@ export default function SimuladorPage() {
     );
   }
 
+  if (estado === 'retroalimentacion' && pregunta) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
+        <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-3 text-yellow-400 font-bold text-xl mb-4">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            Respuesta Incorrecta
+          </div>
+          <p className="text-gray-300 text-sm mb-3">
+            <strong className="text-white">Materia:</strong> {nombreMateriaActual}
+          </p>
+          <div className="bg-white/5 rounded-xl p-4 mb-4">
+            <p className="text-white font-medium mb-2">Tu respuesta:</p>
+            <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
+          </div>
+          <div className="bg-green-500/10 rounded-xl p-4 mb-4">
+            <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
+            <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
+          </div>
+          <div className="bg-[#002B5C]/50 rounded-xl p-4">
+            <p className="text-[#D4AF37] font-semibold mb-2">📖 Explicación Pedagógica:</p>
+            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+              {pregunta.justificacionDescarte}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-auto">
+          <button
+            onClick={continuarDespuesRetroalimentacion}
+            className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349] transition"
+          >
+            Entendido, continuar →
+          </button>
+          <p className="text-center text-gray-500 text-sm mt-3">
+            ⏱️ Reloj pausado - Tómate tu tiempo para leer
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (estado === 'finalizado') {
-    const porcentajeTotal = calcularPorcentaje(aciertos, TOTAL_PREGUNTAS);
-    
-    const resultadosPorMateria = ESTRUCTURA_EXAMEN.map((item, index) => {
-      const materia = TEMARIO_UNAM.materias.find(m => m.id === item.id);
-      return {
-        id: item.id,
-        nombre: materia?.nombre || item.id,
-        cantidad: item.cantidad,
-      };
-    });
+    const porcentajeTotal = Math.round((aciertos / TOTAL_PREGUNTAS) * 100);
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4">
@@ -276,17 +348,32 @@ export default function SimuladorPage() {
 
           <h2 className="text-xl font-semibold text-[#D4AF37] mb-4">Desglose por Materia</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            {resultadosPorMateria.map((materia) => (
-              <div
-                key={materia.id}
-                className="bg-white/5 border border-white/10 rounded-xl p-4"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-white">{materia.nombre}</span>
-                  <span className="text-[#D4AF37] font-bold">{materia.cantidad} preg.</span>
+            {ESTRUCTURA_EXAMEN.map((item) => {
+              const materia = TEMARIO_UNAM.materias.find(m => m.id === item.id);
+              const resultado = resultadosPorMateria[item.id] || { aciertos: 0, errores: 0 };
+              const porcentajeMateria = Math.round((resultado.aciertos / item.cantidad) * 100);
+              const esDominado = porcentajeMateria >= 70;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`rounded-xl p-4 border ${
+                    esDominado ? 'bg-green-500/20 border-green-500/50' : 'bg-red-500/20 border-red-500/50'
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium text-white">{materia?.nombre || item.id}</span>
+                    <span className={`text-sm font-bold ${esDominado ? 'text-green-400' : 'text-red-400'}`}>
+                      {porcentajeMateria}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-300">✓ {resultado.aciertos}/{item.cantidad}</span>
+                    <span className="text-red-300">✗ {resultado.errores}/{item.cantidad}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex flex-col gap-3">
@@ -294,13 +381,13 @@ export default function SimuladorPage() {
               href="/diagnostico"
               className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg text-center hover:bg-[#e5c349] transition"
             >
-              Hacer Diagnóstico
+              Hacer Nuevo Diagnóstico
             </Link>
             <button
-              onClick={() => setEstado('configuracion')}
+              onClick={iniciarExamen}
               className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold hover:bg-white/20 transition"
             >
-              Repetir Simulacro
+              Repetir Mega-Simulacro
             </button>
             <Link
               href="/"
