@@ -1,4 +1,10 @@
-import Link from "next/link";
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getSupabase } from '@/lib/supabase/client';
+import type { Session } from '@supabase/supabase-js';
 
 const materias = [
   "Historia",
@@ -12,9 +18,71 @@ const materias = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    
+    await supabase.auth.signOut();
+    router.refresh();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white">
       <div className="max-w-2xl mx-auto px-6 py-12">
+        {!loading && (
+          <div className="mb-6">
+            {session ? (
+              <div className="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3 border border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-500/30 rounded-full flex items-center justify-center">
+                    <span className="text-sm">✓</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Sesión activa</p>
+                    <p className="text-sm text-white truncate max-w-[200px]">{session.user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-gray-400 hover:text-red-400 transition"
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="block w-full bg-[#D4AF37] text-[#002B5C] py-3 rounded-xl font-bold text-center hover:bg-[#e5c349] transition"
+              >
+                Iniciar Sesión / Registrarse
+              </Link>
+            )}
+          </div>
+        )}
+
         <header className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#D4AF37] mb-6">
             <span className="text-4xl">🎓</span>
