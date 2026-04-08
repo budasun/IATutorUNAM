@@ -43,6 +43,7 @@ export default function SimuladorPage() {
   const [materiaActualIndex, setMateriaActualIndex] = useState(0);
   const [preguntasRespondidasDeMateriaActual, setPreguntasRespondidasDeMateriaActual] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [errorApi, setErrorApi] = useState<string | null>(null);
   const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
@@ -58,6 +59,7 @@ export default function SimuladorPage() {
 
   const obtenerPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
+    setErrorApi(null);
     try {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
@@ -70,9 +72,11 @@ export default function SimuladorPage() {
         setEstado('activo');
       } else {
         console.error('Error de API:', data.error);
+        setErrorApi(data.error || 'La IA está saturada por peticiones rápidas.');
       }
     } catch (error) {
       console.error('Error obteniendo pregunta:', error);
+      setErrorApi('Error de conexión. Revisa tu internet.');
     } finally {
       setLoading(false);
     }
@@ -271,14 +275,30 @@ export default function SimuladorPage() {
     );
   }
 
-  if (loading) {
+  if (loading || errorApi) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p className="text-xl text-[#D4AF37] font-semibold">Generando pregunta...</p>
-        <p className="text-gray-400 mt-2">
-          {preguntaActualGlobal} de {TOTAL_PREGUNTAS}
-        </p>
+        {errorApi ? (
+          <div className="text-center bg-red-500/10 p-6 rounded-2xl border border-red-500/30 max-w-md">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="text-xl text-red-400 font-bold mb-2">Pausa técnica</h2>
+            <p className="text-gray-300 mb-6">{errorApi}<br/><br/>(Suele ocurrir al responder muy rápido).</p>
+            <button
+              onClick={() => obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id)}
+              className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
+            >
+              Reintentar Pregunta
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mb-6"></div>
+            <p className="text-xl text-[#D4AF37] font-semibold">Generando pregunta...</p>
+            <p className="text-gray-400 mt-2">
+              {preguntaActualGlobal} de {TOTAL_PREGUNTAS}
+            </p>
+          </>
+        )}
       </div>
     );
   }
