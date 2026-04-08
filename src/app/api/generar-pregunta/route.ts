@@ -7,6 +7,18 @@ import type {
   PreguntaGenerada 
 } from '@/types/ia';
 
+const MAPA_SUPERINDICES: Record<string, string> = {
+  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+  '-': '⁻', '+': '⁺',
+};
+
+function formatearExponentes(texto: string): string {
+  return texto.replace(/\^([0-9+\-]+)/g, (match, exponente) => {
+    return exponente.split('').map((char: string) => MAPA_SUPERINDICES[char] || char).join('');
+  });
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<RespuestaGenerarPregunta>> {
   try {
     const body: SolicitudGenerarPregunta = await request.json();
@@ -35,7 +47,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 
 Tu tarea es generar UNA pregunta de opción múltiple para un examen de admisión UNAM (Área 3: Ciencias Sociales).
 
-REGLA DE FORMATO MATEMÁTICO: Para Matemáticas, Física y Química, está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes. Debes usar caracteres Unicode para superíndices (ejemplo: x², x³, x⁴, y⁵) o subíndices químicos (ejemplo: H₂O, CO₂). El texto debe verse idéntico a un libro de texto académico.
+REGLA DE FORMATO MATEMÁTICO (CRÍTICO): 
+- Está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes.
+- DEBES usar caracteres Unicode para superíndices.
+- Ejemplos CORRECTOS vs INCORRECTOS:
+  * Correcto: x², y³, z⁴, 2ⁿ, eˣ
+  * Incorrecto: x^2, y^3, z^4, 2^n, e^x
+- Para subíndices químicos usa: H₂O, CO₂, NaCl, O₂, N₂
 
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
@@ -45,7 +63,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   "justificacionDescarte": "Explicación de por qué las otras 3 opciones son incorrectas"
 }`;
 
-    const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}.`;
+    const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
     const chatCompletion = await groqClient.chat.completions.create({
       messages: [
@@ -67,24 +85,31 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       );
     }
 
-    console.log('Groq response:', responseContent);
+    console.log('Groq response (raw):', responseContent);
 
     let parsedQuestion: unknown = JSON.parse(responseContent);
     const question = parsedQuestion as Record<string, unknown>;
     
-    const pregunta = String(question.pregunta || '');
+    const preguntaRaw = String(question.pregunta || '');
     const opcionesRaw = question.opciones;
-    const opciones = Array.isArray(opcionesRaw) ? opcionesRaw.map(String) : [];
-    const respuestaCorrecta = String(question.respuestaCorrecta || '');
-    const justificacionDescarte = String(question.justificacionDescarte || '');
+    const respuestaCorrectaRaw = String(question.respuestaCorrecta || '');
+    const justificacionDescarteRaw = String(question.justificacionDescarte || '');
 
-    if (!pregunta || opciones.length !== 4 || !respuestaCorrecta || !justificacionDescarte) {
+    if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw) {
       console.log('Validation failed. parsed:', parsedQuestion);
       return NextResponse.json(
         { success: false, error: 'La respuesta de Groq no tiene el formato esperado' },
         { status: 500 }
       );
     }
+
+    const pregunta = formatearExponentes(preguntaRaw);
+    const opciones = opcionesRaw.map((op: unknown) => formatearExponentes(String(op)));
+    const respuestaCorrecta = formatearExponentes(respuestaCorrectaRaw);
+    const justificacionDescarte = formatearExponentes(justificacionDescarteRaw);
+
+    console.log('Pregunta formateada:', pregunta);
+    console.log('Opciones formateadas:', opciones);
 
     const validatedQuestion: PreguntaGenerada = {
       pregunta,
