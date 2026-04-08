@@ -18,11 +18,14 @@ export default function DiagnosticoPage() {
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [pregunta, setPregunta] = useState<PreguntaGenerada | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorApi, setErrorApi] = useState<string | null>(null);
+  const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
 
   const totalMaterias = TEMARIO_UNAM.materias.length;
 
   const fetchPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
+    setErrorApi(null);
     try {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
@@ -35,9 +38,11 @@ export default function DiagnosticoPage() {
         setPantalla('examen');
       } else {
         console.error('Error de API:', data.error);
+        setErrorApi(data.error || 'La IA está saturada por peticiones rápidas.');
       }
     } catch (error) {
       console.error('Error obteniendo pregunta:', error);
+      setErrorApi('Error de conexión. Revisa tu internet.');
     } finally {
       setLoading(false);
     }
@@ -48,17 +53,6 @@ export default function DiagnosticoPage() {
     setResultados([]);
     setPantalla('cargando');
     fetchPregunta(TEMARIO_UNAM.materias[0].id);
-  };
-
-  const avanzarSiguientePregunta = () => {
-    const siguienteIndice = indiceMateria + 1;
-    if (siguienteIndice >= totalMaterias) {
-      setPantalla('resultados');
-    } else {
-      setIndiceMateria(siguienteIndice);
-      setPantalla('cargando');
-      fetchPregunta(TEMARIO_UNAM.materias[siguienteIndice].id);
-    }
   };
 
   const handleRespuesta = (opcion: string) => {
@@ -73,16 +67,22 @@ export default function DiagnosticoPage() {
     };
 
     setResultados((prev) => [...prev, nuevoResultado]);
-
-    if (fueCorrecto) {
-      avanzarSiguientePregunta();
-    } else {
-      setPantalla('retroalimentacion');
-    }
+    setFueCorrecta(fueCorrecto);
+    setPantalla('retroalimentacion');
   };
 
   const continuarDespuesRetroalimentacion = () => {
-    avanzarSiguientePregunta();
+    setPantalla('cargando');
+
+    setIndiceMateria(prevIndice => {
+      const siguienteIndice = prevIndice + 1;
+      if (siguienteIndice >= totalMaterias) {
+        setPantalla('resultados');
+        return prevIndice;
+      }
+      fetchPregunta(TEMARIO_UNAM.materias[siguienteIndice].id);
+      return siguienteIndice;
+    });
   };
 
   if (pantalla === 'bienvenida') {
@@ -103,7 +103,7 @@ export default function DiagnosticoPage() {
             <ul className="space-y-2 text-gray-300 mb-6">
               <li>• 9 preguntas (una por materia)</li>
               <li>• Sin límite de tiempo</li>
-              <li>• Retroalimentación al instante si fallas</li>
+              <li>• Retroalimentación en cada pregunta</li>
               <li>• Plan de estudio personalizado</li>
             </ul>
             <button
@@ -124,14 +124,30 @@ export default function DiagnosticoPage() {
     );
   }
 
-  if (pantalla === 'cargando') {
+  if (loading || errorApi) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col items-center justify-center">
-        <div className="w-20 h-20 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p className="text-xl text-[#D4AF37] font-semibold">Preparando siguiente materia...</p>
-        <p className="text-gray-400 mt-2">
-          {indiceMateria + 1} de {totalMaterias}
-        </p>
+        {errorApi ? (
+          <div className="text-center bg-red-500/10 p-6 rounded-2xl border border-red-500/30 max-w-md">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2 className="text-xl text-red-400 font-bold mb-2">Pausa técnica</h2>
+            <p className="text-gray-300 mb-6">{errorApi}<br/><br/>(Suele ocurrir al responder muy rápido).</p>
+            <button
+              onClick={() => fetchPregunta(TEMARIO_UNAM.materias[indiceMateria].id)}
+              className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
+            >
+              Reintentar Pregunta
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="w-20 h-20 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mb-6"></div>
+            <p className="text-xl text-[#D4AF37] font-semibold">Preparando siguiente materia...</p>
+            <p className="text-gray-400 mt-2">
+              {indiceMateria + 1} de {totalMaterias}
+            </p>
+          </>
+        )}
       </div>
     );
   }
@@ -141,28 +157,49 @@ export default function DiagnosticoPage() {
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
-        <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-6 mb-6">
-          <div className="flex items-center gap-3 text-yellow-400 font-bold text-xl mb-4">
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            Respuesta Incorrecta
+        <div className={`rounded-2xl p-6 mb-6 ${
+          fueCorrecta 
+            ? 'bg-green-500/20 border border-green-500/50' 
+            : 'bg-yellow-500/20 border border-yellow-500/50'
+        }`}>
+          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${
+            fueCorrecta ? 'text-green-400' : 'text-yellow-400'
+          }`}>
+            {fueCorrecta ? (
+              <>
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                ¡Excelente! Respuesta Correcta
+              </>
+            ) : (
+              <>
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Respuesta Incorrecta
+              </>
+            )}
           </div>
           <p className="text-gray-300 text-sm mb-3">
             <strong className="text-white">Materia:</strong> {materiaActual.nombre}
           </p>
-          <div className="bg-white/5 rounded-xl p-4 mb-4">
-            <p className="text-white font-medium mb-2">Tu respuesta:</p>
-            <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
-          </div>
+          {!fueCorrecta && (
+            <div className="bg-white/5 rounded-xl p-4 mb-4">
+              <p className="text-white font-medium mb-2">Tu respuesta:</p>
+              <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
+            </div>
+          )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
             <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
-            <p className="text-[#D4AF37] font-semibold mb-2">📖 Explicación Pedagógica:</p>
+            <p className="text-[#D4AF37] font-semibold mb-2">
+              {fueCorrecta ? '💡 Explicación y Fórmula:' : '📖 Explicación Pedagógica:'}
+            </p>
             <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-              {pregunta.justificacionDescarte}
+              {fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte}
             </p>
           </div>
         </div>
@@ -175,7 +212,7 @@ export default function DiagnosticoPage() {
             Entendido, continuar →
           </button>
           <p className="text-center text-gray-500 text-sm mt-3">
-            ⏱️ Reloj pausado - Tómate tu tiempo para leer
+            Tómate tu tiempo para leer la explicación
           </p>
         </div>
       </div>
@@ -225,8 +262,8 @@ export default function DiagnosticoPage() {
                     : 'bg-red-500/20 border-red-500/50'
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-white">{resultado.materia}</span>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-medium text-white">{resultado.materia}</span>
                   <span className="text-xl">
                     {resultado.acierto ? '✓' : '✗'}
                   </span>

@@ -60,7 +60,8 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   "pregunta": "Texto de la pregunta",
   "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
   "respuestaCorrecta": "Opción correcta exacta",
-  "justificacionDescarte": "La propiedad 'justificacionDescarte' debe ser una explicación exhaustiva y educativa. Si la materia es Matemáticas, Física o Química, DEBES mostrar el procedimiento paso a paso para llegar a la respuesta correcta y explicar brevemente por qué los otros incisos son errores comunes. Para las demás materias, aporta un dato complementario o contexto histórico/científico que amplíe el conocimiento del alumno sobre el tema."
+  "justificacionDescarte": "La propiedad 'justificacionDescarte' debe ser una explicación exhaustiva y educativa. Si la materia es Matemáticas, Física o Química, DEBES mostrar el procedimiento paso a paso para llegar a la respuesta correcta y explicar brevemente por qué los otros incisos son errores comunes. Para las demás materias, aporta un dato complementario o contexto histórico/científico que amplíe el conocimiento del alumno sobre el tema.",
+  "explicacionCorrecta": "Explicación detallada de por qué es correcta, con ejemplos adicionales. Si es Matemáticas, Física o Química, muestra la fórmula exacta y explícala paso a paso."
 }`;
 
     const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
@@ -94,8 +95,9 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const opcionesRaw = question.opciones;
     const respuestaCorrectaRaw = String(question.respuestaCorrecta || '');
     const justificacionDescarteRaw = String(question.justificacionDescarte || '');
+    const explicacionCorrectaRaw = String(question.explicacionCorrecta || '');
 
-    if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw) {
+    if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw || !explicacionCorrectaRaw) {
       console.log('Validation failed. parsed:', parsedQuestion);
       return NextResponse.json(
         { success: false, error: 'La respuesta de Groq no tiene el formato esperado' },
@@ -107,6 +109,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const opciones = opcionesRaw.map((op: unknown) => formatearExponentes(String(op)));
     const respuestaCorrecta = formatearExponentes(respuestaCorrectaRaw);
     const justificacionDescarte = formatearExponentes(justificacionDescarteRaw);
+    const explicacionCorrecta = formatearExponentes(explicacionCorrectaRaw);
 
     console.log('Pregunta formateada:', pregunta);
     console.log('Opciones formateadas:', opciones);
@@ -116,6 +119,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       opciones: opciones as [string, string, string, string],
       respuestaCorrecta,
       justificacionDescarte,
+      explicacionCorrecta,
     };
 
     return NextResponse.json({

@@ -45,6 +45,7 @@ export default function SimuladorPage() {
   const [loading, setLoading] = useState(false);
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
+  const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
   const nombreMateriaActual = TEMARIO_UNAM.materias.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
@@ -114,22 +115,24 @@ export default function SimuladorPage() {
     const esCorrecta = opcion === pregunta.respuestaCorrecta;
     const materiaId = materiaActual.id;
 
+    setFueCorrecta(esCorrecta);
+
     if (esCorrecta) {
       setAciertos((prev) => prev + 1);
       setResultadosPorMateria(prev => ({
         ...prev,
         [materiaId]: { ...prev[materiaId], aciertos: prev[materiaId].aciertos + 1 }
       }));
-      avanzarSiguientePregunta();
     } else {
       setErrores((prev) => prev + 1);
       setResultadosPorMateria(prev => ({
         ...prev,
         [materiaId]: { ...prev[materiaId], errores: prev[materiaId].errores + 1 }
       }));
-      setPausado(true);
-      setEstado('retroalimentacion');
     }
+
+    setPausado(true);
+    setEstado('retroalimentacion');
   };
 
   const avanzarSiguientePregunta = () => {
@@ -306,28 +309,49 @@ export default function SimuladorPage() {
   if (estado === 'retroalimentacion' && pregunta) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
-        <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-6 mb-6">
-          <div className="flex items-center gap-3 text-yellow-400 font-bold text-xl mb-4">
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            Respuesta Incorrecta
+        <div className={`rounded-2xl p-6 mb-6 ${
+          fueCorrecta 
+            ? 'bg-green-500/20 border border-green-500/50' 
+            : 'bg-yellow-500/20 border border-yellow-500/50'
+        }`}>
+          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${
+            fueCorrecta ? 'text-green-400' : 'text-yellow-400'
+          }`}>
+            {fueCorrecta ? (
+              <>
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                ¡Excelente! Respuesta Correcta
+              </>
+            ) : (
+              <>
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                Respuesta Incorrecta
+              </>
+            )}
           </div>
           <p className="text-gray-300 text-sm mb-3">
             <strong className="text-white">Materia:</strong> {nombreMateriaActual}
           </p>
-          <div className="bg-white/5 rounded-xl p-4 mb-4">
-            <p className="text-white font-medium mb-2">Tu respuesta:</p>
-            <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
-          </div>
-          <div className="bg-green-500/10 rounded-xl p-4 mb-4">
+          {!fueCorrecta && (
+            <div className="bg-white/5 rounded-xl p-4 mb-4">
+              <p className="text-white font-medium mb-2">Tu respuesta:</p>
+              <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
+            </div>
+          )}
+          <div className={`rounded-xl p-4 mb-4 ${fueCorrecta ? 'bg-green-500/10' : 'bg-green-500/10'}`}>
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
             <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
-            <p className="text-[#D4AF37] font-semibold mb-2">📖 Explicación Pedagógica:</p>
+            <p className="text-[#D4AF37] font-semibold mb-2">
+              {fueCorrecta ? '💡 Profundiza tu conocimiento:' : '📖 Explicación Pedagógica:'}
+            </p>
             <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-              {pregunta.justificacionDescarte}
+              {fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte}
             </p>
           </div>
         </div>

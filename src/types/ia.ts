@@ -3,6 +3,7 @@ export interface PreguntaGenerada {
   opciones: [string, string, string, string];
   respuestaCorrecta: string;
   justificacionDescarte: string;
+  explicacionCorrecta: string;
 }
 
 export interface SolicitudGenerarPregunta {
