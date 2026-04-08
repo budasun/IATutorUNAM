@@ -6,7 +6,7 @@ export interface PreguntaGenerada {
 }
 
 export interface SolicitudGenerarPregunta {
-  tema: string;
+  id_materia: string;
 }
 
 export interface RespuestaGenerarPregunta {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { groqClient } from '@/lib/groq/client';
-import { METODOLOGIA_UNAM } from '@/data/unam_temario';
+import { METODOLOGIA_UNAM, TEMARIO_UNAM } from '@/data/unam_temario';
 import type { 
   SolicitudGenerarPregunta, 
   RespuestaGenerarPregunta,
@@ -11,14 +11,25 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
   try {
     const body: SolicitudGenerarPregunta = await request.json();
     
-    const { tema } = body;
+    const { id_materia } = body;
     
-    if (!tema || typeof tema !== 'string') {
+    if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
-        { success: false, error: 'El campo "tema" es requerido y debe ser un string' },
+        { success: false, error: 'El campo "id_materia" es requerido y debe ser un string' },
         { status: 400 }
       );
     }
+
+    const materia = TEMARIO_UNAM.materias.find(m => m.id === id_materia);
+    
+    if (!materia) {
+      return NextResponse.json(
+        { success: false, error: `Materia "${id_materia}" no encontrada. Materias válidas: ${TEMARIO_UNAM.materias.map(m => m.id).join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    const temaAleatorio = materia.temas[Math.floor(Math.random() * materia.temas.length)];
 
     const systemPrompt = `${METODOLOGIA_UNAM.instrucciones_tutor}
 
@@ -32,7 +43,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   "justificacionDescarte": "Explicación de por qué las otras 3 opciones son incorrectas"
 }`;
 
-    const userPrompt = `Genera una pregunta sobre el tema: "${tema}".`;
+    const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}.`;
 
     const chatCompletion = await groqClient.chat.completions.create({
       messages: [
