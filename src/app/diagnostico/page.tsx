@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
+import { getSupabase } from '@/lib/supabase/client';
 
 type Pantalla = 'bienvenida' | 'cargando' | 'examen' | 'retroalimentacion' | 'resultados';
 
@@ -78,11 +79,37 @@ export default function DiagnosticoPage() {
       const siguienteIndice = prevIndice + 1;
       if (siguienteIndice >= totalMaterias) {
         setPantalla('resultados');
+        guardarProgresoDiagnostico(resultados);
         return prevIndice;
       }
       fetchPregunta(TEMARIO_UNAM.materias[siguienteIndice].id);
       return siguienteIndice;
     });
+  };
+
+  const guardarProgresoDiagnostico = async (resultadosFinales: Resultado[]) => {
+    const sb = getSupabase();
+    if (!sb) {
+      console.log('Supabase no configurado, progreso no guardado');
+      return;
+    }
+    
+    const aciertos = resultadosFinales.filter(r => r.acierto).length;
+    const errores = resultadosFinales.filter(r => !r.acierto).length;
+    const total = resultadosFinales.length;
+    const porcentaje = Math.round((aciertos / total) * 100);
+
+    const { error } = await sb.from('progreso_simulacros').insert({
+      tipo: 'diagnostico',
+      aciertos,
+      errores,
+      porcentaje,
+      fecha: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error('Error guardando progreso del diagnóstico:', error);
+    }
   };
 
   if (pantalla === 'bienvenida') {
