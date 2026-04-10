@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'system', content: promptText }],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama3-8b-8192',
       temperature: 0.3,
       response_format: { type: 'json_object' },
     });
@@ -46,8 +46,12 @@ export async function POST(req: Request) {
     const guia = JSON.parse(respuestaIA);
 
     return NextResponse.json({ success: true, data: guia });
-  } catch (error) {
-    console.error('Error generando guía:', error);
-    return NextResponse.json({ success: false, error: 'Error al generar la guía de estudio' }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('🔥 ERROR CRÍTICO EN GROQ (Guías):', error);
+    const mensajeError = error instanceof Error ? error.message : 'Error desconocido de la API';
+    return NextResponse.json({ 
+      success: false, 
+      error: `Fallo en la IA: ${mensajeError}` 
+    }, { status: 500 });
   }
 }
