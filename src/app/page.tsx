@@ -134,7 +134,7 @@ export default function Home() {
               </div>
             </Link>
 
-            <div className="bg-white/5 border border-white/20 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
+            <Link href="/temario" className="block bg-white/5 border border-white/20 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-3xl">📚</span>
@@ -145,7 +145,6 @@ export default function Home() {
                     Consulta los temas oficiales de Área 3
                   </p>
                 </div>
-                <span className="text-xl text-gray-500">Próximamente</span>
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
                 {materias.map((materia) => (
@@ -157,7 +156,7 @@ export default function Home() {
                   </span>
                 ))}
               </div>
-            </div>
+            </Link>
           </div>
         </section>
 
