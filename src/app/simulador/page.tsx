@@ -6,7 +6,9 @@ import { getSupabase } from '@/lib/supabase/client';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
 
-type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion' | 'finalizado';
+type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion' | 'finalizado' | 'recuperacion';
+
+const STORAGE_KEY = 'ia_tutor_simulador_save';
 
 const TIEMPO_EXAMEN = 3 * 60 * 60;
 
@@ -46,6 +48,44 @@ export default function SimuladorPage() {
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
+
+  useEffect(() => {
+    const guardado = localStorage.getItem(STORAGE_KEY);
+    if (guardado) {
+      setEstado('recuperacion');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (estado === 'configuracion' || estado === 'recuperacion' || estado === 'finalizado') return;
+    const saveData = {
+      estado, pausado, pregunta, tiempoRestante, aciertos, errores,
+      preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria]);
+
+  const restaurarSesion = () => {
+    const guardado = localStorage.getItem(STORAGE_KEY);
+    if (guardado) {
+      const data = JSON.parse(guardado);
+      setEstado(data.estado || 'activo');
+      setPausado(data.pausado ?? false);
+      setPregunta(data.pregunta || null);
+      setTiempoRestante(data.tiempoRestante || TIEMPO_EXAMEN);
+      setAciertos(data.aciertos || 0);
+      setErrores(data.errores || 0);
+      setPreguntaActualGlobal(data.preguntaActualGlobal || 1);
+      setMateriaActualIndex(data.materiaActualIndex || 0);
+      setPreguntasRespondidasDeMateriaActual(data.preguntasRespondidasDeMateriaActual || 0);
+      setResultadosPorMateria(data.resultadosPorMateria || inicializarResultadosPorMateria());
+    }
+  };
+
+  const descartarSesion = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setEstado('configuracion');
+  };
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
   const nombreMateriaActual = TEMARIO_UNAM.materias.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
@@ -211,6 +251,8 @@ export default function SimuladorPage() {
     } else {
       console.log('¡Progreso del simulacro guardado exitosamente en la base de datos!');
     }
+    
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   useEffect(() => {
@@ -289,6 +331,39 @@ export default function SimuladorPage() {
           >
             ← Volver al inicio
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (estado === 'recuperacion') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex items-center justify-center">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#D4AF37] mb-6">
+              <span className="text-5xl">⏸️</span>
+            </div>
+            <h1 className="text-3xl font-bold text-[#D4AF37] mb-3">Tienes un Mega-Simulacro en pausa</h1>
+            <p className="text-gray-300">
+              ¿Quieres continuar donde lo dejaste?
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={restaurarSesion}
+              className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349] transition"
+            >
+              Continuar examen
+            </button>
+            <button
+              onClick={descartarSesion}
+              className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold hover:bg-white/20 transition"
+            >
+              Descartar y empezar de nuevo
+            </button>
+          </div>
         </div>
       </div>
     );
