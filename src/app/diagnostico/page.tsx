@@ -119,7 +119,7 @@ export default function DiagnosticoPage() {
     if (error) {
       console.error('Error guardando progreso del diagnóstico:', error);
     } else {
-      console.log('¡Progreso guardado exitosamente en la base de datos!');
+      console.log('¡Progreso guardado exitosamente!');
     }
   };
 
