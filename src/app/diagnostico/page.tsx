@@ -93,6 +93,13 @@ export default function DiagnosticoPage() {
       console.log('Supabase no configurado, progreso no guardado');
       return;
     }
+
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (!session) {
+      console.error('No hay usuario logeado. No se puede guardar el progreso.');
+      return;
+    }
     
     const aciertos = resultadosFinales.filter(r => r.acierto).length;
     const errores = resultadosFinales.filter(r => !r.acierto).length;
@@ -100,15 +107,19 @@ export default function DiagnosticoPage() {
     const porcentaje = Math.round((aciertos / total) * 100);
 
     const { error } = await sb.from('progreso_simulacros').insert({
+      user_id: session.user.id,
       tipo: 'diagnostico',
-      aciertos,
-      errores,
-      porcentaje,
+      aciertos: aciertos,
+      errores: errores,
+      total_preguntas: total,
+      porcentaje: porcentaje,
       fecha: new Date().toISOString(),
     });
 
     if (error) {
       console.error('Error guardando progreso del diagnóstico:', error);
+    } else {
+      console.log('¡Progreso guardado exitosamente en la base de datos!');
     }
   };
 
