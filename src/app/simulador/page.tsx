@@ -186,14 +186,30 @@ export default function SimuladorPage() {
       console.log('Supabase no configurado, progreso no guardado');
       return;
     }
+
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (!session) {
+      console.error('No hay usuario logeado. No se puede guardar el progreso.');
+      return;
+    }
+
+    const porcentaje = Math.round((aciertos / TOTAL_PREGUNTAS) * 100);
+
     const { error } = await sb.from('progreso_simulacros').insert({
+      user_id: session.user.id,
+      tipo: 'simulador',
       aciertos,
       errores,
       total_preguntas: TOTAL_PREGUNTAS,
+      porcentaje,
       fecha: new Date().toISOString(),
     });
+
     if (error) {
-      console.error('Error guardando progreso:', error);
+      console.error('Error guardando progreso del simulacro:', error);
+    } else {
+      console.log('¡Progreso del simulacro guardado exitosamente en la base de datos!');
     }
   };
 
