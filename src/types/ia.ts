@@ -4,6 +4,7 @@ export interface PreguntaGenerada {
   respuestaCorrecta: string;
   justificacionDescarte: string;
   explicacionCorrecta: string;
+  textoLectura?: string;
 }
 
 export interface SolicitudGenerarPregunta {
@@ -12,6 +13,6 @@ export interface SolicitudGenerarPregunta {
 
 export interface RespuestaGenerarPregunta {
   success: boolean;
-  data?: PreguntaGenerada;
+  data?: PreguntaGenerada | PreguntaGenerada[];
   error?: string;
 }

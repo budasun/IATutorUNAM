@@ -48,6 +48,7 @@ export default function SimuladorPage() {
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
+  const [bufferPreguntas, setBufferPreguntas] = useState<PreguntaGenerada[]>([]);
 
   useEffect(() => {
     const guardado = localStorage.getItem(STORAGE_KEY);
@@ -60,10 +61,10 @@ export default function SimuladorPage() {
     if (estado === 'configuracion' || estado === 'recuperacion' || estado === 'finalizado') return;
     const saveData = {
       estado, pausado, pregunta, tiempoRestante, aciertos, errores,
-      preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria
+      preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria]);
+  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas]);
 
   const restaurarSesion = () => {
     const guardado = localStorage.getItem(STORAGE_KEY);
@@ -79,6 +80,7 @@ export default function SimuladorPage() {
       setMateriaActualIndex(data.materiaActualIndex || 0);
       setPreguntasRespondidasDeMateriaActual(data.preguntasRespondidasDeMateriaActual || 0);
       setResultadosPorMateria(data.resultadosPorMateria || inicializarResultadosPorMateria());
+      setBufferPreguntas(data.bufferPreguntas || []);
     }
   };
 
@@ -101,6 +103,16 @@ export default function SimuladorPage() {
   const obtenerPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
     setErrorApi(null);
+
+    if (bufferPreguntas.length > 0) {
+      const siguiente = bufferPreguntas[0];
+      setBufferPreguntas(prev => prev.slice(1));
+      setPregunta(siguiente);
+      setEstado('activo');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
@@ -108,8 +120,11 @@ export default function SimuladorPage() {
         body: JSON.stringify({ id_materia: materiaId }),
       });
       const data = await res.json();
-      if (data.success && data.data) {
-        setPregunta(data.data);
+      
+      if (data.success && data.data && data.data.length > 0) {
+        const preguntasNuevas: PreguntaGenerada[] = data.data;
+        setPregunta(preguntasNuevas[0]);
+        setBufferPreguntas(preguntasNuevas.slice(1));
         setEstado('activo');
       } else {
         console.error('Error de API:', data.error);
@@ -121,7 +136,7 @@ export default function SimuladorPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [bufferPreguntas]);
 
   const iniciarExamen = () => {
     setAciertos(0);
@@ -577,6 +592,17 @@ export default function SimuladorPage() {
           style={{ width: `${(preguntaActualGlobal / TOTAL_PREGUNTAS) * 100}%` }}
         />
       </div>
+
+      {pregunta.textoLectura && (
+        <div className="bg-[#002B5C] border border-[#D4AF37]/30 rounded-2xl p-6 mb-6 shadow-lg shadow-[#001a3d]">
+          <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2">
+            <span>📖</span> Lectura
+          </h3>
+          <p className="text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5">
+            {pregunta.textoLectura}
+          </p>
+        </div>
+      )}
 
       <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6 border border-white/10">
         <p className="text-lg font-medium text-white leading-relaxed">{pregunta.pregunta}</p>

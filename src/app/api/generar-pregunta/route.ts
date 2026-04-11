@@ -42,10 +42,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     }
 
     const temaAleatorio = materia.temas[Math.floor(Math.random() * materia.temas.length)];
+    
+    const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
+    const cantidad = esLectura ? 3 : 1;
 
     const systemPrompt = `${METODOLOGIA_UNAM.instrucciones_tutor}
 
-Tu tarea es generar UNA pregunta de opción múltiple para un examen de admisión UNAM (Área 3: Ciencias Sociales).
+Tu tarea es generar ${cantidad} pregunta(s) de nivel preparatoria.
+${esLectura ? 'REGLA DE COMPRENSIÓN LECTORA: Escribe un texto de lectura original (2-3 párrafos). Luego genera 3 preguntas diferentes basadas ÚNICAMENTE en ese texto. Agrega el texto en la propiedad "textoLectura" de cada pregunta.' : 'Genera 1 pregunta directa sin texto de lectura.'}
 
 REGLA DE FORMATO MATEMÁTICO (CRÍTICO): 
 - Está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes.
@@ -57,14 +61,19 @@ REGLA DE FORMATO MATEMÁTICO (CRÍTICO):
 
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
-  "pregunta": "Texto de la pregunta",
-  "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
-  "respuestaCorrecta": "Opción correcta exacta",
-  "justificacionDescarte": "La propiedad 'justificacionDescarte' debe ser una explicación exhaustiva y educativa. Si la materia es Matemáticas, Física o Química, DEBES mostrar el procedimiento paso a paso para llegar a la respuesta correcta y explicar brevemente por qué los otros incisos son errores comunes. Para las demás materias, aporta un dato complementario o contexto histórico/científico que amplíe el conocimiento del alumno sobre el tema.",
-  "explicacionCorrecta": "Explicación detallada de por qué es correcta, con ejemplos adicionales. Si es Matemáticas, Física o Química, muestra la fórmula exacta y explícala paso a paso."
+  "preguntas": [
+    {
+      "pregunta": "Texto de la pregunta",
+      "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
+      "respuestaCorrecta": "Opción correcta exacta",
+      "justificacionDescarte": "Explicación exhaustiva y educativa",
+      "explicacionCorrecta": "Explicación detallada"
+      ${esLectura ? ', "textoLectura": "Aquí va el texto completo..."' : ''}
+    }
+  ]
 }`;
 
-    const userPrompt = `Genera una pregunta sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
+    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
     const chatCompletion = await groqClient.chat.completions.create({
       messages: [
@@ -74,7 +83,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       model: 'llama-3.1-8b-instant',
       response_format: { type: 'json_object' },
       temperature: 0.5,
-      max_tokens: 1024,
+      max_tokens: 2048,
     });
 
     const responseContent = chatCompletion.choices[0]?.message?.content;
@@ -88,43 +97,43 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
     console.log('Groq response (raw):', responseContent);
 
-    let parsedQuestion: unknown = JSON.parse(responseContent);
-    const question = parsedQuestion as Record<string, unknown>;
-    
-    const preguntaRaw = String(question.pregunta || '');
-    const opcionesRaw = question.opciones;
-    const respuestaCorrectaRaw = String(question.respuestaCorrecta || '');
-    const justificacionDescarteRaw = String(question.justificacionDescarte || '');
-    const explicacionCorrectaRaw = String(question.explicacionCorrecta || '');
+    const parsedResponse = JSON.parse(responseContent);
+    const preguntasRaw = parsedResponse.preguntas;
 
-    if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw || !explicacionCorrectaRaw) {
-      console.log('Validation failed. parsed:', parsedQuestion);
+    if (!Array.isArray(preguntasRaw) || preguntasRaw.length === 0) {
       return NextResponse.json(
         { success: false, error: 'La respuesta de Groq no tiene el formato esperado' },
         { status: 500 }
       );
     }
 
-    const pregunta = formatearExponentes(preguntaRaw);
-    const opciones = opcionesRaw.map((op: unknown) => formatearExponentes(String(op)));
-    const respuestaCorrecta = formatearExponentes(respuestaCorrectaRaw);
-    const justificacionDescarte = formatearExponentes(justificacionDescarteRaw);
-    const explicacionCorrecta = formatearExponentes(explicacionCorrectaRaw);
+    const validatedQuestions: PreguntaGenerada[] = preguntasRaw.map((q: Record<string, unknown>) => {
+      const preguntaRaw = String(q.pregunta || '');
+      const opcionesRaw = q.opciones;
+      const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
+      const justificacionDescarteRaw = String(q.justificacionDescarte || '');
+      const explicacionCorrectaRaw = String(q.explicacionCorrecta || '');
+      const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
-    console.log('Pregunta formateada:', pregunta);
-    console.log('Opciones formateadas:', opciones);
+      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw || !explicacionCorrectaRaw) {
+        throw new Error('Pregunta inválida en el array');
+      }
 
-    const validatedQuestion: PreguntaGenerada = {
-      pregunta,
-      opciones: opciones as [string, string, string, string],
-      respuestaCorrecta,
-      justificacionDescarte,
-      explicacionCorrecta,
-    };
+      return {
+        pregunta: formatearExponentes(preguntaRaw),
+        opciones: opcionesRaw.map((op: unknown) => formatearExponentes(String(op))) as [string, string, string, string],
+        respuestaCorrecta: formatearExponentes(respuestaCorrectaRaw),
+        justificacionDescarte: formatearExponentes(justificacionDescarteRaw),
+        explicacionCorrecta: formatearExponentes(explicacionCorrectaRaw),
+        textoLectura: textoLecturaRaw ? formatearExponentes(textoLecturaRaw) : undefined,
+      };
+    });
+
+    console.log('Preguntas generadas:', validatedQuestions.length);
 
     return NextResponse.json({
       success: true,
-      data: validatedQuestion,
+      data: validatedQuestions,
     });
 
   } catch (error) {
