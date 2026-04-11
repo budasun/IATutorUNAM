@@ -23,7 +23,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
   try {
     const body: SolicitudGenerarPregunta = await request.json();
     
-    const { id_materia } = body;
+    const { id_materia, area } = body;
     
     if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
@@ -32,11 +32,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
       );
     }
 
-    const materia = TEMARIO_UNAM.materias.find(m => m.id === id_materia);
+    const areaKey: keyof typeof TEMARIO_UNAM = area && Object.keys(TEMARIO_UNAM).includes(area.replace('Área ', '').toLowerCase()) 
+      ? (area.replace('Área ', '').toLowerCase() as keyof typeof TEMARIO_UNAM) 
+      : 'area3';
+    const areaData = TEMARIO_UNAM[areaKey];
+    const materia = areaData.materias.find((m: { id: string }) => m.id === id_materia);
     
     if (!materia) {
       return NextResponse.json(
-        { success: false, error: `Materia "${id_materia}" no encontrada. Materias válidas: ${TEMARIO_UNAM.materias.map(m => m.id).join(', ')}` },
+        { success: false, error: `Materia "${id_materia}" no encontrada en el área seleccionada` },
         { status: 400 }
       );
     }

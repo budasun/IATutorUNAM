@@ -9,6 +9,7 @@ export interface PreguntaGenerada {
 
 export interface SolicitudGenerarPregunta {
   id_materia: string;
+  area?: string;
 }
 
 export interface RespuestaGenerarPregunta {

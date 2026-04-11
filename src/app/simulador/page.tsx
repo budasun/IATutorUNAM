@@ -7,24 +7,11 @@ import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
 
 type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion' | 'finalizado' | 'recuperacion';
+type AreaKey = keyof typeof TEMARIO_UNAM;
 
 const STORAGE_KEY = 'ia_tutor_simulador_save';
 
 const TIEMPO_EXAMEN = 3 * 60 * 60;
-
-const ESTRUCTURA_EXAMEN = [
-  { id: 'matematicas', cantidad: 24 },
-  { id: 'fisica', cantidad: 10 },
-  { id: 'quimica', cantidad: 10 },
-  { id: 'biologia', cantidad: 10 },
-  { id: 'hist_universal', cantidad: 14 },
-  { id: 'hist_mexico', cantidad: 14 },
-  { id: 'literatura', cantidad: 10 },
-  { id: 'geografia', cantidad: 10 },
-  { id: 'espanol', cantidad: 18 },
-];
-
-const TOTAL_PREGUNTAS = ESTRUCTURA_EXAMEN.reduce((acc, item) => acc + item.cantidad, 0);
 
 const MATERIAS_EXACTAS = ['matematicas', 'fisica', 'quimica'];
 
@@ -49,6 +36,12 @@ export default function SimuladorPage() {
   const [resultadosPorMateria, setResultadosPorMateria] = useState<Record<string, ResultadoMateria>>({});
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
   const [bufferPreguntas, setBufferPreguntas] = useState<PreguntaGenerada[]>([]);
+  const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
+
+  const areaActual = TEMARIO_UNAM[areaSeleccionada];
+  const materiasDelArea = areaActual.materias;
+  const ESTRUCTURA_EXAMEN = materiasDelArea.map(m => ({ id: m.id, cantidad: m.preguntas }));
+  const TOTAL_PREGUNTAS = ESTRUCTURA_EXAMEN.reduce((acc, item) => acc + item.cantidad, 0);
 
   useEffect(() => {
     const guardado = localStorage.getItem(STORAGE_KEY);
@@ -90,7 +83,7 @@ export default function SimuladorPage() {
   };
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
-  const nombreMateriaActual = TEMARIO_UNAM.materias.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
+  const nombreMateriaActual = materiasDelArea.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
 
   const inicializarResultadosPorMateria = () => {
     const resultados: Record<string, ResultadoMateria> = {};
@@ -117,7 +110,10 @@ export default function SimuladorPage() {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_materia: materiaId }),
+        body: JSON.stringify({ 
+          id_materia: materiaId,
+          area: areaActual.nombre 
+        }),
       });
       const data = await res.json();
       
@@ -187,7 +183,7 @@ export default function SimuladorPage() {
     const materiaId = materiaActual.id;
 
     if (!esCorrecta && pregunta) {
-      const materiaActual = TEMARIO_UNAM.materias[materiaActualIndex];
+      const materiaActual = materiasDelArea[materiaActualIndex];
       registrarErrorEnBanco(pregunta, materiaActual.nombre);
     }
 
@@ -317,13 +313,13 @@ export default function SimuladorPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-[#D4AF37] mb-2 text-center">
             Mega-Simulador UNAM
           </h1>
-          <p className="text-gray-300 text-center mb-8">{TEMARIO_UNAM.area}</p>
+          <p className="text-gray-300 text-center mb-8">{areaActual.nombre}</p>
 
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-md border border-[#D4AF37]/30 mb-6">
             <h2 className="font-semibold text-lg mb-4 text-[#D4AF37] text-center">Estructura del Examen</h2>
             <div className="space-y-2 text-sm">
               {ESTRUCTURA_EXAMEN.map((item) => {
-                const materia = TEMARIO_UNAM.materias.find(m => m.id === item.id);
+                const materia = materiasDelArea.find(m => m.id === item.id);
                 return (
                   <div key={item.id} className="flex justify-between items-center py-1 border-b border-white/10">
                     <span className="text-gray-300">{materia?.nombre || item.id}</span>
@@ -353,6 +349,19 @@ export default function SimuladorPage() {
                 <span>📊</span> Resultados detallados por materia
               </li>
             </ul>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 w-full text-left">
+              <label className="block text-[#D4AF37] font-semibold mb-2">Selecciona tu Área de Ingreso:</label>
+              <select 
+                value={areaSeleccionada}
+                onChange={(e) => setAreaSeleccionada(e.target.value as AreaKey)}
+                className="w-full bg-[#001a3d] border border-[#D4AF37]/50 text-white rounded-lg p-3 outline-none focus:border-[#D4AF37] transition appearance-none"
+              >
+                <option value="area1">Área 1: Físico-Matemáticas</option>
+                <option value="area2">Área 2: Biológicas y de la Salud</option>
+                <option value="area3">Área 3: Ciencias Sociales</option>
+                <option value="area4">Área 4: Humanidades y Artes</option>
+              </select>
+            </div>
             <button
               onClick={iniciarExamen}
               className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349] transition"
@@ -530,7 +539,7 @@ export default function SimuladorPage() {
           <h2 className="text-xl font-semibold text-[#D4AF37] mb-4">Desglose por Materia</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
             {ESTRUCTURA_EXAMEN.map((item) => {
-              const materia = TEMARIO_UNAM.materias.find(m => m.id === item.id);
+              const materia = materiasDelArea.find(m => m.id === item.id);
               const resultado = resultadosPorMateria[item.id] || { aciertos: 0, errores: 0 };
               const porcentajeMateria = Math.round((resultado.aciertos / item.cantidad) * 100);
               const esDominado = porcentajeMateria >= 70;
