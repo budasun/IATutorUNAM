@@ -8,6 +8,7 @@ interface Guia {
   titulo: string;
   resumen: string;
   puntosClave: string[];
+  ejemploPractico?: string;
 }
 
 export default function TemarioPage() {
@@ -87,6 +88,17 @@ export default function TemarioPage() {
             ))}
           </ul>
         </div>
+
+        {guia.ejemploPractico && (
+          <div className="bg-[#002B5C] border border-[#D4AF37]/50 rounded-xl p-5 mt-6 shadow-lg shadow-[#D4AF37]/5">
+            <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2">
+              <span>📐</span> Fórmulas y Ejemplo Práctico
+            </h3>
+            <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line font-mono bg-black/30 p-4 rounded-lg">
+              {guia.ejemploPractico}
+            </p>
+          </div>
+        )}
       </div>
     );
   }

@@ -14,21 +14,21 @@ export async function POST(req: Request) {
     }
 
     const promptText = `
-      Eres un tutor experto en el examen de admisión a la UNAM (Universidad Nacional Autónoma de México) para el Área 3 (Ciencias Sociales).
-      Tu tarea es generar una "Píldora de Estudio" (un resumen muy conciso y directo al grano) sobre el siguiente tema:
-      
+      Eres un tutor experto en el examen de admisión a la UNAM.
+      Genera una "Píldora de Estudio" para:
       Materia: ${materia}
       Tema: ${tema}
 
-      Reglas estrictas:
-      1. Explica el tema en máximo 3 párrafos cortos y fáciles de digerir.
-      2. Enfócate SOLO en lo que históricamente pregunta la UNAM sobre este tema (ve directo al grano, sin relleno).
-      3. Extrae entre 3 y 5 "Puntos Clave" (bullet points) que el alumno debe memorizar obligatoriamente.
-      4. Devuelve la respuesta ESTRICTAMENTE en formato JSON válido con la siguiente estructura:
+      Reglas dinámicas:
+      - Si la materia es Historia, Literatura, Geografía, etc.: Usa 3 párrafos explicativos directos.
+      - Si la materia es Matemáticas, Física o Química: Sé más breve en el texto, PERO enfócate en mostrar las fórmulas necesarias, reglas, o el procedimiento paso a paso.
+
+      Devuelve la respuesta ESTRICTAMENTE en este formato JSON válido:
       {
         "titulo": "Nombre del tema",
-        "resumen": "Los 3 párrafos unidos por saltos de línea \\n\\n",
-        "puntosClave": ["Punto 1", "Punto 2", "Punto 3"]
+        "resumen": "Explicación teórica (usa saltos de línea \\n\\n)",
+        "puntosClave": ["Punto 1", "Punto 2", "Punto 3"],
+        "ejemploPractico": "Opcional pero OBLIGATORIO para Matemáticas/Física/Química. Aquí pon la fórmula exacta, constantes (ej. Gravedad) y un pequeño ejemplo paso a paso de cómo se resuelve. Usa texto claro."
       }
       No incluyas markdown adicional fuera del JSON.
     `;
