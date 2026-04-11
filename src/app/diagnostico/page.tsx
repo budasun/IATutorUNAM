@@ -34,8 +34,8 @@ export default function DiagnosticoPage() {
         body: JSON.stringify({ id_materia: materiaId }),
       });
       const data = await res.json();
-      if (data.success && data.data) {
-        setPregunta(data.data);
+      if (data.success && data.data && data.data.length > 0) {
+        setPregunta(data.data[0]);
         setPantalla('examen');
       } else {
         console.error('Error de API:', data.error);
@@ -56,11 +56,28 @@ export default function DiagnosticoPage() {
     fetchPregunta(TEMARIO_UNAM.materias[0].id);
   };
 
+  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string) => {
+    const sb = getSupabase();
+    if (!sb) return;
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    await sb.from('banco_errores').insert({
+      user_id: session.user.id,
+      materia: nombreMateria,
+      datos_pregunta: preguntaFallada
+    });
+  };
+
   const handleRespuesta = (opcion: string) => {
     if (pantalla !== 'examen' || !pregunta) return;
 
     const materiaActual = TEMARIO_UNAM.materias[indiceMateria];
     const fueCorrecto = opcion === pregunta.respuestaCorrecta;
+
+    if (!fueCorrecto) {
+      registrarErrorEnBanco(pregunta, materiaActual.nombre);
+    }
 
     const nuevoResultado: Resultado = {
       materia: materiaActual.nombre,
