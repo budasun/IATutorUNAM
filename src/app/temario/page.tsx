@@ -17,11 +17,14 @@ export default function TemarioPage() {
   const [guia, setGuia] = useState<Guia | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorApi, setErrorApi] = useState<string | null>(null);
+  const [ejemplosExtras, setEjemplosExtras] = useState<string[]>([]);
+  const [loadingEjemplo, setLoadingEjemplo] = useState(false);
 
   const generarGuia = async (materia: string, tema: string) => {
     setLoading(true);
     setErrorApi(null);
     setTemaSeleccionado(tema);
+    setMateriaActiva(materia);
 
     try {
       const res = await fetch('/api/generar-guia', {
@@ -46,6 +49,27 @@ export default function TemarioPage() {
     setGuia(null);
     setTemaSeleccionado(null);
     setErrorApi(null);
+    setEjemplosExtras([]);
+  };
+
+  const pedirOtroEjemplo = async () => {
+    if (!materiaActiva || !temaSeleccionado) return;
+    setLoadingEjemplo(true);
+    try {
+      const res = await fetch('/api/generar-ejemplo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ materia: materiaActiva, tema: temaSeleccionado }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.ejemplo) {
+        setEjemplosExtras(prev => [...prev, data.data.ejemplo]);
+      }
+    } catch (error) {
+      console.error("Error pidiendo ejemplo:", error);
+    } finally {
+      setLoadingEjemplo(false);
+    }
   };
 
   if (loading) {
@@ -98,6 +122,29 @@ export default function TemarioPage() {
               {guia.ejemploPractico}
             </p>
           </div>
+        )}
+
+        {ejemplosExtras.map((ej, index) => (
+          <div key={index} className="bg-[#002B5C] border border-[#D4AF37]/50 rounded-xl p-5 mt-4 shadow-lg shadow-[#D4AF37]/5">
+            <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2">
+              <span>🔄</span> Ejemplo Adicional {index + 1}
+            </h3>
+            <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line font-mono bg-black/30 p-4 rounded-lg">
+              {ej}
+            </p>
+          </div>
+        ))}
+
+        {(materiaActiva === 'Matemáticas' || materiaActiva === 'Física' || materiaActiva === 'Química') && guia?.ejemploPractico && (
+          <button
+            onClick={pedirOtroEjemplo}
+            disabled={loadingEjemplo}
+            className="mt-6 w-full bg-transparent border-2 border-[#D4AF37] text-[#D4AF37] py-3 rounded-xl font-bold hover:bg-[#D4AF37]/10 transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loadingEjemplo ? (
+               <div className="w-5 h-5 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+            ) : '➕ Generar otro ejemplo'}
+          </button>
         )}
       </div>
     );
