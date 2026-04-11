@@ -164,11 +164,32 @@ export default function SimuladorPage() {
     return () => clearInterval(timer);
   }, [estado, pausado, tiempoRestante]);
 
+  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string) => {
+    const sb = getSupabase();
+    if (!sb) return;
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const { error } = await sb.from('banco_errores').insert({
+      user_id: session.user.id,
+      materia: nombreMateria,
+      datos_pregunta: preguntaFallada
+    });
+
+    if (error) console.error('Error al registrar en banco de debilidades:', error);
+  };
+
   const handleRespuesta = (opcion: string) => {
     if (estado !== 'activo' || !pregunta) return;
 
     const esCorrecta = opcion === pregunta.respuestaCorrecta;
     const materiaId = materiaActual.id;
+
+    if (!esCorrecta && pregunta) {
+      const materiaActual = TEMARIO_UNAM.materias[materiaActualIndex];
+      registrarErrorEnBanco(pregunta, materiaActual.nombre);
+    }
 
     setFueCorrecta(esCorrecta);
 
