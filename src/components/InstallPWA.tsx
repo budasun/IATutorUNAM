@@ -10,20 +10,24 @@ export default function InstallPWA() {
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
   useEffect(() => {
+    // 1. Detectar si ya está instalada como app nativa
     if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true) {
       setIsStandalone(true);
       return;
     }
 
+    // 2. Detectar si es un iPhone/iPad (iOS)
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIosDevice);
 
     if (isIosDevice) {
+      // En iOS, esperamos 3 segundos y mostramos el pop-up educativo
       const timer = setTimeout(() => setShowIOSPrompt(true), 3000);
       return () => clearTimeout(timer);
     }
 
+    // 3. Detectar Android / Chrome PWA
     const handler = (e: Event) => {
       e.preventDefault();
       setSupportsPWA(true);
@@ -43,11 +47,13 @@ export default function InstallPWA() {
     }
   };
 
+  // Si ya está instalada, no mostramos nada
   if (isStandalone) return null;
 
+  // Render para Android: Botón flotante elegante
   if (supportsPWA) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 bg-[#002B5C] border border-[#D4AF37]/50 rounded-2xl p-4 shadow-2xl z-50 flex items-center justify-between">
+      <div className="fixed bottom-20 md:bottom-4 left-4 right-4 bg-[#002B5C] border border-[#D4AF37]/50 rounded-2xl p-4 shadow-2xl z-50 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src="/apple-touch-icon.png" alt="TIAUNAM" className="w-12 h-12 rounded-xl" />
           <div>
@@ -55,16 +61,17 @@ export default function InstallPWA() {
             <p className="text-gray-300 text-xs">Acceso rápido y sin internet</p>
           </div>
         </div>
-        <button onClick={onClickInstall} className="bg-[#D4AF37] text-[#002B5C] px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#e5c349]">
+        <button onClick={onClickInstall} className="bg-[#D4AF37] text-[#002B5C] px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#e5c349] transition">
           Instalar
         </button>
       </div>
     );
   }
 
+  // Render para iOS: Globo instructivo
   if (isIOS && showIOSPrompt) {
     return (
-      <div className="fixed bottom-6 left-4 right-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl z-50 animate-bounce">
+      <div className="fixed bottom-20 left-4 right-4 bg-[#002B5C]/90 backdrop-blur-xl border border-[#D4AF37]/50 rounded-2xl p-4 shadow-2xl z-50 animate-bounce">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-[#D4AF37] font-bold text-sm flex items-center gap-2">
             <span>🍎</span> Instalar en iPhone

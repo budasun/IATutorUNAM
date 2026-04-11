@@ -7,14 +7,12 @@ export const metadata: Metadata = {
   description: 'El simulador más avanzado con Inteligencia Artificial para el examen de ingreso a la UNAM. Entrena con simulacros exactos, guías dinámicas y un banco de errores inteligente para las 4 áreas.',
   keywords: [
     'UNAM', 'examen de admisión', 'simulador UNAM', 'guía UNAM 2026', 
-    'TIAUNAM', 'ingreso a la universidad', 'inteligencia artificial educativa',
-    'examen UNAM área 1', 'examen UNAM área 2', 'examen UNAM área 3', 'examen UNAM área 4'
+    'TIAUNAM', 'ingreso a la universidad', 'inteligencia artificial educativa'
   ],
   authors: [{ name: 'TIAUNAM' }],
-  metadataBase: new URL('https://tiaunam.com'),
   openGraph: {
     title: 'TIAUNAM | Asegura tu lugar en la UNAM',
-    description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas. Disponible para las 4 Áreas de estudio.',
+    description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas.',
     url: '/',
     siteName: 'Tutor IA UNAM',
     images: [
@@ -31,9 +29,10 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TIAUNAM | Asegura tu lugar en la UNAM',
-    description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas.',
+    description: 'Entrena con el único simulador guiado por IA.',
     images: ['/og-image.png'],
   },
+  manifest: '/manifest.json',
   icons: {
     icon: [
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
@@ -50,13 +49,9 @@ export const metadata: Metadata = {
     title: 'TIAUNAM',
     statusBarStyle: 'black-translucent',
   },
-  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
   themeColor: '#002B5C',
 };
 
