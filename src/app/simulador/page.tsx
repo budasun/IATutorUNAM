@@ -160,7 +160,7 @@ export default function SimuladorPage() {
     return () => clearInterval(timer);
   }, [estado, pausado, tiempoRestante]);
 
-  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string) => {
+  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string, nombreArea: string) => {
     const sb = getSupabase();
     if (!sb) return;
 
@@ -169,6 +169,7 @@ export default function SimuladorPage() {
 
     const { error } = await sb.from('banco_errores').insert({
       user_id: session.user.id,
+      area: nombreArea,
       materia: nombreMateria,
       datos_pregunta: preguntaFallada
     });
@@ -184,7 +185,7 @@ export default function SimuladorPage() {
 
     if (!esCorrecta && pregunta) {
       const materiaActual = materiasDelArea[materiaActualIndex];
-      registrarErrorEnBanco(pregunta, materiaActual.nombre);
+      registrarErrorEnBanco(pregunta, materiaActual.nombre, areaActual.nombre);
     }
 
     setFueCorrecta(esCorrecta);
@@ -270,6 +271,7 @@ export default function SimuladorPage() {
 
     const { error } = await sb.from('progreso_simulacros').insert({
       user_id: session.user.id,
+      area: areaActual.nombre,
       tipo: 'simulador',
       aciertos,
       errores,
