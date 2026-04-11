@@ -60,7 +60,7 @@ export default function DiagnosticoPage() {
     fetchPregunta(materiasDelArea[0].id);
   };
 
-  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string) => {
+  const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string, nombreArea: string) => {
     const sb = getSupabase();
     if (!sb) return;
     const { data: { session } } = await sb.auth.getSession();
@@ -68,6 +68,7 @@ export default function DiagnosticoPage() {
 
     await sb.from('banco_errores').insert({
       user_id: session.user.id,
+      area: nombreArea,
       materia: nombreMateria,
       datos_pregunta: preguntaFallada
     });
@@ -80,7 +81,7 @@ export default function DiagnosticoPage() {
     const fueCorrecto = opcion === pregunta.respuestaCorrecta;
 
     if (!fueCorrecto) {
-      registrarErrorEnBanco(pregunta, materiaActual.nombre);
+      registrarErrorEnBanco(pregunta, materiaActual.nombre, areaActual.nombre);
     }
 
     const nuevoResultado: Resultado = {
@@ -129,6 +130,7 @@ export default function DiagnosticoPage() {
 
     const { error } = await sb.from('progreso_simulacros').insert({
       user_id: session.user.id,
+      area: areaActual.nombre,
       tipo: 'diagnostico',
       aciertos: aciertos,
       errores: errores,
