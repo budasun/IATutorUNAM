@@ -420,13 +420,16 @@ export const TEMARIO_UNAM = {
         preguntas: 22,
         temas: [
           'Operaciones con números reales, complejos y expresiones algebraicas',
+          'Productos notables y factorización',
           'Ecuaciones y desigualdades',
           'Sistemas de ecuaciones',
           'Funciones algebraicas',
           'Trigonometría',
-          'Geometría analítica',
-          'Límites y derivadas',
-          'La integral'
+          'Funciones exponenciales y logarítmicas',
+          'Geometría analítica (Línea recta, circunferencia, parábola, elipse e hipérbola)',
+          'Límites',
+          'La derivada y sus aplicaciones',
+          'La integral y sus aplicaciones'
         ]
       },
       { 
@@ -435,13 +438,14 @@ export const TEMARIO_UNAM = {
         preguntas: 10,
         temas: [
           'Cinemática',
-          'Fuerzas, leyes de Newton y Ley de la Gravitación Universal',
-          'Trabajo y leyes de la conservación',
+          'Fuerzas, Leyes de Newton y Gravitación Universal',
+          'Trabajo y Energía',
           'Termodinámica',
           'Ondas',
           'Electromagnetismo',
-          'Fluidos y óptica',
-          'Física contemporánea'
+          'Mecánica de Fluidos',
+          'Óptica',
+          'Física Contemporánea'
         ]
       },
       { 
@@ -449,13 +453,15 @@ export const TEMARIO_UNAM = {
         nombre: 'Química', 
         preguntas: 10,
         temas: [
-          'Temas básicos (materia, sustancias, mezclas)',
-          'El agua',
-          'Aire y oxígeno',
-          'Estructura atómica y tabla periódica',
+          'Conceptos básicos, sustancias y mezclas',
+          'Estructura atómica',
+          'Tabla periódica',
           'Enlaces químicos',
+          'Nomenclatura inorgánica',
           'Reacciones químicas',
-          'Química de compuestos del carbono'
+          'Estequiometría',
+          'Ácidos y bases',
+          'Química del carbono'
         ]
       },
       { 
@@ -466,7 +472,7 @@ export const TEMARIO_UNAM = {
           'La célula',
           'Metabolismo celular',
           'Reproducción',
-          'Mecanismos de la herencia',
+          'Mecanismos de la herencia (Genética)',
           'Evolución',
           'Los seres vivos y su ambiente'
         ]
@@ -490,9 +496,10 @@ export const TEMARIO_UNAM = {
         nombre: 'Literatura', 
         preguntas: 10,
         temas: [
-          'El texto (periodístico, dramático, poético)',
-          'Géneros y corrientes literarias',
-          'Redacción y técnicas de investigación documental'
+          'El texto literario',
+          'Géneros literarios',
+          'Corrientes literarias',
+          'Redacción e investigación documental'
         ]
       },
       { 
@@ -500,14 +507,15 @@ export const TEMARIO_UNAM = {
         nombre: 'Historia de México', 
         preguntas: 10,
         temas: [
-          'La Nueva España (siglos XVI a XIX)',
-          'El movimiento de Independencia (1810-1821)',
-          'México independiente (1821-1854)',
-          'La Reforma liberal y la resistencia de la República (1854-1876)',
-          'El Porfiriato (1876-1911)',
-          'La Revolución Mexicana (1910-1920)',
-          'La reconstrucción nacional (1920-1940)',
-          'México contemporáneo (1940-2000)'
+          'Mesoamérica',
+          'La Nueva España',
+          'El movimiento de Independencia',
+          'México independiente',
+          'La Reforma liberal y la resistencia de la República',
+          'El Porfiriato',
+          'La Revolución Mexicana',
+          'La reconstrucción nacional',
+          'México contemporáneo'
         ]
       },
       { 
@@ -515,14 +523,14 @@ export const TEMARIO_UNAM = {
         nombre: 'Historia Universal', 
         preguntas: 10,
         temas: [
-          'La Historia y su estudio',
+          'La historia como estudio',
           'Las revoluciones burguesas',
           'Movimientos sociales y políticos del siglo XIX',
-          'El imperialismo',
+          'El Imperialismo',
           'La Primera Guerra Mundial',
-          'El mundo entre guerras',
+          'El periodo de entreguerras',
           'La Segunda Guerra Mundial',
-          'La Guerra Fría',
+          'El conflicto entre capitalismo y socialismo (Guerra Fría)',
           'El mundo contemporáneo'
         ]
       },
@@ -531,9 +539,9 @@ export const TEMARIO_UNAM = {
         nombre: 'Geografía', 
         preguntas: 10,
         temas: [
-          'La Tierra, base del desarrollo del hombre',
-          'Geografía física',
-          'Geografía humana: el paisaje cultural',
+          'El espacio geográfico',
+          'Geografía física (Relieve, clima, hidrografía)',
+          'Geografía humana (Población)',
           'Geografía económica',
           'Geografía política'
         ]
@@ -543,10 +551,13 @@ export const TEMARIO_UNAM = {
         nombre: 'Filosofía', 
         preguntas: 10,
         temas: [
-          'Lógica',
-          'Ética',
-          'Estética',
-          'Historia de la filosofía'
+          'Diferencia entre filosofía, ciencia y religión',
+          'Disciplinas filosóficas (Ontología, Epistemología, Ética, Estética)',
+          'Lógica (Concepto, juicio, razonamiento, silogismo y falacias)',
+          'Filosofía antigua (Presocráticos, Sócrates, Platón, Aristóteles)',
+          'Filosofía medieval (Agustín de Hipona, Tomás de Aquino)',
+          'Filosofía moderna (Racionalismo, Empirismo, Idealismo Kantiano)',
+          'Filosofía contemporánea (Positivismo, Marxismo, Existencialismo)'
         ]
       }
     ]
