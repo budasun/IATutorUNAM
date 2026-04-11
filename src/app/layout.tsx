@@ -3,6 +3,7 @@ import "./globals.css";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://ia-tutor-unam.vercel.app'),
   title: 'TIAUNAM | Tutor IA para tu Examen de Admisión',
   description: 'El simulador más avanzado con Inteligencia Artificial para el examen de ingreso a la UNAM. Entrena con simulacros exactos, guías dinámicas y un banco de errores inteligente para las 4 áreas.',
   keywords: [
