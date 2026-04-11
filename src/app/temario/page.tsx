@@ -12,6 +12,7 @@ interface Guia {
 }
 
 export default function TemarioPage() {
+  const [areaSeleccionada, setAreaSeleccionada] = useState<keyof typeof TEMARIO_UNAM>('area3');
   const [materiaActiva, setMateriaActiva] = useState<string | null>(null);
   const [temaSeleccionado, setTemaSeleccionado] = useState<string | null>(null);
   const [guia, setGuia] = useState<Guia | null>(null);
@@ -19,6 +20,9 @@ export default function TemarioPage() {
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [ejemplosExtras, setEjemplosExtras] = useState<string[]>([]);
   const [loadingEjemplo, setLoadingEjemplo] = useState(false);
+
+  const areaActual = TEMARIO_UNAM[areaSeleccionada];
+  const materiasDelArea = areaActual.materias;
 
   const generarGuia = async (materia: string, tema: string) => {
     setLoading(true);
@@ -174,10 +178,24 @@ export default function TemarioPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 pb-24">
-      <h1 className="text-2xl font-bold mb-6 text-center">Temario Oficial UNAM</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">Temario Oficial UNAM</h1>
+
+      <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4 text-left">
+        <label className="block text-[#D4AF37] font-semibold mb-2 text-sm">Selecciona tu Área:</label>
+        <select 
+          value={areaSeleccionada}
+          onChange={(e) => { setAreaSeleccionada(e.target.value as keyof typeof TEMARIO_UNAM); setMateriaActiva(null); }}
+          className="w-full bg-[#001a3d] border border-[#D4AF37]/50 text-white rounded-lg p-2 outline-none focus:border-[#D4AF37] transition text-sm"
+        >
+          <option value="area1">Área 1: Físico-Matemáticas</option>
+          <option value="area2">Área 2: Biológicas y de la Salud</option>
+          <option value="area3">Área 3: Ciencias Sociales</option>
+          <option value="area4">Área 4: Humanidades y Artes</option>
+        </select>
+      </div>
 
       <div className="grid gap-4">
-        {TEMARIO_UNAM.materias.map((materia) => (
+        {materiasDelArea.map((materia) => (
           <div key={materia.id} className="bg-white/10 backdrop-blur rounded-xl border border-white/10 overflow-hidden">
             <button
               onClick={() => setMateriaActiva(materiaActiva === materia.id ? null : materia.id)}
