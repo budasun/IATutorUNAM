@@ -77,15 +77,19 @@ export default function DiagnosticoPage() {
   const handleRespuesta = (opcion: string) => {
     if (pantalla !== 'examen' || !pregunta) return;
 
-    const materiaActual = materiasDelArea[indiceMateria];
+    const materiasArea = TEMARIO_UNAM[areaSeleccionada]?.materias || [];
+    const materiaActualObj = materiasArea[indiceMateria] || materiasArea[0];
+    const nombreMateria = materiaActualObj?.nombre || 'Materia Desconocida';
+    const nombreArea = areaActual?.nombre || 'Área Desconocida';
+
     const fueCorrecto = opcion === pregunta.respuestaCorrecta;
 
     if (!fueCorrecto) {
-      registrarErrorEnBanco(pregunta, materiaActual.nombre, areaActual.nombre);
+      registrarErrorEnBanco(pregunta, nombreMateria, nombreArea);
     }
 
     const nuevoResultado: Resultado = {
-      materia: materiaActual.nombre,
+      materia: nombreMateria,
       acierto: fueCorrecto,
     };
 

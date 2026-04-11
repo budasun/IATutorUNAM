@@ -83,7 +83,8 @@ export default function SimuladorPage() {
   };
 
   const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
-  const nombreMateriaActual = materiasDelArea.find(m => m.id === materiaActual.id)?.nombre || materiaActual.id;
+  const materiaObj = materiasDelArea.find(m => m.id === materiaActual?.id);
+  const nombreMateriaActual = materiaObj?.nombre || materiaActual?.id || 'Materia Desconocida';
 
   const inicializarResultadosPorMateria = () => {
     const resultados: Record<string, ResultadoMateria> = {};
@@ -180,12 +181,16 @@ export default function SimuladorPage() {
   const handleRespuesta = (opcion: string) => {
     if (estado !== 'activo' || !pregunta) return;
 
+    const materiasArea = TEMARIO_UNAM[areaSeleccionada]?.materias || [];
+    const materiaActualObj = materiasArea[materiaActualIndex] || materiasArea[0];
+    const materiaId = materiaActualObj?.id || '';
+    const nombreMateria = materiaActualObj?.nombre || 'Materia Desconocida';
+    const nombreArea = areaActual?.nombre || 'Área Desconocida';
+
     const esCorrecta = opcion === pregunta.respuestaCorrecta;
-    const materiaId = materiaActual.id;
 
     if (!esCorrecta && pregunta) {
-      const materiaActual = materiasDelArea[materiaActualIndex];
-      registrarErrorEnBanco(pregunta, materiaActual.nombre, areaActual.nombre);
+      registrarErrorEnBanco(pregunta, nombreMateria, nombreArea);
     }
 
     setFueCorrecta(esCorrecta);
