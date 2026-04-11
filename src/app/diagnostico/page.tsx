@@ -7,6 +7,7 @@ import { PreguntaGenerada } from '@/types/ia';
 import { getSupabase } from '@/lib/supabase/client';
 
 type Pantalla = 'bienvenida' | 'cargando' | 'examen' | 'retroalimentacion' | 'resultados';
+type AreaKey = keyof typeof TEMARIO_UNAM;
 
 interface Resultado {
   materia: string;
@@ -21,8 +22,11 @@ export default function DiagnosticoPage() {
   const [loading, setLoading] = useState(false);
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
+  const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
 
-  const totalMaterias = TEMARIO_UNAM.materias.length;
+  const areaActual = TEMARIO_UNAM[areaSeleccionada];
+  const materiasDelArea = areaActual.materias;
+  const totalMaterias = materiasDelArea.length;
 
   const fetchPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
@@ -31,7 +35,7 @@ export default function DiagnosticoPage() {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_materia: materiaId }),
+        body: JSON.stringify({ id_materia: materiaId, area: areaActual.nombre }),
       });
       const data = await res.json();
       if (data.success && data.data && data.data.length > 0) {
@@ -53,7 +57,7 @@ export default function DiagnosticoPage() {
     setIndiceMateria(0);
     setResultados([]);
     setPantalla('cargando');
-    fetchPregunta(TEMARIO_UNAM.materias[0].id);
+    fetchPregunta(materiasDelArea[0].id);
   };
 
   const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string) => {
@@ -72,7 +76,7 @@ export default function DiagnosticoPage() {
   const handleRespuesta = (opcion: string) => {
     if (pantalla !== 'examen' || !pregunta) return;
 
-    const materiaActual = TEMARIO_UNAM.materias[indiceMateria];
+    const materiaActual = materiasDelArea[indiceMateria];
     const fueCorrecto = opcion === pregunta.respuestaCorrecta;
 
     if (!fueCorrecto) {
@@ -99,7 +103,7 @@ export default function DiagnosticoPage() {
         guardarProgresoDiagnostico(resultados);
         return prevIndice;
       }
-      fetchPregunta(TEMARIO_UNAM.materias[siguienteIndice].id);
+      fetchPregunta(materiasDelArea[siguienteIndice].id);
       return siguienteIndice;
     });
   };
@@ -151,16 +155,29 @@ export default function DiagnosticoPage() {
             Examen Diagnóstico
           </h1>
           <p className="text-gray-300 text-center mb-8 max-w-md">
-            Evaluaremos tus conocimientos en las 9 materias del Área 3 con una pregunta rápida de cada una.
+            Evaluaremos tus conocimientos en las {totalMaterias} materias de {areaActual.nombre} con una pregunta rápida de cada una.
           </p>
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-sm border border-[#D4AF37]/30">
             <h2 className="font-semibold text-lg mb-4 text-[#D4AF37]">¿Qué evaluarás?</h2>
             <ul className="space-y-2 text-gray-300 mb-6">
-              <li>• 9 preguntas (una por materia)</li>
+              <li>• {totalMaterias} preguntas (una por materia)</li>
               <li>• Sin límite de tiempo</li>
               <li>• Retroalimentación en cada pregunta</li>
               <li>• Plan de estudio personalizado</li>
             </ul>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 w-full text-left">
+              <label className="block text-[#D4AF37] font-semibold mb-2">Selecciona tu Área de Ingreso:</label>
+              <select 
+                value={areaSeleccionada}
+                onChange={(e) => setAreaSeleccionada(e.target.value as AreaKey)}
+                className="w-full bg-[#001a3d] border border-[#D4AF37]/50 text-white rounded-lg p-3 outline-none focus:border-[#D4AF37] transition appearance-none"
+              >
+                <option value="area1">Área 1: Físico-Matemáticas</option>
+                <option value="area2">Área 2: Biológicas y de la Salud</option>
+                <option value="area3">Área 3: Ciencias Sociales</option>
+                <option value="area4">Área 4: Humanidades y Artes</option>
+              </select>
+            </div>
             <button
               onClick={iniciarDiagnostico}
               className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349] transition"
@@ -188,7 +205,7 @@ export default function DiagnosticoPage() {
             <h2 className="text-xl text-red-400 font-bold mb-2">Pausa técnica</h2>
             <p className="text-gray-300 mb-6">{errorApi}<br/><br/>(Suele ocurrir al responder muy rápido).</p>
             <button
-              onClick={() => fetchPregunta(TEMARIO_UNAM.materias[indiceMateria].id)}
+              onClick={() => fetchPregunta(materiasDelArea[indiceMateria].id)}
               className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
             >
               Reintentar Pregunta
@@ -208,7 +225,7 @@ export default function DiagnosticoPage() {
   }
 
   if (pantalla === 'retroalimentacion' && pregunta) {
-    const materiaActual = TEMARIO_UNAM.materias[indiceMateria];
+    const materiaActual = materiasDelArea[indiceMateria];
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
@@ -288,7 +305,7 @@ export default function DiagnosticoPage() {
               <span className="text-4xl">📊</span>
             </div>
             <h1 className="text-3xl font-bold text-[#D4AF37] mb-2">Resultados del Diagnóstico</h1>
-            <p className="text-gray-400">Área 3: Ciencias Sociales</p>
+            <p className="text-gray-400">{areaActual.nombre}</p>
           </div>
 
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6 border border-[#D4AF37]/30 text-center">
@@ -399,7 +416,7 @@ export default function DiagnosticoPage() {
     );
   }
 
-  const materiaActual = TEMARIO_UNAM.materias[indiceMateria];
+  const materiaActual = materiasDelArea[indiceMateria];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
