@@ -32,8 +32,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
       );
     }
 
-    const areaKey: keyof typeof TEMARIO_UNAM = area && Object.keys(TEMARIO_UNAM).includes(area.replace('Área ', '').toLowerCase()) 
-      ? (area.replace('Área ', '').toLowerCase() as keyof typeof TEMARIO_UNAM) 
+    const areaMatch = area?.match(/Áreas? (\d)/);
+    const areaKey: keyof typeof TEMARIO_UNAM = areaMatch 
+      ? (`area${areaMatch[1]}` as keyof typeof TEMARIO_UNAM) 
       : 'area3';
     const areaData = TEMARIO_UNAM[areaKey];
     const materia = areaData.materias.find((m: { id: string }) => m.id === id_materia);
