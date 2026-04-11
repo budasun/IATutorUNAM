@@ -3,9 +3,42 @@ import "./globals.css";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 
 export const metadata: Metadata = {
-  title: "IA Tutor UNAM",
-  description: "Plataforma mobile-first para ayudar a aspirantes a pasar el examen de la UNAM",
-  manifest: "/manifest.json",
+  title: 'TIAUNAM | Tutor IA para tu Examen de Admisión',
+  description: 'El simulador más avanzado con Inteligencia Artificial para el examen de ingreso a la UNAM. Entrena con simulacros exactos, guías dinámicas y un banco de errores inteligente para las 4 áreas.',
+  keywords: [
+    'UNAM', 'examen de admisión', 'simulador UNAM', 'guía UNAM 2026', 
+    'TIAUNAM', 'ingreso a la universidad', 'inteligencia artificial educativa',
+    'examen UNAM área 1', 'examen UNAM área 2', 'examen UNAM área 3', 'examen UNAM área 4'
+  ],
+  authors: [{ name: 'TIAUNAM' }],
+  metadataBase: new URL('https://tiaunam.com'),
+  openGraph: {
+    title: 'TIAUNAM | Asegura tu lugar en la UNAM',
+    description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas. Disponible para las 4 Áreas de estudio.',
+    url: '/',
+    siteName: 'Tutor IA UNAM',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'TIAUNAM - Interfaz del Simulador',
+      },
+    ],
+    locale: 'es_MX',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TIAUNAM | Asegura tu lugar en la UNAM',
+    description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas.',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: '/icon-512x512.png',
+    apple: '/icon-512x512.png',
+  },
+  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
