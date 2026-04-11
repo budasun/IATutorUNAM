@@ -5,27 +5,34 @@ import BottomNavBar from "@/components/layout/BottomNavBar";
 export const metadata: Metadata = {
   metadataBase: new URL('https://ia-tutor-unam.vercel.app'),
   title: 'TIAUNAM | Asegura tu lugar en la UNAM',
-  description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades y te ayuda a dominarlas.',
+  description: 'Simulador de examen con IA para las 4 áreas de la UNAM.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'TIAUNAM',
+    statusBarStyle: 'black-translucent',
+  },
   openGraph: {
     title: 'TIAUNAM | Asegura tu lugar en la UNAM',
     description: 'Entrena con el único simulador guiado por IA.',
-    url: 'https://ia-tutor-unam.vercel.app',
+    url: '/',
     siteName: 'Tutor IA UNAM',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'TIAUNAM - Simulador de Examen UNAM',
-      },
-    ],
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     locale: 'es_MX',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'TIAUNAM | Asegura tu lugar en la UNAM',
-    description: 'Entrena con el único simulador guiado por IA.',
     images: ['/og-image.png'],
   },
 };
