@@ -186,8 +186,8 @@ export default function Home() {
         </Link>
 
         <footer className="mt-12 text-center text-gray-500 text-sm">
-          <p>IA Tutor UNAM © 2026</p>
-          <p className="mt-1 text-xs">Potenciado por Gemini AI</p>
+          <p>Tutor IA UNAM © 2026</p>
+          <p className="mt-1 text-xs">Potenciado por Grok AI</p>
         </footer>
       </div>
     </div>
