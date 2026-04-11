@@ -175,15 +175,15 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-[#002B5C]/30 border border-[#D4AF37]/20 rounded-2xl p-8 text-center">
+        <Link href="/progreso" className="block bg-[#002B5C]/30 border border-[#D4AF37]/20 rounded-2xl p-8 text-center hover:bg-[#002B5C]/50 transition">
           <div className="w-16 h-16 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">📊</span>
           </div>
           <h2 className="text-xl font-semibold text-[#D4AF37] mb-2">Mi Progreso</h2>
           <p className="text-gray-400">
-            Toma tu primer simulacro para ver tus estadísticas aquí
+            Consulta tus estadísticas y historial de exámenes
           </p>
-        </section>
+        </Link>
 
         <footer className="mt-12 text-center text-gray-500 text-sm">
           <p>IA Tutor UNAM © 2026</p>
