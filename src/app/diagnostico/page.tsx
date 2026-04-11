@@ -24,10 +24,12 @@ export default function DiagnosticoPage() {
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
 
-  const areaActual = TEMARIO_UNAM[areaSeleccionada];
-  const materiasDelArea = areaActual.materias;
+  // PARCHE DE SEGURIDAD 1: Extracción segura de datos para evitar crasheos (Stale Closure)
+  const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
+  const materiasDelArea = areaActual?.materias || [];
   const totalMaterias = materiasDelArea.length;
 
+  // PARCHE DE SEGURIDAD 2: Agregamos areaActual.nombre a las dependencias
   const fetchPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
     setErrorApi(null);
@@ -51,13 +53,14 @@ export default function DiagnosticoPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [areaActual.nombre]);
 
   const iniciarDiagnostico = () => {
     setIndiceMateria(0);
     setResultados([]);
     setPantalla('cargando');
-    fetchPregunta(materiasDelArea[0].id);
+    // Extracción segura del primer ID
+    fetchPregunta(materiasDelArea[0]?.id);
   };
 
   const registrarErrorEnBanco = async (preguntaFallada: PreguntaGenerada, nombreMateria: string, nombreArea: string) => {
@@ -77,19 +80,20 @@ export default function DiagnosticoPage() {
   const handleRespuesta = (opcion: string) => {
     if (pantalla !== 'examen' || !pregunta) return;
 
-    const materiasArea = TEMARIO_UNAM[areaSeleccionada]?.materias || [];
-    const materiaActualObj = materiasArea[indiceMateria] || materiasArea[0];
-    const nombreMateria = materiaActualObj?.nombre || 'Materia Desconocida';
-    const nombreArea = areaActual?.nombre || 'Área Desconocida';
+    // PARCHE DE SEGURIDAD 3: Leer siempre del estado actual para evitar Undefined
+    const materiasAreaLocal = TEMARIO_UNAM[areaSeleccionada]?.materias || [];
+    const materiaActualObjLocal = materiasAreaLocal[indiceMateria] || materiasAreaLocal[0];
+    const nombreMateriaLocal = materiaActualObjLocal?.nombre || 'Materia Desconocida';
+    const nombreAreaLocal = TEMARIO_UNAM[areaSeleccionada]?.nombre || 'Área Desconocida';
 
     const fueCorrecto = opcion === pregunta.respuestaCorrecta;
 
     if (!fueCorrecto) {
-      registrarErrorEnBanco(pregunta, nombreMateria, nombreArea);
+      registrarErrorEnBanco(pregunta, nombreMateriaLocal, nombreAreaLocal);
     }
 
     const nuevoResultado: Resultado = {
-      materia: nombreMateria,
+      materia: nombreMateriaLocal,
       acierto: fueCorrecto,
     };
 
@@ -108,7 +112,8 @@ export default function DiagnosticoPage() {
         guardarProgresoDiagnostico(resultados);
         return prevIndice;
       }
-      fetchPregunta(materiasDelArea[siguienteIndice].id);
+      // Extracción segura del siguiente ID
+      fetchPregunta(materiasDelArea[siguienteIndice]?.id);
       return siguienteIndice;
     });
   };
@@ -121,16 +126,16 @@ export default function DiagnosticoPage() {
     }
 
     const { data: { session } } = await sb.auth.getSession();
-    
+
     if (!session) {
       console.error('No hay usuario logeado. No se puede guardar el progreso.');
       return;
     }
-    
+
     const aciertos = resultadosFinales.filter(r => r.acierto).length;
     const errores = resultadosFinales.filter(r => !r.acierto).length;
     const total = resultadosFinales.length;
-    const porcentaje = Math.round((aciertos / total) * 100);
+    const porcentaje = total > 0 ? Math.round((aciertos / total) * 100) : 0;
 
     const { error } = await sb.from('progreso_simulacros').insert({
       user_id: session.user.id,
@@ -161,7 +166,7 @@ export default function DiagnosticoPage() {
             Examen Diagnóstico
           </h1>
           <p className="text-gray-300 text-center mb-8 max-w-md">
-            Evaluaremos tus conocimientos en las {totalMaterias} materias de {areaActual.nombre} con una pregunta rápida de cada una.
+            Evaluaremos tus conocimientos en las {totalMaterias} materias de {areaActual?.nombre} con una pregunta rápida de cada una.
           </p>
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-sm border border-[#D4AF37]/30">
             <h2 className="font-semibold text-lg mb-4 text-[#D4AF37]">¿Qué evaluarás?</h2>
@@ -173,7 +178,7 @@ export default function DiagnosticoPage() {
             </ul>
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 w-full text-left">
               <label className="block text-[#D4AF37] font-semibold mb-2">Selecciona tu Área de Ingreso:</label>
-              <select 
+              <select
                 value={areaSeleccionada}
                 onChange={(e) => setAreaSeleccionada(e.target.value as AreaKey)}
                 className="w-full bg-[#001a3d] border border-[#D4AF37]/50 text-white rounded-lg p-3 outline-none focus:border-[#D4AF37] transition appearance-none"
@@ -209,9 +214,9 @@ export default function DiagnosticoPage() {
           <div className="text-center bg-red-500/10 p-6 rounded-2xl border border-red-500/30 max-w-md">
             <div className="text-4xl mb-4">⚠️</div>
             <h2 className="text-xl text-red-400 font-bold mb-2">Pausa técnica</h2>
-            <p className="text-gray-300 mb-6">{errorApi}<br/><br/>(Suele ocurrir al responder muy rápido).</p>
+            <p className="text-gray-300 mb-6">{errorApi}<br /><br />(Suele ocurrir al responder muy rápido).</p>
             <button
-              onClick={() => fetchPregunta(materiasDelArea[indiceMateria].id)}
+              onClick={() => fetchPregunta(materiasDelArea[indiceMateria]?.id)}
               className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
             >
               Reintentar Pregunta
@@ -231,18 +236,17 @@ export default function DiagnosticoPage() {
   }
 
   if (pantalla === 'retroalimentacion' && pregunta) {
-    const materiaActual = materiasDelArea[indiceMateria];
+    // PARCHE DE SEGURIDAD 4: Fallback de UI
+    const materiaActualObj = materiasDelArea[indiceMateria] || materiasDelArea[0];
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
-        <div className={`rounded-2xl p-6 mb-6 ${
-          fueCorrecta 
-            ? 'bg-green-500/20 border border-green-500/50' 
+        <div className={`rounded-2xl p-6 mb-6 ${fueCorrecta
+            ? 'bg-green-500/20 border border-green-500/50'
             : 'bg-yellow-500/20 border border-yellow-500/50'
-        }`}>
-          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${
-            fueCorrecta ? 'text-green-400' : 'text-yellow-400'
           }`}>
+          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${fueCorrecta ? 'text-green-400' : 'text-yellow-400'
+            }`}>
             {fueCorrecta ? (
               <>
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -260,7 +264,7 @@ export default function DiagnosticoPage() {
             )}
           </div>
           <p className="text-gray-300 text-sm mb-3">
-            <strong className="text-white">Materia:</strong> {materiaActual.nombre}
+            <strong className="text-white">Materia:</strong> {materiaActualObj?.nombre || 'Desconocida'}
           </p>
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
@@ -300,7 +304,7 @@ export default function DiagnosticoPage() {
   if (pantalla === 'resultados') {
     const aciertosTotales = resultados.filter((r) => r.acierto).length;
     const erroresTotales = resultados.filter((r) => !r.acierto).length;
-    const porcentaje = Math.round((aciertosTotales / totalMaterias) * 100);
+    const porcentaje = totalMaterias > 0 ? Math.round((aciertosTotales / totalMaterias) * 100) : 0;
     const materiasDebiles = resultados.filter((r) => !r.acierto).map((r) => r.materia);
 
     return (
@@ -311,7 +315,7 @@ export default function DiagnosticoPage() {
               <span className="text-4xl">📊</span>
             </div>
             <h1 className="text-3xl font-bold text-[#D4AF37] mb-2">Resultados del Diagnóstico</h1>
-            <p className="text-gray-400">{areaActual.nombre}</p>
+            <p className="text-gray-400">{areaActual?.nombre}</p>
           </div>
 
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6 border border-[#D4AF37]/30 text-center">
@@ -334,11 +338,10 @@ export default function DiagnosticoPage() {
             {resultados.map((resultado, index) => (
               <div
                 key={index}
-                className={`rounded-xl p-4 border ${
-                  resultado.acierto
+                className={`rounded-xl p-4 border ${resultado.acierto
                     ? 'bg-green-500/20 border-green-500/50'
                     : 'bg-red-500/20 border-red-500/50'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium text-white">{resultado.materia}</span>
@@ -347,11 +350,10 @@ export default function DiagnosticoPage() {
                   </span>
                 </div>
                 <span
-                  className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    resultado.acierto
+                  className={`text-xs font-bold px-3 py-1 rounded-full ${resultado.acierto
                       ? 'bg-green-500/30 text-green-300'
                       : 'bg-red-500/30 text-red-300'
-                  }`}
+                    }`}
                 >
                   {resultado.acierto ? 'Dominado' : 'Por repasar'}
                 </span>
@@ -422,13 +424,14 @@ export default function DiagnosticoPage() {
     );
   }
 
-  const materiaActual = materiasDelArea[indiceMateria];
+  // PARCHE DE SEGURIDAD 5: Fallback de UI
+  const materiaActualObj = materiasDelArea[indiceMateria] || materiasDelArea[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm text-[#D4AF37] font-medium">
-          {materiaActual.nombre}
+          {materiaActualObj?.nombre || 'Desconocida'}
         </span>
         <span className="text-sm text-gray-400">
           {indiceMateria + 1} de {totalMaterias}
@@ -438,7 +441,7 @@ export default function DiagnosticoPage() {
       <div className="w-full bg-white/10 rounded-full h-1 mb-6">
         <div
           className="bg-[#D4AF37] h-1 rounded-full transition-all duration-500"
-          style={{ width: `${((indiceMateria + 1) / totalMaterias) * 100}%` }}
+          style={{ width: `${totalMaterias > 0 ? ((indiceMateria + 1) / totalMaterias) * 100 : 0}%` }}
         />
       </div>
 

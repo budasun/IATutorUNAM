@@ -10,10 +10,7 @@ type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion
 type AreaKey = keyof typeof TEMARIO_UNAM;
 
 const STORAGE_KEY = 'ia_tutor_simulador_save';
-
 const TIEMPO_EXAMEN = 3 * 60 * 60;
-
-const MATERIAS_EXACTAS = ['matematicas', 'fisica', 'quimica'];
 
 interface ResultadoMateria {
   aciertos: number;
@@ -38,8 +35,9 @@ export default function SimuladorPage() {
   const [bufferPreguntas, setBufferPreguntas] = useState<PreguntaGenerada[]>([]);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
 
-  const areaActual = TEMARIO_UNAM[areaSeleccionada];
-  const materiasDelArea = areaActual.materias;
+  // PROTECCIÓN 1: Evitar que el área sea undefined
+  const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
+  const materiasDelArea = areaActual?.materias || [];
   const ESTRUCTURA_EXAMEN = materiasDelArea.map(m => ({ id: m.id, cantidad: m.preguntas }));
   const TOTAL_PREGUNTAS = ESTRUCTURA_EXAMEN.reduce((acc, item) => acc + item.cantidad, 0);
 
@@ -50,19 +48,22 @@ export default function SimuladorPage() {
     }
   }, []);
 
+  // PROTECCIÓN 2: Guardar también el área seleccionada en la memoria
   useEffect(() => {
     if (estado === 'configuracion' || estado === 'recuperacion' || estado === 'finalizado') return;
     const saveData = {
       estado, pausado, pregunta, tiempoRestante, aciertos, errores,
-      preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas
+      preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual,
+      resultadosPorMateria, bufferPreguntas, areaSeleccionada
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas]);
+  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas, areaSeleccionada]);
 
   const restaurarSesion = () => {
     const guardado = localStorage.getItem(STORAGE_KEY);
     if (guardado) {
       const data = JSON.parse(guardado);
+      setAreaSeleccionada(data.areaSeleccionada || 'area3');
       setEstado(data.estado || 'activo');
       setPausado(data.pausado ?? false);
       setPregunta(data.pregunta || null);
@@ -82,9 +83,10 @@ export default function SimuladorPage() {
     setEstado('configuracion');
   };
 
-  const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex];
+  // PROTECCIÓN 3: Extracción segura de nombres para evitar colapso de React
+  const materiaActual = ESTRUCTURA_EXAMEN[materiaActualIndex] || ESTRUCTURA_EXAMEN[0];
   const materiaObj = materiasDelArea.find(m => m.id === materiaActual?.id);
-  const nombreMateriaActual = materiaObj?.nombre || materiaActual?.id || 'Materia Desconocida';
+  const nombreMateriaActual = materiaObj?.nombre || 'Materia Desconocida';
 
   const inicializarResultadosPorMateria = () => {
     const resultados: Record<string, ResultadoMateria> = {};
@@ -94,6 +96,7 @@ export default function SimuladorPage() {
     return resultados;
   };
 
+  // PROTECCIÓN 4: Agregamos areaActual.nombre a las dependencias
   const obtenerPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
     setErrorApi(null);
@@ -111,31 +114,30 @@ export default function SimuladorPage() {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           id_materia: materiaId,
-          area: areaActual.nombre 
+          area: areaActual.nombre
         }),
       });
       const data = await res.json();
-      
+
       if (data.success && data.data && data.data.length > 0) {
         const preguntasNuevas: PreguntaGenerada[] = data.data;
         setPregunta(preguntasNuevas[0]);
         setBufferPreguntas(preguntasNuevas.slice(1));
         setEstado('activo');
       } else {
-        console.error('Error de API:', data.error);
         setErrorApi(data.error || 'La IA está saturada por peticiones rápidas.');
       }
     } catch (error) {
-      console.error('Error obteniendo pregunta:', error);
       setErrorApi('Error de conexión. Revisa tu internet.');
     } finally {
       setLoading(false);
     }
-  }, [bufferPreguntas]);
+  }, [bufferPreguntas, areaActual.nombre]);
 
   const iniciarExamen = () => {
+    setBufferPreguntas([]); // Limpiar la sala de espera de otras áreas
     setAciertos(0);
     setErrores(0);
     setPreguntaActualGlobal(1);
@@ -168,44 +170,43 @@ export default function SimuladorPage() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
 
-    const { error } = await sb.from('banco_errores').insert({
+    await sb.from('banco_errores').insert({
       user_id: session.user.id,
       area: nombreArea,
       materia: nombreMateria,
       datos_pregunta: preguntaFallada
     });
-
-    if (error) console.error('Error al registrar en banco de debilidades:', error);
   };
 
   const handleRespuesta = (opcion: string) => {
     if (estado !== 'activo' || !pregunta) return;
 
     const materiasArea = TEMARIO_UNAM[areaSeleccionada]?.materias || [];
-    const materiaActualObj = materiasArea[materiaActualIndex] || materiasArea[0];
-    const materiaId = materiaActualObj?.id || '';
-    const nombreMateria = materiaActualObj?.nombre || 'Materia Desconocida';
-    const nombreArea = areaActual?.nombre || 'Área Desconocida';
+    const materiaActualObjLocal = materiasArea[materiaActualIndex] || materiasArea[0];
+    const materiaIdLocal = materiaActualObjLocal?.id || '';
+    const nombreMateriaLocal = materiaActualObjLocal?.nombre || 'Materia Desconocida';
+    const nombreAreaLocal = areaActual?.nombre || 'Área Desconocida';
 
     const esCorrecta = opcion === pregunta.respuestaCorrecta;
 
     if (!esCorrecta && pregunta) {
-      registrarErrorEnBanco(pregunta, nombreMateria, nombreArea);
+      registrarErrorEnBanco(pregunta, nombreMateriaLocal, nombreAreaLocal);
     }
 
     setFueCorrecta(esCorrecta);
 
+    // PROTECCIÓN 5: Optional chaining en la suma de resultados
     if (esCorrecta) {
       setAciertos((prev) => prev + 1);
       setResultadosPorMateria(prev => ({
         ...prev,
-        [materiaId]: { ...prev[materiaId], aciertos: prev[materiaId].aciertos + 1 }
+        [materiaIdLocal]: { ...prev[materiaIdLocal], aciertos: (prev[materiaIdLocal]?.aciertos || 0) + 1 }
       }));
     } else {
       setErrores((prev) => prev + 1);
       setResultadosPorMateria(prev => ({
         ...prev,
-        [materiaId]: { ...prev[materiaId], errores: prev[materiaId].errores + 1 }
+        [materiaIdLocal]: { ...prev[materiaIdLocal], errores: (prev[materiaIdLocal]?.errores || 0) + 1 }
       }));
     }
 
@@ -218,7 +219,7 @@ export default function SimuladorPage() {
 
     setPreguntasRespondidasDeMateriaActual(prevRespondidas => {
       const nuevasRespondidas = prevRespondidas + 1;
-      
+
       setMateriaActualIndex(prevMateriaIndex => {
         let siguienteMateriaIndex = prevMateriaIndex;
         let buscarSiguienteMateria = false;
@@ -230,17 +231,17 @@ export default function SimuladorPage() {
 
         setPreguntaActualGlobal(prevGlobal => {
           const nuevaGlobal = prevGlobal + 1;
-          
+
           if (nuevaGlobal > TOTAL_PREGUNTAS) {
             setEstado('finalizado');
             return prevGlobal;
           }
 
           if (buscarSiguienteMateria) {
-             setTimeout(() => setPreguntasRespondidasDeMateriaActual(0), 0);
-             obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
+            setTimeout(() => setPreguntasRespondidasDeMateriaActual(0), 0);
+            obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
           } else {
-             obtenerPregunta(ESTRUCTURA_EXAMEN[prevMateriaIndex].id);
+            obtenerPregunta(ESTRUCTURA_EXAMEN[prevMateriaIndex].id);
           }
 
           return nuevaGlobal;
@@ -260,21 +261,14 @@ export default function SimuladorPage() {
 
   const guardarProgreso = async () => {
     const sb = getSupabase();
-    if (!sb) {
-      console.log('Supabase no configurado, progreso no guardado');
-      return;
-    }
+    if (!sb) return;
 
     const { data: { session } } = await sb.auth.getSession();
-    
-    if (!session) {
-      console.error('No hay usuario logeado. No se puede guardar el progreso.');
-      return;
-    }
+    if (!session) return;
 
-    const porcentaje = Math.round((aciertos / TOTAL_PREGUNTAS) * 100);
+    const porcentaje = TOTAL_PREGUNTAS > 0 ? Math.round((aciertos / TOTAL_PREGUNTAS) * 100) : 0;
 
-    const { error } = await sb.from('progreso_simulacros').insert({
+    await sb.from('progreso_simulacros').insert({
       user_id: session.user.id,
       area: areaActual.nombre,
       tipo: 'simulador',
@@ -285,12 +279,6 @@ export default function SimuladorPage() {
       fecha: new Date().toISOString(),
     });
 
-    if (error) {
-      console.error('Error guardando progreso del simulacro:', error);
-    } else {
-      console.log('¡Progreso del simulacro guardado exitosamente en la base de datos!');
-    }
-    
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -343,22 +331,14 @@ export default function SimuladorPage() {
 
           <div className="bg-white/10 backdrop-blur rounded-2xl p-6 w-full max-w-md border border-[#D4AF37]/30">
             <ul className="space-y-2 text-gray-300 mb-6">
-              <li className="flex items-center gap-2">
-                <span>⏱️</span> 3 horas de duración
-              </li>
-              <li className="flex items-center gap-2">
-                <span>📋</span> {TOTAL_PREGUNTAS} preguntas de opción múltiple
-              </li>
-              <li className="flex items-center gap-2">
-                <span>🎯</span> Retroalimentación al instante si fallas
-              </li>
-              <li className="flex items-center gap-2">
-                <span>📊</span> Resultados detallados por materia
-              </li>
+              <li className="flex items-center gap-2"><span>⏱️</span> 3 horas de duración</li>
+              <li className="flex items-center gap-2"><span>📋</span> {TOTAL_PREGUNTAS} preguntas de opción múltiple</li>
+              <li className="flex items-center gap-2"><span>🎯</span> Retroalimentación al instante</li>
+              <li className="flex items-center gap-2"><span>📊</span> Resultados detallados por materia</li>
             </ul>
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 w-full text-left">
               <label className="block text-[#D4AF37] font-semibold mb-2">Selecciona tu Área de Ingreso:</label>
-              <select 
+              <select
                 value={areaSeleccionada}
                 onChange={(e) => setAreaSeleccionada(e.target.value as AreaKey)}
                 className="w-full bg-[#001a3d] border border-[#D4AF37]/50 text-white rounded-lg p-3 outline-none focus:border-[#D4AF37] transition appearance-none"
@@ -377,10 +357,7 @@ export default function SimuladorPage() {
             </button>
           </div>
 
-          <Link
-            href="/"
-            className="mt-6 text-gray-400 hover:text-[#D4AF37] transition"
-          >
+          <Link href="/" className="mt-6 text-gray-400 hover:text-[#D4AF37] transition">
             ← Volver al inicio
           </Link>
         </div>
@@ -397,11 +374,8 @@ export default function SimuladorPage() {
               <span className="text-5xl">⏸️</span>
             </div>
             <h1 className="text-3xl font-bold text-[#D4AF37] mb-3">Tienes un Mega-Simulacro en pausa</h1>
-            <p className="text-gray-300">
-              ¿Quieres continuar donde lo dejaste?
-            </p>
+            <p className="text-gray-300">¿Quieres continuar donde lo dejaste?</p>
           </div>
-
           <div className="flex flex-col gap-4">
             <button
               onClick={restaurarSesion}
@@ -428,7 +402,7 @@ export default function SimuladorPage() {
           <div className="text-center bg-red-500/10 p-6 rounded-2xl border border-red-500/30 max-w-md">
             <div className="text-4xl mb-4">⚠️</div>
             <h2 className="text-xl text-red-400 font-bold mb-2">Pausa técnica</h2>
-            <p className="text-gray-300 mb-6">{errorApi}<br/><br/>(Suele ocurrir al responder muy rápido).</p>
+            <p className="text-gray-300 mb-6">{errorApi}<br /><br />(Suele ocurrir al responder muy rápido).</p>
             <button
               onClick={() => obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id)}
               className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
@@ -452,29 +426,11 @@ export default function SimuladorPage() {
   if (estado === 'retroalimentacion' && pregunta) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
-        <div className={`rounded-2xl p-6 mb-6 ${
-          fueCorrecta 
-            ? 'bg-green-500/20 border border-green-500/50' 
-            : 'bg-yellow-500/20 border border-yellow-500/50'
-        }`}>
-          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${
-            fueCorrecta ? 'text-green-400' : 'text-yellow-400'
+        <div className={`rounded-2xl p-6 mb-6 ${fueCorrecta ? 'bg-green-500/20 border border-green-500/50' : 'bg-yellow-500/20 border border-yellow-500/50'
           }`}>
-            {fueCorrecta ? (
-              <>
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                ¡Excelente! Respuesta Correcta
-              </>
-            ) : (
-              <>
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                Respuesta Incorrecta
-              </>
-            )}
+          <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${fueCorrecta ? 'text-green-400' : 'text-yellow-400'
+            }`}>
+            {fueCorrecta ? '¡Excelente! Respuesta Correcta' : 'Respuesta Incorrecta'}
           </div>
           <p className="text-gray-300 text-sm mb-3">
             <strong className="text-white">Materia:</strong> {nombreMateriaActual}
@@ -485,7 +441,7 @@ export default function SimuladorPage() {
               <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
             </div>
           )}
-          <div className={`rounded-xl p-4 mb-4 ${fueCorrecta ? 'bg-green-500/10' : 'bg-green-500/10'}`}>
+          <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
             <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
           </div>
@@ -506,16 +462,14 @@ export default function SimuladorPage() {
           >
             Entendido, continuar →
           </button>
-          <p className="text-center text-gray-500 text-sm mt-3">
-            ⏱️ Reloj pausado - Tómate tu tiempo para leer
-          </p>
+          <p className="text-center text-gray-500 text-sm mt-3">⏱️ Reloj pausado</p>
         </div>
       </div>
     );
   }
 
   if (estado === 'finalizado') {
-    const porcentajeTotal = Math.round((aciertos / TOTAL_PREGUNTAS) * 100);
+    const porcentajeTotal = TOTAL_PREGUNTAS > 0 ? Math.round((aciertos / TOTAL_PREGUNTAS) * 100) : 0;
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4">
@@ -525,7 +479,7 @@ export default function SimuladorPage() {
               <span className="text-4xl">🎓</span>
             </div>
             <h1 className="text-3xl font-bold text-[#D4AF37] mb-2">Resultados del Mega-Simulacro</h1>
-            <p className="text-gray-400">Examen Área 3: Ciencias Sociales</p>
+            <p className="text-gray-400">{areaActual.nombre}</p>
           </div>
 
           <div className="bg-white/10 backdrop-blur rounded-2xl p-8 mb-6 border border-[#D4AF37]/30 text-center">
@@ -548,21 +502,14 @@ export default function SimuladorPage() {
             {ESTRUCTURA_EXAMEN.map((item) => {
               const materia = materiasDelArea.find(m => m.id === item.id);
               const resultado = resultadosPorMateria[item.id] || { aciertos: 0, errores: 0 };
-              const porcentajeMateria = Math.round((resultado.aciertos / item.cantidad) * 100);
+              const porcentajeMateria = item.cantidad > 0 ? Math.round((resultado.aciertos / item.cantidad) * 100) : 0;
               const esDominado = porcentajeMateria >= 70;
 
               return (
-                <div
-                  key={item.id}
-                  className={`rounded-xl p-4 border ${
-                    esDominado ? 'bg-green-500/20 border-green-500/50' : 'bg-red-500/20 border-red-500/50'
-                  }`}
-                >
+                <div key={item.id} className={`rounded-xl p-4 border ${esDominado ? 'bg-green-500/20 border-green-500/50' : 'bg-red-500/20 border-red-500/50'}`}>
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-white">{materia?.nombre || item.id}</span>
-                    <span className={`text-sm font-bold ${esDominado ? 'text-green-400' : 'text-red-400'}`}>
-                      {porcentajeMateria}%
-                    </span>
+                    <span className={`text-sm font-bold ${esDominado ? 'text-green-400' : 'text-red-400'}`}>{porcentajeMateria}%</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-green-300">✓ {resultado.aciertos}/{item.cantidad}</span>
@@ -574,22 +521,13 @@ export default function SimuladorPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Link
-              href="/diagnostico"
-              className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg text-center hover:bg-[#e5c349] transition"
-            >
+            <Link href="/diagnostico" className="w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg text-center hover:bg-[#e5c349] transition">
               Hacer Nuevo Diagnóstico
             </Link>
-            <button
-              onClick={iniciarExamen}
-              className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold hover:bg-white/20 transition"
-            >
+            <button onClick={iniciarExamen} className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold hover:bg-white/20 transition">
               Repetir Mega-Simulacro
             </button>
-            <Link
-              href="/"
-              className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold text-center hover:bg-white/20 transition"
-            >
+            <Link href="/" className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-xl font-semibold text-center hover:bg-white/20 transition">
               ← Volver al Inicio
             </Link>
           </div>
@@ -609,32 +547,23 @@ export default function SimuladorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <span className="text-sm text-gray-400">
-          Pregunta {preguntaActualGlobal} de {TOTAL_PREGUNTAS}
-        </span>
+        <span className="text-sm text-gray-400">Pregunta {preguntaActualGlobal} de {TOTAL_PREGUNTAS}</span>
         <span className={`font-mono text-lg font-bold ${tiempoRestante < 300 ? 'text-red-400' : 'text-[#D4AF37]'}`}>
           {formatTime(tiempoRestante)}
         </span>
       </div>
 
       <div className="bg-[#D4AF37]/20 rounded-lg px-3 py-1 inline-block mb-4 self-start">
-        <span className="text-sm text-[#D4AF37] font-medium">
-          {nombreMateriaActual}
-        </span>
+        <span className="text-sm text-[#D4AF37] font-medium">{nombreMateriaActual}</span>
       </div>
 
       <div className="w-full bg-white/10 rounded-full h-1 mb-6">
-        <div
-          className="bg-[#D4AF37] h-1 rounded-full transition-all duration-300"
-          style={{ width: `${(preguntaActualGlobal / TOTAL_PREGUNTAS) * 100}%` }}
-        />
+        <div className="bg-[#D4AF37] h-1 rounded-full transition-all duration-300" style={{ width: `${(preguntaActualGlobal / TOTAL_PREGUNTAS) * 100}%` }} />
       </div>
 
       {pregunta.textoLectura && (
         <div className="bg-[#002B5C] border border-[#D4AF37]/30 rounded-2xl p-6 mb-6 shadow-lg shadow-[#001a3d]">
-          <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2">
-            <span>📖</span> Lectura
-          </h3>
+          <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2"><span>📖</span> Lectura</h3>
           <p className="text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5">
             {pregunta.textoLectura}
           </p>
