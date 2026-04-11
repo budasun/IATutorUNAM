@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase/client';
 import type { Session } from '@supabase/supabase-js';
+import InstallPWA from '@/components/InstallPWA';
 
 const materias = [
   "Historia",
@@ -189,6 +190,8 @@ export default function Home() {
           <p>Tutor IA UNAM © 2026</p>
           <p className="mt-1 text-xs">Potenciado por Grok AI</p>
         </footer>
+
+        <InstallPWA />
       </div>
     </div>
   );
