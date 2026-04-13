@@ -79,9 +79,14 @@ Tu respuesta DEBE seguir este esquema EXACTO. NO puedes omitir ningún bloque ni
 [Aquí explicas la respuesta correcta: conceptos clave, fórmulas, desarrollo si hay.
 Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na** es menor que la del **Cl**, por eso el **Na** cede electrones y se forma **NaCl**"]
 
-### 🔍 ¿Por qué fallaste?
-* **Tu opción:** [Explicación breve - por qué está mal]
-* **Otras opciones:** [Menciona las demás en 1 línea]
+### 🔍 Análisis de Distractores
+[Escribe esto PARA AMBOS: quien acertó y quien falló.
+Usa frases como "Es común confundir este concepto con..." o "Las otras opciones fallan porque..."
+- **Opción A:** [Por qué está mal - ej. "Se confunde con el enlace covalente por la fórmula"]
+- **Opción B:** [Por qué está mal - ej. "Omite que el Cl es más electronegativo"]
+- **Opción C:** [Por qué está mal]
+
+Esto sirve para confirmar a quien acertó y enseñar a quien falló.]
 
 ### 💡 Tip Pro
 [Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
