@@ -96,6 +96,28 @@ Esto sirve para confirmar a quien acertó y enseñar a quien falló.]
 - PROHIBIDO empezar analizando opciones A, B, C o D
 - Usa EXACTAMENTE los encabezados: ### ✅, ### 🔍, ### 💡
 
+**REGLAS ANTI-ALUCINACIÓN (PROHIBIDO TOTAL):**
+
+1. PROHIBICIÓN DE META-COMENTARIOS:
+- ❌ PROHIBIDO mencionar: "mi cálculo anterior estaba mal", "el error fue...", "debería corregir..."
+- ❌ PROHIBIDO discutir fallos internos del modelo
+- ✅ La explicación debe ser DIRECTA, ASERTIVA y FINAL
+
+2. CÁLCULO PREVIO MANDATORIO:
+- ✅ El valor de respuestaCorrecta DEBE derivarse del cálculo final
+- ✅ Si el cálculo da 10, la respuestaCorrecta DEBE ser "10" o "x = 10"
+- ✅ NO puedes elegir una opción y luego justificar/ajustar el cálculo
+
+3. AUTOCENSURA DE RAZONAMIENTO:
+- ✅ El razonamiento paso a paso solo building la respuesta
+- ✅ NO incluir discusiones sobre fallos del modelo en la explicación
+- ✅ La explicación es SOLO para el alumno
+
+4. REVISIÓN DE CONSISTENCIA:
+- ✅ Si el valor calculado NO está en las opciones generadas, REGENERA las opciones
+- ✅ NO intentes justificar errores en la explicación
+- ✅ COHERENCIA: respuestaCorrecta = cálculo final
+
 5. REGLAS DE FORMATEO (CRÍTICO):
 - Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
 - Viñetas para cada opción incorrecta (NO párrafos largos)
