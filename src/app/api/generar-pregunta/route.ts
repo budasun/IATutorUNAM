@@ -7,18 +7,6 @@ import type {
   PreguntaGenerada 
 } from '@/types/ia';
 
-const MAPA_SUPERINDICES: Record<string, string> = {
-  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-  '-': '⁻', '+': '⁺',
-};
-
-function formatearExponentes(texto: string): string {
-  return texto.replace(/\^([0-9+\-]+)/g, (match, exponente) => {
-    return exponente.split('').map((char: string) => MAPA_SUPERINDICES[char] || char).join('');
-  });
-}
-
 export async function POST(request: NextRequest): Promise<NextResponse<RespuestaGenerarPregunta>> {
   try {
     const body: SolicitudGenerarPregunta = await request.json();
@@ -172,17 +160,16 @@ IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}
 
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
-  "preguntas": [
+"preguntas": [
     {
       "pregunta": "Texto de la pregunta",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
       "respuestaCorrecta": "Opción correcta exacta",
-      "justificacionDescarte": "Explicación exhaustiva y educativa",
-      "explicacionCorrecta": "Explicación detallada"
+      "explicacion": "Todo el contenido pedagógico en un solo campo usando el template forzado"
       ${esLectura ? ', "textoLectura": "Aquí va el texto completo..."' : ''}
     }
   ]
-}`;
+}`
 
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
@@ -222,21 +209,19 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       const preguntaRaw = String(q.pregunta || '');
       const opcionesRaw = q.opciones;
       const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
-      const justificacionDescarteRaw = String(q.justificacionDescarte || '');
-      const explicacionCorrectaRaw = String(q.explicacionCorrecta || '');
+      const explicacionRaw = String(q.explicacion || '');
       const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
-      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !justificacionDescarteRaw || !explicacionCorrectaRaw) {
+      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionRaw) {
         throw new Error('Pregunta inválida en el array');
       }
 
       return {
-        pregunta: formatearExponentes(preguntaRaw),
-        opciones: opcionesRaw.map((op: unknown) => formatearExponentes(String(op))) as [string, string, string, string],
-        respuestaCorrecta: formatearExponentes(respuestaCorrectaRaw),
-        justificacionDescarte: formatearExponentes(justificacionDescarteRaw),
-        explicacionCorrecta: formatearExponentes(explicacionCorrectaRaw),
-        textoLectura: textoLecturaRaw ? formatearExponentes(textoLecturaRaw) : undefined,
+        pregunta: preguntaRaw,
+        opciones: opcionesRaw.map((op: unknown) => String(op)) as [string, string, string, string],
+        respuestaCorrecta: respuestaCorrectaRaw,
+        explicacion: explicacionRaw,
+        textoLectura: textoLecturaRaw,
       };
     });
 

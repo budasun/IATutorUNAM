@@ -2,8 +2,7 @@ export interface PreguntaGenerada {
   pregunta: string;
   opciones: [string, string, string, string];
   respuestaCorrecta: string;
-  justificacionDescarte: string;
-  explicacionCorrecta: string;
+  explicacion: string;
   textoLectura?: string;
 }
 

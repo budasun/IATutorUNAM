@@ -183,7 +183,7 @@ export default function DebilidadesPage() {
         </div>
         <div className="bg-[#002B5C]/50 p-4 rounded-xl mt-4">
           <p className="text-[#D4AF37] font-semibold mb-2">Explicación:</p>
-          <MathMarkdown content={fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte} className="text-gray-300 text-sm" />
+          <MathMarkdown content={pregunta.explicacion} className="text-gray-300 text-sm" />
         </div>
         </div>
         <button onClick={siguientePregunta} className="mt-auto w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349]">

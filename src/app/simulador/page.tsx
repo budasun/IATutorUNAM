@@ -448,10 +448,10 @@ export default function SimuladorPage() {
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
             <p className="text-[#D4AF37] font-semibold mb-2">
-              {fueCorrecta ? '💡 Profundiza tu conocimiento:' : '📖 Explicación Pedagógica:'}
+              📖 Explicación Completa
             </p>
             <MathMarkdown 
-              content={fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte} 
+              content={pregunta.explicacion} 
               className="text-gray-300 text-sm leading-relaxed" 
             />
           </div>
