@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 
 // 1. VIEWPORT (Solo una vez)
