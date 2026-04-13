@@ -136,6 +136,20 @@ Un truco corto (máximo 2 líneas) para éviter errores o resolver más rápido:
 - ❌ NO uses \$ escapado
 - ❌ NO pongas $ alredeor de números simples: NO "$\frac{1}{2}$" cuando es solo "1/2"
 
+8. REGLA DE INTEGRALES Y DIFERENCIALES:
+**FORMATO CORRECTO de integrales:**
+- MAL: $\int_{0}^{2} 3x^{2},dx$ (con coma + coma extra)
+- MAL: $(\int_{0}^{2} 3x^{2} dx)$ (paréntesis innecesario)
+- BIEN: $\int_{0}^{2} 3x^{2}\ dx$ (sin coma, con espacio, $dx$ fuera)
+- BIEN: $\int_{a}^{b} f(x)\ dx$
+
+**REGLAS ESPECÍFICAS:**
+- NUNCA uses coma antes del diferencial: NO ",$dx$", usa "$dx$"
+- NO uses coma antes de "$dx$" o cualquier diferencial
+- El diferencial VA FUERA del integrando: $\int f(x)\ dx$, NO $\int f(x),dx$
+- USA espacio entre integrando y diferencial: $x^2\ dx$ (con espacio)
+- NO uses paréntesis a menos que sea operación compuesta: $\int (x+1)\ dx$ es OK, $\int x\ dx$ debe ser $\int x\ dx$
+
 7. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
 Las opciones incorrectas NO deben ser números al azar.
 Deben ser errores comunes reales:
