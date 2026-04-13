@@ -83,25 +83,34 @@ La justificacionDescarte debe explicar el ERROR LÓGICO real del alumno:
 - Error en jerarquía de operaciones (ej: resolver antes de paréntesis)
 - Omisión de unidades o pasos
 
-4. ESTRUCTURA DE EXPLICACIÓN (FORMATO OBLIGATORIO):
---- EXPLICACIÓN CORRECTA (explicacionCorrecta) ---
-Usa este formato exactocada vez:
+4. ESTRUCTURA DE TRES BLOQUES (FORMATO OBLIGATORIO):
 
-**Concepto:** [Definición breve del tema]
+--- BLOQUE 1: EXPLICACIÓN CORRECTA (explicacionCorrecta) ---
+Usa SIEMPRE este encabezamiento: ### ✅ Procedimiento Correcto
 
-**Procedimiento:** [Paso a paso - usa $fórmula$ para todo]
+Luego desarrolla:
+- **Ciencias (Mate/Física/Química):** Fórmula → Sustitución → Cálculo final
+- **Humanidades (Historia/Literatura/Geografía):** Concepto → Contexto → Respuesta
 
-**Respuesta:** [El resultado final]
+Ejemplo Ciencias: 
+"La fórmula es $E = mc^2$. Sustituimos $m = 2$ y $c = 3 \times 10^8$, entonces $E = 2(3 \times 10^8)^2 = 2 \times 9 \times 10^{16}$"
 
---- JUSTIFICACIÓN PEDAGÓGICA (justificacionDescarte) ---
-Formatea con ESTAS reglas:
+Ejemplo Humanidades:
+"La Revolución Mexicana started en 1910 por el Grito de Dolores. El líder era Miguel Hidalgo."
 
-**¿Por qué está mal tu respuesta?**
-- *Opción A:* [Razón corta - error específico]
-- *Opción B:* [Razón corta - otro error]
-- *Opción C:* [Razón corta]
+--- BLOQUE 2: JUSTIFICACIÓN PEDAGÓGICA (justificacionDescarte) ---
+Usa SIEMPRE este encabezamiento: ### 🔍 Análisis de Opciones
 
-💡 **Tip para el examen:** [Mnemotécnico o truco memorable]
+Usa viñetas resumidas para cada opción incorrecta:
+- **Opción A:** [Error común: ej. "Confundir fórmula de área con perímetro"]
+- **Opción B:** [Error común: ej. "Olvidar la raíz cuadrada"]
+
+--- BLOQUE 3: TIP DEL EXAMEN ---
+Usa SIEMPRE este encabezamiento: ### 💡 Tip Pro
+
+Un truco corto (máximo 2 líneas) para éviter errores o resolver más rápido:
+- "Si ves $\sqrt{}$, siempre considera valores positivos y negativos"
+- "EnHistoria, las fechas de Miguel Hidalgo SON 1810, NO 1910"
 
 5. REGLAS DE FORMATEO (CRÍTICO):
 - Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
