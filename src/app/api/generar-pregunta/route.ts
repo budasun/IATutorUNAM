@@ -83,13 +83,33 @@ La justificacionDescarte debe explicar el ERROR LÓGICO real del alumno:
 - Error en jerarquía de operaciones (ej: resolver antes de paréntesis)
 - Omisión de unidades o pasos
 
-4. ESTRUCTURA DE explicacionCorrecta:
-Debe seguir exactamente este formato:
-"Concepto: [Definición breve del tema]"
-"Procedimiento: [Desarrollo paso a paso usando LaTeX si es necesario - ejemplo: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$]"
-"Conclusión: [Resultado final verificado]"
+4. ESTRUCTURA DE EXPLICACIÓN (FORMATO OBLIGATORIO):
+--- EXPLICACIÓN CORRECTA (explicacionCorrecta) ---
+Usa este formato exactocada vez:
 
-5. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
+**Concepto:** [Definición breve del tema]
+
+**Procedimiento:** [Paso a paso - usa $fórmula$ para todo]
+
+**Respuesta:** [El resultado final]
+
+--- JUSTIFICACIÓN PEDAGÓGICA (justificacionDescarte) ---
+Formatea con ESTAS reglas:
+
+**¿Por qué está mal tu respuesta?**
+- *Opción A:* [Razón corta - error específico]
+- *Opción B:* [Razón corta - otro error]
+- *Opción C:* [Razón corta]
+
+💡 **Tip para el examen:** [Mnemotécnico o truco memorable]
+
+5. REGLAS DE FORMATEO (CRÍTICO):
+- Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
+- Viñetas para cada opción incorrecta (NO párrafos largos)
+- TODO fórmula entre $...$: $K_w = 1.0 \times 10^{-14}$, $NaCl \rightarrow Na^+ + Cl^-$
+- Química: Use estruturas como $\mathrm{H_2O}$ para fórmulas
+
+6. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
 Las opciones incorrectas NO deben ser números al azar.
 Deben ser errores comunes reales:
 - Si la respuesta es "x = 5", genera "x = -5" (error de signo)
@@ -107,9 +127,9 @@ REGLA DE FORMATO MATEMÁTICO (CRÍTICO):
 - Ejemplos CORRECTOS vs INCORRECTOS:
   * Correcto: x², y³, z⁴, 2ⁿ, eˣ
   * Incorrecto: x^2, y^3, z^4, 2^n, e^x
-- Para subíndices químicos usa: H₂O, CO₂, NaCl, O₂, N₂
+- Para TODO (matemáticas, química, física) USA SIMPRE $\mathrm{H_2O}$, $\mathrm{CO_2}$, $\mathrm{NaCl}$
 
-IMPORTANTE: Para fórmulas matemáticas, usa LaTeX con símbolos de dólar:
+IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}$:
 - $...$ para fórmulas en línea
 - $$...$$ para fórmulas centradas
 - El JSON debe ser compatible con renderizador KaTeX (no escapes barras invertidas incorrectamente)
