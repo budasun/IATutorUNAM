@@ -106,10 +106,28 @@ Formatea con ESTAS reglas:
 5. REGLAS DE FORMATEO (CRÍTICO):
 - Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
 - Viñetas para cada opción incorrecta (NO párrafos largos)
-- TODO fórmula entre $...$: $K_w = 1.0 \times 10^{-14}$, $NaCl \rightarrow Na^+ + Cl^-$
-- Química: Use estruturas como $\mathrm{H_2O}$ para fórmulas
 
-6. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
+6. REGLA ANTI-DÓLAR (CRÍTICO - PROHBE ERRORES COMUNES):
+
+**NÚMEROS SIMPLES (texto plano - SIN $):**
+- Para opciones como: "158", "-2", "x = 5", "Opción A", "3.14"
+- USA texto plano, SIN signos de dólar
+- MAL: ["$$158$$"] o ["\$158"] - BIEN: ["158"]
+
+**MATEMÁTICAS COMPLEJAS (SÍ usa $):**
+- Solo usa $...$ para fórmulas con:
+  - Radicales: $\sqrt{x}$, $\sqrt{b^2-4ac}$
+  - Fracciones: $\frac{a}{b}$, $\frac{-b \pm \sqrt{D}}{2a}$
+  - Exponentes: $x^2$, $e^{-x}$
+  - Símbolos especiales: $\pi$, $\theta$, $\alpha$, $\beta$
+  - Notación química: $\mathrm{H_2O}$, $\mathrm{NaCl}$
+
+**PROHIBIDO ABSOLUTO:**
+- ❌ NO uses $$...$$ (doble dólar/block)
+- ❌ NO uses \$ escapado
+- ❌ NO pongas $ alredeor de números simples: NO "$\frac{1}{2}$" cuando es solo "1/2"
+
+7. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
 Las opciones incorrectas NO deben ser números al azar.
 Deben ser errores comunes reales:
 - Si la respuesta es "x = 5", genera "x = -5" (error de signo)
