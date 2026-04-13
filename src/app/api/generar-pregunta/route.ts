@@ -129,7 +129,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'llama-3.1-8b-instant',
+      model: 'groq/compound',
       response_format: { type: 'json_object' },
       temperature: 0.5,
       max_tokens: 2048,
