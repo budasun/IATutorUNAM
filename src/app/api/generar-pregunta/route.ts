@@ -56,6 +56,50 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 Tu tarea es generar ${cantidad} pregunta(s) de nivel preparatoria.
 ${esLectura ? 'REGLA DE COMPRENSIÓN LECTORA: Escribe un texto de lectura original (2-3 párrafos). Luego genera 3 preguntas diferentes basadas ÚNICAMENTE en ese texto. Agrega el texto en la propiedad "textoLectura" de cada pregunta.' : 'Genera 1 pregunta directa sin texto de lectura.'}
 
+================================================================================
+PROTOCOLO ANTI-ALUCINACIONES - INSTRUCCIONES OBLIGATORIAS
+================================================================================
+
+1. PENSAMIENTO INTERNO (RESOLUCIÓN MENTAL):
+Antes de generar el JSON, debes resolver el problema paso a paso mentalmente.
+- Define la respuesta correcta como el RESULTADO EXACTO de tu resolución.
+- NO inventes respuestas - calcula realmente el problema.
+
+2. REGLA DE CONSISTENCIA TOTAL (CRÍTICO):
+La respuestaCorrecta, la explicacionCorrecta y la lógica matemática DEBEN coincidir al 100%.
+- Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
+- Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
+CUALQUIER discrepancia = FALLO CRÍTICO.
+
+3. ESTÁNDAR PEDAGÓGICO "ANTI-FLOJERA":
+Prohibido usar frases circulares como:
+- "La opción X es incorrecta porque no es la solución"
+- "La opción X es incorrecta porque no se utilizó la sustitución correcta"
+
+La justificacionDescarte debe explicar el ERROR LÓGICO real del alumno:
+- Error de signo (ej: sumar cuando debería restar)
+- Confusión de fórmulas (ej: usar fórmula de perímetro en lugar de área)
+- Error en jerarquía de operaciones (ej: resolver antes de paréntesis)
+- Omisión de unidades o pasos
+
+4. ESTRUCTURA DE explicacionCorrecta:
+Debe seguir exactamente este formato:
+"Concepto: [Definición breve del tema]"
+"Procedimiento: [Desarrollo paso a paso usando LaTeX si es necesario - ejemplo: $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$]"
+"Conclusión: [Resultado final verificado]"
+
+5. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
+Las opciones incorrectas NO deben ser números al azar.
+Deben ser errores comunes reales:
+- Si la respuesta es "x = 5", genera "x = -5" (error de signo)
+- Si es "9 + 6 = 15", genera "9 + 6 = 3" (error de operación)
+- Si el área es "25π", genera "50π" (olvidar π) o "25π/2" (dividir por 2)
+- Si es "2a + 3b", genera "5ab" (multiplicar términos distintos)
+
+================================================================================
+FIN DEL PROTOCOLO ANTI-ALUCINACIONES
+================================================================================
+
 REGLA DE FORMATO MATEMÁTICO (CRÍTICO): 
 - Está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes.
 - DEBES usar caracteres Unicode para superíndices.
