@@ -35,6 +35,7 @@ export default function SimuladorPage() {
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
   const [bufferPreguntas, setBufferPreguntas] = useState<PreguntaGenerada[]>([]);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
+  const [respuestaSeleccionada, setRespuestaSeleccionada] = useState<string | null>(null);
 
   // PROTECCIÓN 1: Evitar que el área sea undefined
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -55,10 +56,10 @@ export default function SimuladorPage() {
     const saveData = {
       estado, pausado, pregunta, tiempoRestante, aciertos, errores,
       preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual,
-      resultadosPorMateria, bufferPreguntas, areaSeleccionada
+      resultadosPorMateria, bufferPreguntas, areaSeleccionada, respuestaSeleccionada
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas, areaSeleccionada]);
+  }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas, areaSeleccionada, respuestaSeleccionada]);
 
   const restaurarSesion = () => {
     const guardado = localStorage.getItem(STORAGE_KEY);
@@ -76,6 +77,7 @@ export default function SimuladorPage() {
       setPreguntasRespondidasDeMateriaActual(data.preguntasRespondidasDeMateriaActual || 0);
       setResultadosPorMateria(data.resultadosPorMateria || inicializarResultadosPorMateria());
       setBufferPreguntas(data.bufferPreguntas || []);
+      setRespuestaSeleccionada(data.respuestaSeleccionada || null);
     }
   };
 
@@ -138,7 +140,7 @@ export default function SimuladorPage() {
   }, [bufferPreguntas, areaActual.nombre]);
 
   const iniciarExamen = () => {
-    setBufferPreguntas([]); // Limpiar la sala de espera de otras áreas
+    setBufferPreguntas([]);
     setAciertos(0);
     setErrores(0);
     setPreguntaActualGlobal(1);
@@ -147,6 +149,7 @@ export default function SimuladorPage() {
     setTiempoRestante(TIEMPO_EXAMEN);
     setPausado(false);
     setResultadosPorMateria(inicializarResultadosPorMateria());
+    setRespuestaSeleccionada(null);
     setEstado('cargando');
     obtenerPregunta(ESTRUCTURA_EXAMEN[0].id);
   };
@@ -194,6 +197,7 @@ export default function SimuladorPage() {
       registrarErrorEnBanco(pregunta, nombreMateriaLocal, nombreAreaLocal);
     }
 
+    setRespuestaSeleccionada(opcion);
     setFueCorrecta(esCorrecta);
 
     // PROTECCIÓN 5: Optional chaining en la suma de resultados
@@ -217,6 +221,7 @@ export default function SimuladorPage() {
 
   const avanzarSiguientePregunta = () => {
     setEstado('cargando');
+    setRespuestaSeleccionada(null);
 
     setPreguntasRespondidasDeMateriaActual(prevRespondidas => {
       const nuevasRespondidas = prevRespondidas + 1;
@@ -439,7 +444,7 @@ export default function SimuladorPage() {
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
               <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <MathMarkdown content={pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta) || ''} className="text-red-300" />
+              <MathMarkdown content={respuestaSeleccionada || ''} className="text-red-300" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
