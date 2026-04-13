@@ -10,6 +10,7 @@ export interface PreguntaGenerada {
 export interface SolicitudGenerarPregunta {
   id_materia: string;
   area?: string;
+  model?: string;
 }
 
 export interface RespuestaGenerarPregunta {

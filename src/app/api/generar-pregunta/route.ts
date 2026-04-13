@@ -23,7 +23,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
   try {
     const body: SolicitudGenerarPregunta = await request.json();
     
-    const { id_materia, area } = body;
+    const { id_materia, area, model } = body;
+    const modeloAI = model || 'groq/compound';
     
     if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
@@ -129,7 +130,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      model: 'groq/compound',
+      model: modeloAI,
       response_format: { type: 'json_object' },
       temperature: 0.5,
       max_tokens: 2048,

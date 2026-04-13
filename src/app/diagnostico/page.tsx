@@ -37,7 +37,7 @@ export default function DiagnosticoPage() {
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_materia: materiaId, area: areaActual.nombre }),
+        body: JSON.stringify({ id_materia: materiaId, area: areaActual.nombre, model: 'openai/gpt-oss-120b' }),
       });
       const data = await res.json();
       if (data.success && data.data && data.data.length > 0) {
