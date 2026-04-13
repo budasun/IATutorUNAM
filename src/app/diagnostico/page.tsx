@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
 import { getSupabase } from '@/lib/supabase/client';
+import MathMarkdown from '@/components/MathMarkdown';
 
 type Pantalla = 'bienvenida' | 'cargando' | 'examen' | 'retroalimentacion' | 'resultados';
 type AreaKey = keyof typeof TEMARIO_UNAM;
@@ -269,20 +270,21 @@ export default function DiagnosticoPage() {
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
               <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
+              <MathMarkdown content={pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta) || ''} className="text-red-300" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
-            <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
+            <MathMarkdown content={pregunta.respuestaCorrecta} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
             <p className="text-[#D4AF37] font-semibold mb-2">
               {fueCorrecta ? '💡 Explicación y Fórmula:' : '📖 Explicación Pedagógica:'}
             </p>
-            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-              {fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte}
-            </p>
+            <MathMarkdown 
+              content={fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte} 
+              className="text-gray-300 text-sm leading-relaxed" 
+            />
           </div>
         </div>
 
@@ -446,7 +448,7 @@ export default function DiagnosticoPage() {
       </div>
 
       <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6 border border-white/10">
-        <p className="text-lg font-medium text-white leading-relaxed">{pregunta.pregunta}</p>
+        <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium text-white leading-relaxed" />
       </div>
 
       <div className="flex-1 flex flex-col gap-3">

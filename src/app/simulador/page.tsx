@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getSupabase } from '@/lib/supabase/client';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
+import MathMarkdown from '@/components/MathMarkdown';
 
 type EstadoExamen = 'configuracion' | 'cargando' | 'activo' | 'retroalimentacion' | 'finalizado' | 'recuperacion';
 type AreaKey = keyof typeof TEMARIO_UNAM;
@@ -438,20 +439,21 @@ export default function SimuladorPage() {
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
               <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <p className="text-red-300">{pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta)}</p>
+              <MathMarkdown content={pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta) || ''} className="text-red-300" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
-            <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
+            <MathMarkdown content={pregunta.respuestaCorrecta} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
             <p className="text-[#D4AF37] font-semibold mb-2">
               {fueCorrecta ? '💡 Profundiza tu conocimiento:' : '📖 Explicación Pedagógica:'}
             </p>
-            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-              {fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte}
-            </p>
+            <MathMarkdown 
+              content={fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte} 
+              className="text-gray-300 text-sm leading-relaxed" 
+            />
           </div>
         </div>
 
@@ -564,14 +566,14 @@ export default function SimuladorPage() {
       {pregunta.textoLectura && (
         <div className="bg-[#002B5C] border border-[#D4AF37]/30 rounded-2xl p-6 mb-6 shadow-lg shadow-[#001a3d]">
           <h3 className="text-lg font-bold text-[#D4AF37] mb-3 flex items-center gap-2"><span>📖</span> Lectura</h3>
-          <p className="text-gray-200 text-sm md:text-base leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5">
-            {pregunta.textoLectura}
-          </p>
+          <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+            <MathMarkdown content={pregunta.textoLectura} className="text-gray-200 text-sm md:text-base leading-relaxed" />
+          </div>
         </div>
       )}
 
       <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6 border border-white/10">
-        <p className="text-lg font-medium text-white leading-relaxed">{pregunta.pregunta}</p>
+        <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium text-white leading-relaxed" />
       </div>
 
       <div className="flex-1 flex flex-col gap-3">
@@ -584,7 +586,7 @@ export default function SimuladorPage() {
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D4AF37]/30 text-[#D4AF37] font-bold mr-3">
               {String.fromCharCode(65 + index)}
             </span>
-            {opcion}
+            <MathMarkdown content={opcion} />
           </button>
         ))}
       </div>

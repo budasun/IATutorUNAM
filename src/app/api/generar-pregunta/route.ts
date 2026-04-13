@@ -109,6 +109,11 @@ REGLA DE FORMATO MATEMÁTICO (CRÍTICO):
   * Incorrecto: x^2, y^3, z^4, 2^n, e^x
 - Para subíndices químicos usa: H₂O, CO₂, NaCl, O₂, N₂
 
+IMPORTANTE: Para fórmulas matemáticas, usa LaTeX con símbolos de dólar:
+- $...$ para fórmulas en línea
+- $$...$$ para fórmulas centradas
+- El JSON debe ser compatible con renderizador KaTeX (no escapes barras invertidas incorrectamente)
+
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
   "preguntas": [

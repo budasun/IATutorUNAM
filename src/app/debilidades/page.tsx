@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getSupabase } from '@/lib/supabase/client';
 import { PreguntaGenerada } from '@/types/ia';
+import MathMarkdown from '@/components/MathMarkdown';
 
 interface ErrorBanco {
   id: number;
@@ -144,18 +145,18 @@ export default function DebilidadesPage() {
         
         {pregunta.textoLectura && (
           <div className="bg-[#002B5C] border border-[#D4AF37]/30 rounded-2xl p-4 mb-4 shadow-lg shadow-[#001a3d]">
-            <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line">{pregunta.textoLectura}</p>
+            <MathMarkdown content={pregunta.textoLectura} className="text-gray-200 text-sm leading-relaxed" />
           </div>
         )}
 
         <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6">
-          <p className="text-lg font-medium">{pregunta.pregunta}</p>
+          <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium" />
         </div>
 
         <div className="flex flex-col gap-3">
           {pregunta.opciones.map((opcion: string, idx: number) => (
             <button key={idx} onClick={() => manejarRespuesta(opcion)} className="p-4 rounded-xl text-left font-medium transition bg-white/10 border-2 border-white/20 hover:border-[#D4AF37]">
-              {opcion}
+              <MathMarkdown content={opcion} />
             </button>
           ))}
         </div>
@@ -171,19 +172,19 @@ export default function DebilidadesPage() {
             {fueCorrecta ? '¡Correcto! Eliminada del banco 🗑️' : 'Incorrecto. La mantendremos para repasar 🧠'}
           </h2>
           {!fueCorrecta && (
-             <div className="mb-4">
-               <p className="text-white text-sm mb-1">Tu respuesta:</p>
-               <p className="text-red-300">{opcionElegida}</p>
-             </div>
-          )}
-          <div className="mb-4">
-            <p className="text-green-400 text-sm mb-1">Respuesta correcta:</p>
-            <p className="text-green-300">{pregunta.respuestaCorrecta}</p>
+<div className="mb-4">
+            <p className="text-white text-sm mb-1">Tu respuesta:</p>
+            <MathMarkdown content={opcionElegida} className="text-red-300" />
           </div>
-          <div className="bg-[#002B5C]/50 p-4 rounded-xl mt-4">
-            <p className="text-[#D4AF37] font-semibold mb-2">Explicación:</p>
-            <p className="text-gray-300 text-sm whitespace-pre-line">{fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte}</p>
-          </div>
+        )}
+        <div className="mb-4">
+          <p className="text-green-400 text-sm mb-1">Respuesta correcta:</p>
+          <MathMarkdown content={pregunta.respuestaCorrecta} className="text-green-300" />
+        </div>
+        <div className="bg-[#002B5C]/50 p-4 rounded-xl mt-4">
+          <p className="text-[#D4AF37] font-semibold mb-2">Explicación:</p>
+          <MathMarkdown content={fueCorrecta ? pregunta.explicacionCorrecta : pregunta.justificacionDescarte} className="text-gray-300 text-sm" />
+        </div>
         </div>
         <button onClick={siguientePregunta} className="mt-auto w-full bg-[#D4AF37] text-[#002B5C] py-4 rounded-xl font-bold text-lg hover:bg-[#e5c349]">
           Siguiente →
