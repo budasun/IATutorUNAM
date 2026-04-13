@@ -12,7 +12,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const body: SolicitudGenerarPregunta = await request.json();
     
     const { id_materia, area, model } = body;
-    const modeloAI = model || 'groq/compound';
+    const modeloAI = model || 'llama-3.3-70b-versatile';
     
     if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
@@ -173,23 +173,56 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
-    const chatCompletion = await groqClient.chat.completions.create({
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      model: modeloAI,
-      response_format: { type: 'json_object' },
-      temperature: 0.5,
-      max_tokens: 2048,
-    });
+    const MODELOS_FALLBACK = [
+      'llama-3.3-70b-versatile',
+      'llama-3.1-8b-instant',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+      'qwen/qwen3-32b',
+      'moonshotai/kimi-k2-instruct-0905',
+      'openai/gpt-oss-20b',
+      'openai/gpt-oss-120b',
+    ];
 
-    const responseContent = chatCompletion.choices[0]?.message?.content;
-    
+    let responseContent = null;
+    let modeloUsado = '';
+    let ultimoError = '';
+
+    for (const modelo of MODELOS_FALLBACK) {
+      try {
+        modeloUsado = modelo;
+        const chatCompletion = await groqClient.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          model: modelo,
+          response_format: { type: 'json_object' },
+          temperature: 0.5,
+          max_tokens: 2048,
+        });
+
+        responseContent = chatCompletion.choices[0]?.message?.content;
+        
+        if (responseContent) {
+          console.log(`Pregunta generaciónada con modelo: ${modelo}`);
+          break;
+        }
+      } catch (error: unknown) {
+        const err = error as Error & { status?: number };
+        console.warn(`Modelo ${modelo} falló: ${err.message}`);
+        ultimoError = err.message;
+        
+        if (err.status === 429) {
+          continue;
+        }
+        break;
+      }
+    }
+
     if (!responseContent) {
       return NextResponse.json(
-        { success: false, error: 'No se recibió respuesta de Groq' },
-        { status: 500 }
+        { success: false, error: `Todos los modelos agotados. Último error: ${ultimoError}` },
+        { status: 429 }
       );
     }
 
