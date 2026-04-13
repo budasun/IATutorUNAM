@@ -80,13 +80,11 @@ Tu respuesta DEBE seguir este esquema EXACTO. NO puedes omitir ningún bloque ni
 Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na** es menor que la del **Cl**, por eso el **Na** cede electrones y se forma **NaCl**"]
 
 ### 🔍 Análisis de Distractores
-[Escribe esto PARA AMBOS: quien acertó y quien falló.
-Usa frases como "Es común confundir este concepto con..." o "Las otras opciones fallan porque..."
-- **Opción A:** [Por qué está mal - ej. "Se confunde con el enlace covalente por la fórmula"]
-- **Opción B:** [Por qué está mal - ej. "Omite que el Cl es más electronegativo"]
-- **Opción C:** [Por qué está mal]
-
-Esto sirve para confirmar a quien acertó y enseñar a quien falló.]
+[Explica brevemente los errores lógicos o matemáticos de las 3 opciones incorrectas generadas.
+**REGLA ESTRICTA:** NUNCA uses frases como "Tu opción", "Si elegiste esta", o asumas lo que el usuario respondió, porque este texto se genera ANTES de que el usuario interactúe. Simplemente analiza las opciones de forma objetiva:
+- **Opción incorrecta 1:** [Error - ej. "Asume que la pendiente es negativa cuando es positiva"]
+- **Opción incorrecta 2:** [Error - ej. "Omite la constante de integración"]
+- **Opción incorrecta 3:** [Error - ej. "Aplica mal la jerarquía de operaciones"]]
 
 ### 💡 Tip Pro
 [Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
@@ -224,7 +222,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
           ],
           model: modelo,
           response_format: { type: 'json_object' },
-          temperature: 0.5,
+          temperature: 0.1,
           max_tokens: 2048,
         });
 
