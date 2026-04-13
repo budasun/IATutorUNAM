@@ -83,42 +83,25 @@ La justificacionDescarte debe explicar el ERROR LÓGICO real del alumno:
 - Error en jerarquía de operaciones (ej: resolver antes de paréntesis)
 - Omisión de unidades o pasos
 
-4. ESTRUCTURA DE TRES BLOQUES (FORMATO OBLIGATORIO - REGLAS DE HIERRO):
+4. TEMPLATE FORZADO (OBLIGATORIO - USA ESTE EXACTO):
 
-Tu respuesta SIEMPRE debe seguir este esquema EXACTO y en este ORDEN:
+Tu respuesta DEBE seguir este esquema EXACTO. NO puedes omitir ningún bloque ni cambiar el orden:
 
-=== BLOQUE 1: explicacionCorrecta ===
-DEBE empezar CON ESTE título exacto en la primera línea:
-### ✅ Procedimiento Correcto
+### ✅ El Concepto Clave
+[Aquí explicas la respuesta correcta: conceptos clave, fórmulas, desarrollo si hay.
+Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na** es menor que la del **Cl**, por eso el **Na** cede electrones y se forma **NaCl**"]
 
-Luego desarrolla el ejercicio COMPLETO paso a paso:
-- SIEMPRE muestra la sustitución: $(3 + 2i)(5 - 4i) = ...$
-- SIEMPRE muestra el desarrollo: $= 15 - 12i + 10i - 8i^2$
-- SIEMPRE muestra el cálculo: $= 15 - 2i + 8$ (porque $i^2 = -1$)
-- SIEMPRE muestra el resultado: $= 23 - 2i$
+### 🔍 ¿Por qué fallaste?
+* **Tu opción:** [Explicación breve - por qué está mal]
+* **Otras opciones:** [Menciona las demás en 1 línea]
 
-**PROHIBIDO:** NO resumas como "Se multiplican y se obtiene..." - DEBES mostrar cada paso.
-
-Separa del siguiente bloque con \n\n
-
-=== BLOQUE 2: justificacionDescarte ===
-DEBE usar este título exacto:
-### 🔍 Análisis de Opciones
-
-**Explica por qué cada opción INCORRECTA está mal:**
-- **A:** [Aquí va el error específico - ej: "Usaste $i^2 = 1$ en lugar de $-1$"]
-- **B:** [Error diferente - ej: "Sumaste las partes reales cuando debías restar"]
-- **C:** [Otro error]
-
-Separa del siguiente bloque con \n\n
-
-=== BLOQUE 3: TIP DEL EXAMEN ===
-DEBE usar este título exacto:
 ### 💡 Tip Pro
+[Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
 
-Truco corto (máximo 1-2 líneas) para evitar la trampa:
-- "En complejos, siempre usa $i^2 = -1$"
-- "En integrales, el diferencial VA FUERA: $\int f(x)\ dx$"
+**REGLA DE HIERRO:** 
+- PRIMERO ENSEÑAS, LUEGO CORRIGES
+- PROHIBIDO empezar analizando opciones A, B, C o D
+- Usa EXACTAMENTE los encabezados: ### ✅, ### 🔍, ### 💡
 
 5. REGLAS DE FORMATEO (CRÍTICO):
 - Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
