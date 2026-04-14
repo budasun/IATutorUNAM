@@ -40,22 +40,49 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
     const cantidad = esLectura ? 3 : 1;
 
-    const systemPrompt = `${METODOLOGIA_UNAM.instrucciones_tutor}
-
-Tu tarea es generar ${cantidad} pregunta(s) de nivel preparatoria.
-${esLectura ? 'REGLA DE COMPRENSIÓN LECTORA: Escribe un texto de lectura original (2-3 párrafos). Luego genera 3 preguntas diferentes basadas ÚNICAMENTE en ese texto. Agrega el texto en la propiedad "textoLectura" de cada pregunta.' : 'Genera 1 pregunta directa sin texto de lectura.'}
+    const systemPrompt = `
+================================================================================
+ROL Y OBJETIVO
+================================================================================
+Actúa como un Diseñador Instruccional Senior y Experto Evaluador de la UNAM.
+Tu tarea es generar ${cantidad} pregunta(s) de opción múltiple con una calidad pedagógica "Imperial".
+La retroalimentación debe ser una "Masterclass" en miniatura: constructiva, detallada, con refuerzo positivo y sin asumir las acciones del usuario.
 
 ================================================================================
-PROTOCOLO ANTI-ALUCINACIONES - INSTRUCCIONES OBLIGATORIAS
+PROTOCOLO ANTI-ALUCINACIONES Y RESOLUCIÓN OBLIGATORIA
 ================================================================================
+1. RESOLUCIÓN MENTAL PREVIA: Antes de elegir la "respuestaCorrecta", DEBES resolver el problema paso a paso. El resultado de tu cálculo debe ser exactamente la "respuestaCorrecta".
+2. PROHIBICIÓN DE META-COMENTARIOS: Jamás menciones tus propios errores, dudas o correcciones internas. Sé una fuente de verdad absoluta.
+3. CERO SUPOSICIONES: Como este texto se genera ANTES de que el alumno responda, TIENES PROHIBIDO usar frases como "Tu opción", "Si elegiste esta", o "Te equivocaste". Sé 100% objetivo.
 
-1. PENSAMIENTO INTERNO (RESOLUCIÓN MENTAL):
-Antes de generar el JSON, debes resolver el problema paso a paso mentalmente.
-- Define la respuesta correcta como el RESULTADO EXACTO de tu resolución.
-- NO inventes respuestas - calcula realmente el problema.
+================================================================================
+TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)
+================================================================================
+El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAMENTE esta estructura de 3 bloques. 
+¡PROHIBIDO HACER RESÚMENES O EXPLICACIONES CORTAS!
 
-2. REGLA DE CONSISTENCIA TOTAL (CRÍTICO):
-La respuestaCorrecta, la explicacionCorrecta y la lógica matemática DEBEN coincidir al 100%.
+### ✅ El Concepto Clave (o Procedimiento Correcto)
+[Obligatorio: Enseña el tema. Si es matemáticas/física/química, desarrolla la ecuación paso a paso desde la fórmula hasta el resultado. Si es humanidades, explica el contexto histórico o definición completa. Usa **negritas** para conceptos clave.]
+
+### 🔍 Análisis de Distractores
+[Explica detalladamente y de forma objetiva por qué las otras 3 opciones son incorrectas. Usa viñetas. Ej: 
+* **Opción X:** Es incorrecta porque asume que la pendiente es negativa...
+* **Opción Y:** Falla al no considerar la jerarquía de operaciones...]
+
+### 💡 Tip Pro
+[Un consejo rápido de 1-2 líneas para el examen de la UNAM. Un truco mnemotécnico, una regla general o una trampa común a evitar.]
+
+================================================================================
+REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
+================================================================================
+1. REGLA ANTI-DÓLAR (NÚMEROS SIMPLES): Si es un número o texto simple (ej. "158", "-2", "Opción A"), usa texto plano SIN signos de dólar. 
+2. REGLA MATEMÁTICA: Solo usa "\$...\$" (dólar simple) para fórmulas compleja
+</think>
+
+Error al editar: oldString no se encuentra en el archivo. Necesito buscar el texto exacto.
+<minimax:tool_call>
+<invoke name="read">
+<parameter name="filePath">C:\Users\JAQ\Desktop\IATutorUNAM\src\app\api\generar-pregunta\route.ts
 - Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
 - Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
 CUALQUIER discrepancia = FALLO CRÍTICO.
