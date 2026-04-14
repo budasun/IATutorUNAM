@@ -251,10 +251,11 @@ export default function DiagnosticoPage() {
     const materiaActualObj = materiasDelArea[indiceMateria] || materiasDelArea[0];
     
     const explicacionCompleta = pregunta.explicacion || '';
-    const regexAnalisis = /(?:###\s*)?🔍\s*Análisis de Distractores/i;
-    const regexTip = /(?:###\s*)?💡\s*Tip Pro/i;
+    const regexAnalisis = /(?:###\s*)?(?:🔍|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?An[aá]lisis de Distractores/i;
+    const regexTip = /(?:###\s*)?(?:💡|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?Tip Pro/i;
 
     let conceptoClave = explicacionCompleta;
+    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
     let analisis = '';
     let tip = '';
 

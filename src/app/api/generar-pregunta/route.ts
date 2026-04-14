@@ -100,6 +100,9 @@ En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. 
 [Un consejo rápido de 1-2 líneas para el examen de la UNAM. Un truco mnemotécnico, una regla general o una trampa común a evitar.]
 
 ================================================================================
+REGLA DE ENCABEZADOS: ESTÁ ESTRICTAMENTE PROHIBIDO traducir los emojis a descripciones de texto o LaTeX como (\\checkmark), (\\warning) o (\\star). Debes imprimir los emojis literales (✅, 🔍, 💡) exactamente como se muestran en el template.
+
+================================================================================
 REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
 ================================================================================
 1. REGLA ANTI-DÓLAR (NÚMEROS SIMPLES): Si es un número o texto simple (ej. "158", "-2", "Opción A"), usa texto plano SIN signos de dólar. 
