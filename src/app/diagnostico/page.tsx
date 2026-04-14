@@ -248,6 +248,10 @@ export default function DiagnosticoPage() {
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
+        <div className="bg-[#002B5C] border border-white/10 rounded-xl p-5 mb-6 shadow-md">
+          <p className="text-[#D4AF37] text-xs font-semibold mb-2 uppercase tracking-wide">Pregunta</p>
+          <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium text-white leading-relaxed" />
+        </div>
         <div className={`rounded-2xl p-6 mb-6 ${fueCorrecta
             ? 'bg-green-500/20 border border-green-500/50'
             : 'bg-yellow-500/20 border border-yellow-500/50'
