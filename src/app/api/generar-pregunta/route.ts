@@ -267,11 +267,14 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       const preguntaRaw = String(q.pregunta || '');
       const opcionesRaw = q.opciones;
       const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
-      const explicacionRaw = String(q.explicacion || '');
+      const explicacionRaw = typeof q.explicacion === 'object' 
+        ? JSON.stringify(q.explicacion) 
+        : String(q.explicacion || '');
       const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
-      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionRaw) {
-        throw new Error('Pregunta inválida en el array');
+      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionRaw || explicacionRaw === '[object Object]') {
+        console.error('Pregunta inválida - explicacion:', q.explicacion);
+        throw new Error('Pregunta inválida: explicacion vacía o mal formateada');
       }
 
       return {
