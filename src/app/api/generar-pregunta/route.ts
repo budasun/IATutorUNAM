@@ -199,9 +199,9 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
     const MODELOS_FALLBACK = [
-      'llama-3.1-8b-instant',
       'meta-llama/llama-4-scout-17b-16e-instruct',
       'llama-3.3-70b-versatile',
+      'llama-3.1-8b-instant',
       'qwen/qwen3-32b',
       'moonshotai/kimi-k2-instruct-0905',
       'openai/gpt-oss-20b',
