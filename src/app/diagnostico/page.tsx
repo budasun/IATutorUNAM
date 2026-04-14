@@ -24,6 +24,7 @@ export default function DiagnosticoPage() {
   const [errorApi, setErrorApi] = useState<string | null>(null);
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
+  const [respuestaSeleccionada, setRespuestaSeleccionada] = useState<string | null>(null);
 
   // PARCHE DE SEGURIDAD 1: Extracción segura de datos para evitar crasheos (Stale Closure)
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -59,6 +60,8 @@ export default function DiagnosticoPage() {
   const iniciarDiagnostico = () => {
     setIndiceMateria(0);
     setResultados([]);
+    setRespuestaSeleccionada(null);
+    setPregunta(null);
     setPantalla('cargando');
     // Extracción segura del primer ID
     fetchPregunta(materiasDelArea[0]?.id);
@@ -100,10 +103,13 @@ export default function DiagnosticoPage() {
 
     setResultados((prev) => [...prev, nuevoResultado]);
     setFueCorrecta(fueCorrecto);
+    setRespuestaSeleccionada(opcion);
     setPantalla('retroalimentacion');
   };
 
   const continuarDespuesRetroalimentacion = () => {
+    setRespuestaSeleccionada(null);
+    setPregunta(null);
     setPantalla('cargando');
 
     setIndiceMateria(prevIndice => {
@@ -270,7 +276,7 @@ export default function DiagnosticoPage() {
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
               <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <MathMarkdown content={pregunta.opciones.find(o => o !== pregunta.respuestaCorrecta) || ''} className="text-red-300" />
+              <MathMarkdown content={respuestaSeleccionada || ''} className="text-red-300" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
