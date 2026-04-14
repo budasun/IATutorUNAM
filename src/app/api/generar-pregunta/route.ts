@@ -203,8 +203,12 @@ Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na
 - ❌ NO uses \$ escapado
 - ❌ NO pongas $ alredeor de números simples: NO "$\frac{1}{2}$" cuando es solo "1/2"
 
+4. REGLA DE UNIDADES DE MEDIDA: NUNCA uses el comando \text{} dentro de una fórmula matemática, ya que rompe el formato JSON. Si necesitas escribir unidades de medida (como m/s, kg, N), ponlas AFUERA de los signos de dólar como texto plano.
+- Ej. CORRECTO: $v = 19.6$ m/s
+- Ej. INCORRECTO: $v = 19.6 \text{m/s}$
+
 8. REGLA DE INTEGRALES Y DIFERENCIALES:
-**Símbolo DE integral DEBE ser \int (con barra invertida)**
+**Símbolo DE integral DEBE ser \\\\int (CON DOBLE barra invertida, NO \int)**
 
 **FORMATO CORRECTO de integrales:**
 - MAL: $\int_{0}^{2} 3x^{2},dx$ (con coma + coma extra)
