@@ -84,7 +84,7 @@ CANDADO DE EXTENSIÓN (OBLIGATORIO - ESTÁ PROHIBIDO ABREVIAR)
 ================================================================================
 PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
 
-En Matemáticas/Física/Química: ESTÁ PROHIBIDO saltarse pasos. Debes mostrar la fórmula original, la sustitución de datos y el despeje final paso a paso.
+En Matemáticas/Física/Química: ESTÁ PROHIBIDO saltarse pasos algebraicos o aritméticos (ej. si multiplicas 3 * 2x, muéstralo). ESTÁ PROHIBIDO escribir la resolución como un solo párrafo. DEBES usar saltos de línea (\\n\\n) para poner cada paso de la ecuación en una línea nueva hacia abajo. Asegúrate de usar los nombres correctos de los teoremas (ej. Regla de la Potencia, no del Producto para polinomios simples).
 
 En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Debes dar el contexto histórico completo (causas, desarrollo y consecuencias) o definir el concepto a fondo antes de pasar al análisis de distractores.
 
