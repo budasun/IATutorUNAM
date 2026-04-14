@@ -489,6 +489,27 @@ export default function SimuladorPage() {
   }
 
   if (estado === 'retroalimentacion' && pregunta) {
+    const explicacionCompleta = pregunta.explicacion || '';
+    const regexAnalisis = /(?:###\s*)?🔍\s*Análisis de Distractores/i;
+    const regexTip = /(?:###\s*)?💡\s*Tip Pro/i;
+
+    let conceptoClave = explicacionCompleta;
+    let analisis = '';
+    let tip = '';
+
+    if (regexAnalisis.test(explicacionCompleta)) {
+      const partes = explicacionCompleta.split(regexAnalisis);
+      conceptoClave = partes[0];
+      const resto = partes[1];
+      
+      if (regexTip.test(resto)) {
+        const partesTip = resto.split(regexTip);
+        analisis = partesTip[0];
+        tip = partesTip[1];
+      } else {
+        analisis = resto;
+      }
+    }
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
         <span className="hidden">{nombreMateriaActual}</span>
@@ -516,13 +537,27 @@ export default function SimuladorPage() {
             <MathMarkdown content={pregunta.respuestaCorrecta} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
-            <p className="text-[#D4AF37] font-semibold mb-2">
-              📖 Explicación Completa
-            </p>
-            <MathMarkdown 
-              content={pregunta.explicacion} 
-              className="text-gray-300 text-sm leading-relaxed" 
-            />
+            <p className="text-[#D4AF37] font-semibold mb-3">📖 Explicación Completa</p>
+            
+            <MathMarkdown content={conceptoClave} className="text-gray-300 text-sm leading-relaxed mb-4" />
+            
+            {analisis && (
+              <details className="group mb-4 bg-black/20 rounded-xl border border-white/10 overflow-hidden">
+                <summary className="cursor-pointer p-4 font-semibold text-blue-300 list-none flex justify-between items-center hover:bg-white/5 transition">
+                  <span className="flex items-center gap-2">🔍 Ver Análisis de Errores Comunes</span>
+                  <span className="group-open:rotate-180 transition-transform duration-300">▼</span>
+                </summary>
+                <div className="p-4 pt-0">
+                  <MathMarkdown content={analisis} className="text-gray-300 text-sm leading-relaxed" />
+                </div>
+              </details>
+            )}
+
+            {tip && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <MathMarkdown content={`### 💡 Tip Pro\n${tip}`} className="text-[#D4AF37] text-sm leading-relaxed" />
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-auto">
