@@ -306,7 +306,7 @@ export default function DiagnosticoPage() {
           {!fueCorrecta && (
             <div className="bg-white/5 rounded-xl p-4 mb-4">
               <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <MathMarkdown content={respuestaSeleccionada || ''} className="text-red-300" />
+              <MathMarkdown content={respuestaSeleccionada || ''} className="text-white font-bold" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
