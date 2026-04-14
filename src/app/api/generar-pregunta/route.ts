@@ -267,12 +267,15 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
     const MODELOS_FALLBACK = [
-      'llama-3.3-70b-versatile',
       'llama-3.1-8b-instant',
+      'llama-3.3-70b-versatile',
+      'groq/compound',
+      'groq/compound-mini',
+      'moonshotai/kimi-k2-instruct',
       'moonshotai/kimi-k2-instruct-0905',
+      'meta-llama/llama-4-scout-17b-16e-instruct'
     ];
 
-    let responseContent = null;
     let modeloUsado = '';
     let ultimoError = '';
 
@@ -290,81 +293,71 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
           max_tokens: 2048,
         });
 
-        responseContent = chatCompletion.choices[0]?.message?.content;
-        
-        if (responseContent) {
-          console.log(`Pregunta generaciónada con modelo: ${modelo}`);
-          break;
-        }
-      } catch (error: unknown) {
-        const err = error as Error & { status?: number };
-        console.warn(`Modelo ${modelo} falló: ${err.message}`);
-        ultimoError = err.message;
-        
-        if (err.status === 429) {
+        const responseContent = chatCompletion.choices[0]?.message?.content;
+        if (!responseContent) {
+          console.warn(`Fallo con modelo ${modelo}, sin respuesta, intentando siguiente...`);
           continue;
         }
-        break;
+
+        const parsedResponse = JSON.parse(responseContent);
+        const preguntasRaw = parsedResponse.preguntas;
+
+        if (!Array.isArray(preguntasRaw) || preguntasRaw.length === 0) {
+          console.warn(`Fallo con modelo ${modelo}, array vacío, intentando siguiente...`);
+          continue;
+        }
+
+        console.log(`Pregunta generada con modelo: ${modelo}`);
+        
+        const validatedQuestions: PreguntaGenerada[] = preguntasRaw.map((q: Record<string, unknown>) => {
+          const preguntaRaw = String(q.pregunta || '');
+          const opcionesRaw = q.opciones;
+          const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
+          
+          let explicacionFinal = '';
+          if (typeof q.explicacion === 'object' && q.explicacion !== null) {
+            const obj = q.explicacion as Record<string, unknown>;
+            explicacionFinal = `${obj.concepto || obj.conceptoClave || ''}\n\n${obj.analisis || obj.analisisDistractores || ''}\n\n${obj.tip || obj.tipPro || ''}`;
+          } else {
+            explicacionFinal = String(q.explicacion || '');
+          }
+          
+          const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
+
+          if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionFinal || explicacionFinal === '[object Object]') {
+            throw new Error('Pregunta inválida: campos vacíos o mal formateados');
+          }
+
+          return {
+            pregunta: preguntaRaw,
+            opciones: opcionesRaw.map((op: unknown) => String(op)) as [string, string, string, string],
+            respuestaCorrecta: respuestaCorrectaRaw,
+            explicacion: explicacionFinal,
+            textoLectura: textoLecturaRaw,
+            tema_usado: temaAleatorio,
+          };
+        });
+
+        return NextResponse.json({
+          success: true,
+          data: validatedQuestions,
+        });
+
+      } catch (error: unknown) {
+        const err = error as Error & { status?: number; message?: string };
+        console.warn(`Fallo con modelo ${modelo}: ${err.message || err.status}, intentando siguiente...`);
+        ultimoError = err.message || String(err);
+        
+        if (err.status === 429 || err.status === 503) {
+          continue;
+        }
       }
     }
 
-    if (!responseContent) {
-      return NextResponse.json(
-        { success: false, error: `Todos los modelos agotados. Último error: ${ultimoError}` },
-        { status: 429 }
-      );
-    }
-
-    console.log('Groq response (raw):', responseContent);
-
-    const parsedResponse = JSON.parse(responseContent);
-    const preguntasRaw = parsedResponse.preguntas;
-
-    if (!Array.isArray(preguntasRaw) || preguntasRaw.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'La respuesta de Groq no tiene el formato esperado' },
-        { status: 500 }
-      );
-    }
-
-    const validatedQuestions: PreguntaGenerada[] = preguntasRaw.map((q: Record<string, unknown>) => {
-      const preguntaRaw = String(q.pregunta || '');
-      const opcionesRaw = q.opciones;
-      const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
-      
-      // Parser blindado: maneja objeto anidado o string
-      let explicacionFinal = '';
-      if (typeof q.explicacion === 'object' && q.explicacion !== null) {
-        const obj = q.explicacion as Record<string, unknown>;
-        // Concatena las partes del objeto con saltos de línea
-        explicacionFinal = `${obj.concepto || obj.conceptoClave || ''}\n\n${obj.analisis || obj.analisisDistractores || ''}\n\n${obj.tip || obj.tipPro || ''}`;
-      } else {
-        explicacionFinal = String(q.explicacion || '');
-      }
-      
-      const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
-
-      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionFinal || explicacionFinal === '[object Object]') {
-        console.error('Pregunta inválida - explicacion:', q.explicacion);
-        throw new Error('Pregunta inválida: explicacion vacía o mal formateada');
-      }
-
-      return {
-        pregunta: preguntaRaw,
-        opciones: opcionesRaw.map((op: unknown) => String(op)) as [string, string, string, string],
-        respuestaCorrecta: respuestaCorrectaRaw,
-        explicacion: explicacionFinal,
-        textoLectura: textoLecturaRaw,
-        tema_usado: temaAleatorio,
-      };
-    });
-
-    console.log('Preguntas generadas:', validatedQuestions.length);
-
-    return NextResponse.json({
-      success: true,
-      data: validatedQuestions,
-    });
+    return NextResponse.json(
+      { success: false, error: `Todos los modelos agotados. Último error: ${ultimoError}` },
+      { status: 429 }
+    );
 
   } catch (error) {
     console.error('Error en /api/generar-pregunta:', error);

@@ -28,12 +28,15 @@ export async function POST(req: Request) {
     `;
 
     const MODELOS_FALLBACK = [
-      'llama-3.3-70b-versatile',
       'llama-3.1-8b-instant',
+      'llama-3.3-70b-versatile',
+      'groq/compound',
+      'groq/compound-mini',
+      'moonshotai/kimi-k2-instruct',
       'moonshotai/kimi-k2-instruct-0905',
+      'meta-llama/llama-4-scout-17b-16e-instruct'
     ];
 
-    let respuestaIA = null;
     let ultimoError = '';
 
     for (const modelo of MODELOS_FALLBACK) {
@@ -43,22 +46,31 @@ export async function POST(req: Request) {
           model: modelo,
           temperature: 0.7,
           response_format: { type: 'json_object' },
+          max_tokens: 2048,
         });
 
-        respuestaIA = completion.choices[0]?.message?.content;
-        if (respuestaIA) break;
+        const respuestaIA = completion.choices[0]?.message?.content;
+        if (!respuestaIA) {
+          console.warn(`Fallo con modelo ${modelo}, sin respuesta, intentando siguiente...`);
+          continue;
+        }
+
+        console.log(`Ejemplo generado con modelo: ${modelo}`);
+        const data = JSON.parse(respuestaIA);
+        return NextResponse.json({ success: true, data });
+
       } catch (error: unknown) {
-        const err = error as Error & { status?: number };
-        ultimoError = err.message;
-        if (err.status === 429) continue;
-        break;
+        const err = error as Error & { status?: number; message?: string };
+        console.warn(`Fallo con modelo ${modelo}: ${err.message || err.status}, intentando siguiente...`);
+        ultimoError = err.message || String(err);
+
+        if (err.status === 429 || err.status === 503) {
+          continue;
+        }
       }
     }
 
-    if (!respuestaIA) throw new Error(`Modelos agotados: ${ultimoError}`);
-
-    const data = JSON.parse(respuestaIA);
-    return NextResponse.json({ success: true, data });
+    throw new Error(`Todos los modelos agotados: ${ultimoError}`);
   } catch (error: unknown) {
     console.error('Error generando ejemplo extra:', error);
     return NextResponse.json({ success: false, error: 'Error en la IA' }, { status: 500 });
