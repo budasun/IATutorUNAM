@@ -210,9 +210,11 @@ IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}
 - $$...$$ para fórmulas centradas
 - El JSON debe ser compatible con renderizador KaTeX (no escapes barras invertidas incorrectamente)
 
+IMPORTANTE: El campo "explicacion" DEBE SER UN ÚNICO STRING de texto plano. ESTÁ ESTRICTAMENTE PROHIBIDO enviar un objeto JSON anidado (ej. NO hagas {"concepto": "...", "tip": "..."}). Concatena todo con saltos de línea \n\n en una sola cadena.
+
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
-"preguntas": [
+  "preguntas": [
     {
       "pregunta": "Texto de la pregunta",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
@@ -294,12 +296,20 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       const preguntaRaw = String(q.pregunta || '');
       const opcionesRaw = q.opciones;
       const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
-      const explicacionRaw = typeof q.explicacion === 'object' 
-        ? JSON.stringify(q.explicacion) 
-        : String(q.explicacion || '');
+      
+      // Parser blindado: maneja objeto anidado o string
+      let explicacionFinal = '';
+      if (typeof q.explicacion === 'object' && q.explicacion !== null) {
+        const obj = q.explicacion as Record<string, unknown>;
+        // Concatena las partes del objeto con saltos de línea
+        explicacionFinal = `${obj.concepto || obj.conceptoClave || ''}\n\n${obj.analisis || obj.analisisDistractores || ''}\n\n${obj.tip || obj.tipPro || ''}`;
+      } else {
+        explicacionFinal = String(q.explicacion || '');
+      }
+      
       const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
-      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionRaw || explicacionRaw === '[object Object]') {
+      if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionFinal || explicacionFinal === '[object Object]') {
         console.error('Pregunta inválida - explicacion:', q.explicacion);
         throw new Error('Pregunta inválida: explicacion vacía o mal formateada');
       }
@@ -308,7 +318,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         pregunta: preguntaRaw,
         opciones: opcionesRaw.map((op: unknown) => String(op)) as [string, string, string, string],
         respuestaCorrecta: respuestaCorrectaRaw,
-        explicacion: explicacionRaw,
+        explicacion: explicacionFinal,
         textoLectura: textoLecturaRaw,
       };
     });
