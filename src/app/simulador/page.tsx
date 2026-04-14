@@ -296,6 +296,7 @@ export default function SimuladorPage() {
           }
 
           if (buscarSiguienteMateria) {
+            setBufferPreguntas([]); // Purgar el buffer de la materia anterior
             setTimeout(() => setPreguntasRespondidasDeMateriaActual(0), 0);
             obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
           } else {
