@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
@@ -25,6 +25,7 @@ export default function DiagnosticoPage() {
   const [fueCorrecta, setFueCorrecta] = useState<boolean>(false);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
   const [respuestaSeleccionada, setRespuestaSeleccionada] = useState<string | null>(null);
+  const fetchActivo = useRef(false);
 
   // PARCHE DE SEGURIDAD 1: Extracción segura de datos para evitar crasheos (Stale Closure)
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -33,6 +34,9 @@ export default function DiagnosticoPage() {
 
   // PARCHE DE SEGURIDAD 2: Agregamos areaActual.nombre a las dependencias
   const fetchPregunta = useCallback(async (materiaId: string) => {
+    if (fetchActivo.current) return;
+    fetchActivo.current = true;
+    
     setLoading(true);
     setErrorApi(null);
     try {
@@ -54,6 +58,7 @@ export default function DiagnosticoPage() {
       setErrorApi('Error de conexión. Revisa tu internet.');
     } finally {
       setLoading(false);
+      fetchActivo.current = false;
     }
   }, [areaActual.nombre]);
 

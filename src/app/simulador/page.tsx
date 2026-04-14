@@ -39,6 +39,7 @@ export default function SimuladorPage() {
   const [temasUsados, setTemasUsados] = useState<Record<string, string[]>>({});
   const [timeoutCarga, setTimeoutCarga] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fetchActivo = useRef(false);
 
   // PROTECCIÓN 1: Evitar que el área sea undefined
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -120,6 +121,9 @@ export default function SimuladorPage() {
 
   // PROTECCIÓN 4: Agregamos areaActual.nombre a las dependencias
   const obtenerPregunta = useCallback(async (materiaId: string) => {
+    if (fetchActivo.current) return;
+    fetchActivo.current = true;
+    
     setLoading(true);
     setErrorApi(null);
     setTimeoutCarga(false);
@@ -182,6 +186,7 @@ export default function SimuladorPage() {
       if (!timeoutCarga) {
         setLoading(false);
       }
+      fetchActivo.current = false;
     }
   }, [bufferPreguntas, areaActual.nombre, temasUsados]);
 
