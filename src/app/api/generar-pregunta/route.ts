@@ -76,7 +76,16 @@ El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAME
 REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
 ================================================================================
 1. REGLA ANTI-DÓLAR (NÚMEROS SIMPLES): Si es un número o texto simple (ej. "158", "-2", "Opción A"), usa texto plano SIN signos de dólar. 
-2. REGLA MATEMÁTICA: Solo usa "\$...\$" (dólar simple) para fórmulas compleja
+2. REGLA MATEMÁTICA: Solo usa "$...$" (dólar simple) para fórmulas complejas.Toda fórmula matemática DEBE estar dentro de$: $\\frac{a}{b}$, $\\int$, $\\sqrt{}$, $\\pi$.
+
+3. DOBLE ESCAPE DE BACKSLASHES EN JSON (CRÍTICO):
+**Como tu respuesta es un objeto JSON, TODOS los comandos de LaTeX deben tener doble barra invertida (\\\\). Si usas una sola, el JSON se rompe al parsearse.**
+
+❌ MAL: \\frac{a}{b}, \\int, \\sqrt, \\pi
+
+✅ BIEN: \\\frac{a}{b}, \\\int, \\\sqrt, \\\pi
+
+Además, RECUERDA que toda fórmula matemática o fracción DEBE ir estrictamente dentro de signos de dólar simples ($ ... $). Si no pones los dólares, la plataforma no dibujará la ecuación.
 </think>
 
 Error al editar: oldString no se encuentra en el archivo. Necesito buscar el texto exacto.
