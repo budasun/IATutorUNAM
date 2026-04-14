@@ -85,8 +85,15 @@ export default function SimuladorPage() {
     const guardado = localStorage.getItem(STORAGE_KEY);
     if (guardado) {
       const data = JSON.parse(guardado);
+      
+      let estadoRecuperado = data.estado || 'activo';
+      
+      if (estadoRecuperado === 'cargando' && data.pregunta) {
+        estadoRecuperado = 'activo';
+      }
+
       setAreaSeleccionada(data.areaSeleccionada || 'area3');
-      setEstado(data.estado || 'activo');
+      setEstado(estadoRecuperado);
       setPausado(data.pausado ?? false);
       setPregunta(data.pregunta || null);
       setTiempoRestante(data.tiempoRestante || TIEMPO_EXAMEN);
