@@ -447,6 +447,7 @@ export default function SimuladorPage() {
   if (estado === 'retroalimentacion' && pregunta) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
+        <span className="hidden">{nombreMateriaActual}</span>
         <div className={`rounded-2xl p-6 mb-6 ${fueCorrecta ? 'bg-green-500/20 border border-green-500/50' : 'bg-yellow-500/20 border border-yellow-500/50'
           }`}>
           <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${fueCorrecta ? 'text-green-400' : 'text-yellow-400'
@@ -476,7 +477,10 @@ export default function SimuladorPage() {
             />
           </div>
         </div>
-
+        <div className="bg-[#002B5C] border border-white/10 rounded-xl p-5 mb-6 shadow-md">
+          <p className="text-[#D4AF37] text-xs font-semibold mb-2 uppercase tracking-wide">Pregunta</p>
+          <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium text-white leading-relaxed" />
+        </div>
         <div className="mt-auto">
           <button
             onClick={continuarDespuesRetroalimentacion}
