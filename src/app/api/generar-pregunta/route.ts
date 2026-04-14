@@ -266,7 +266,16 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
-    const MODELOS_FALLBACK = [
+    // ================================================================
+    // ENRUTAMIENTO DINÁMICO POR MATERIA
+    // ================================================================
+    const normalizar = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const materiaNorm = normalizar(materia.nombre);
+    
+    const esExacta = ['matematicas', 'fisica', 'quimica', 'matemáticas', 'física', 'química'];
+    const esMateriaExacta = esExacta.some(m => materiaNorm.includes(normalizar(m)));
+    
+    const MODELOS_BASE = [
       'llama-3.1-8b-instant',
       'llama-3.3-70b-versatile',
       'groq/compound',
@@ -275,6 +284,10 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       'moonshotai/kimi-k2-instruct-0905',
       'meta-llama/llama-4-scout-17b-16e-instruct'
     ];
+    
+    const MODELOS_FALLBACK = esMateriaExacta
+      ? [MODELOS_BASE[1], MODELOS_BASE[2], ...MODELOS_BASE.slice(0, 1), ...MODELOS_BASE.slice(3)]
+      : MODELOS_BASE;
 
     let modeloUsado = '';
     let ultimoError = '';
