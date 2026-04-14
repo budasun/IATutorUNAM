@@ -29,11 +29,9 @@ export async function POST(req: Request) {
 
     const MODELOS_FALLBACK = [
       'llama-3.1-8b-instant',
-      'llama-3.3-70b-versatile',
-      'groq/compound-mini',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
       'moonshotai/kimi-k2-instruct',
-      'moonshotai/kimi-k2-instruct-0905',
-      'meta-llama/llama-4-scout-17b-16e-instruct'
+      'llama-3.3-70b-versatile'
     ];
 
     let ultimoError = '';
