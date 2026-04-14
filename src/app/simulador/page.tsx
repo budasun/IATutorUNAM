@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { getSupabase } from '@/lib/supabase/client';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
@@ -37,6 +37,8 @@ export default function SimuladorPage() {
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
   const [respuestaSeleccionada, setRespuestaSeleccionada] = useState<string | null>(null);
   const [temasUsados, setTemasUsados] = useState<Record<string, string[]>>({});
+  const [timeoutCarga, setTimeoutCarga] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // PROTECCIÓN 1: Evitar que el área sea undefined
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -54,12 +56,28 @@ export default function SimuladorPage() {
   // PROTECCIÓN 2: Guardar también el área seleccionada en la memoria
   useEffect(() => {
     if (estado === 'configuracion' || estado === 'recuperacion' || estado === 'finalizado') return;
+    const bufferLimitado = bufferPreguntas.slice(0, 2);
     const saveData = {
       estado, pausado, pregunta, tiempoRestante, aciertos, errores,
       preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual,
-      resultadosPorMateria, bufferPreguntas, areaSeleccionada, respuestaSeleccionada
+      resultadosPorMateria, bufferPreguntas: bufferLimitado, areaSeleccionada, respuestaSeleccionada
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        const saveDataMinimo = {
+          estado, pausado, pregunta: null, tiempoRestante, aciertos, errores,
+          preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual,
+          resultadosPorMateria, bufferPreguntas: [], areaSeleccionada, respuestaSeleccionada: null
+        };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(saveDataMinimo));
+        } catch {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+    }
   }, [estado, pausado, pregunta, tiempoRestante, aciertos, errores, preguntaActualGlobal, materiaActualIndex, preguntasRespondidasDeMateriaActual, resultadosPorMateria, bufferPreguntas, areaSeleccionada, respuestaSeleccionada]);
 
   const restaurarSesion = () => {
@@ -104,12 +122,20 @@ export default function SimuladorPage() {
   const obtenerPregunta = useCallback(async (materiaId: string) => {
     setLoading(true);
     setErrorApi(null);
+    setTimeoutCarga(false);
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setTimeoutCarga(true);
+      setLoading(false);
+    }, 60000);
 
     if (bufferPreguntas.length > 0) {
       const siguiente = bufferPreguntas[0];
       setBufferPreguntas(prev => prev.slice(1));
       setPregunta(siguiente);
       setEstado('activo');
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setLoading(false);
       return;
     }
@@ -131,7 +157,7 @@ export default function SimuladorPage() {
         const preguntasNuevas: PreguntaGenerada[] = data.data;
         const nuevaPreg = preguntasNuevas[0];
         setPregunta(nuevaPreg);
-        setBufferPreguntas(preguntasNuevas.slice(1));
+        setBufferPreguntas(preguntasNuevas.slice(1, 3));
         
         // Registrar tema usado
         if (nuevaPreg.tema_usado) {
@@ -149,7 +175,13 @@ export default function SimuladorPage() {
     } catch (error) {
       setErrorApi('Error de conexión. Revisa tu internet.');
     } finally {
-      setLoading(false);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (!timeoutCarga) {
+        setLoading(false);
+      }
     }
   }, [bufferPreguntas, areaActual.nombre, temasUsados]);
 
@@ -416,7 +448,7 @@ export default function SimuladorPage() {
     );
   }
 
-  if (loading || errorApi) {
+  if (loading || errorApi || timeoutCarga) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col items-center justify-center">
         {errorApi ? (
@@ -429,6 +461,18 @@ export default function SimuladorPage() {
               className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
             >
               Reintentar Pregunta
+            </button>
+          </div>
+        ) : timeoutCarga ? (
+          <div className="text-center bg-yellow-500/10 p-6 rounded-2xl border border-yellow-500/30 max-w-md">
+            <div className="text-4xl mb-4">⏱️</div>
+            <h2 className="text-xl text-yellow-400 font-bold mb-2">Tiempo de espera agotado</h2>
+            <p className="text-gray-300 mb-6">La conexión está tardando más de lo normal. ¿Deseas reintentar?</p>
+            <button
+              onClick={() => obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id)}
+              className="bg-[#D4AF37] text-[#002B5C] px-6 py-3 rounded-xl font-bold hover:bg-[#e5c349] transition"
+            >
+              Reintentar conexión
             </button>
           </div>
         ) : (

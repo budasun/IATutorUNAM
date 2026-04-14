@@ -61,11 +61,32 @@ PROTOCOLO ANTI-ALUCINACIONES Y RESOLUCIÓN OBLIGATORIA
 2. PROHIBICIÓN DE META-COMENTARIOS: Jamás menciones tus propios errores, dudas o correcciones internas. Sé una fuente de verdad absoluta.
 3. CERO SUPOSICIONES: Como este texto se genera ANTES de que el alumno responda, TIENES PROHIBIDO usar frases como "Tu opción", "Si elegiste esta", o "Te equivocaste". Sé 100% objetivo.
 
+${esLectura ? `
 ================================================================================
-TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)
+REGLA DE COMPRENSIÓN LECTORA (OBLIGATORIA)
+================================================================================
+- Tienes PROHIBIDO escribir textos cortos. Debes escribir un ensayo o artículo original, de nivel universitario.
+- El texto debe contener MÍNIMO 6 PÁRRAFOS extensos y complejos.
+- Usa un lenguaje rico y estructurado con argumentos sólidos.
+- Después del texto, genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
+- IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de las 3 preguntas generadas.
+
+================================================================================
+TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)` : `
+================================================================================
+TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)`}
 ================================================================================
 El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAMENTE esta estructura de 3 bloques. 
 ¡PROHIBIDO HACER RESÚMENES O EXPLICACIONES CORTAS!
+
+================================================================================
+CANDADO DE EXTENSIÓN (OBLIGATORIO - ESTÁ PROHIBIDO ABREVIAR)
+================================================================================
+PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
+
+En Matemáticas/Física/Química: ESTÁ PROHIBIDO saltarse pasos. Debes mostrar la fórmula original, la sustitución de datos y el despeje final paso a paso.
+
+En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Debes dar el contexto histórico completo (causas, desarrollo y consecuencias) o definir el concepto a fondo antes de pasar al análisis de distractores.
 
 ### ✅ El Concepto Clave (o Procedimiento Correcto)
 [Obligatorio: Enseña el tema. Si es matemáticas/física/química, desarrolla la ecuación paso a paso desde la fórmula hasta el resultado. Si es humanidades, explica el contexto histórico o definición completa. Usa **negritas** para conceptos clave.]
