@@ -11,6 +11,11 @@ interface MathMarkdownProps {
 }
 
 export default function MathMarkdown({ content, className = '' }: MathMarkdownProps) {
+  const contentLimpio = content
+    .replace(/\\\\/g, '')
+    .replace(/\\n/g, '\n')
+    .replace(/\\([a-zA-Z])/g, '\\$1');
+
   return (
     <div className={`math-content ${className}`}>
       <ReactMarkdown
@@ -20,7 +25,7 @@ export default function MathMarkdown({ content, className = '' }: MathMarkdownPr
           p: ({ children }) => <p className="mb-2">{children}</p>,
         }}
       >
-        {content}
+        {contentLimpio}
       </ReactMarkdown>
     </div>
   );
