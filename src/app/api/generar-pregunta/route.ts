@@ -264,7 +264,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
     
-    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
+    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.`;
 
     // ================================================================
     // ENRUTAMIENTO DINÁMICO POR MATERIA
