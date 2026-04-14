@@ -141,6 +141,7 @@ export default function SimuladorPage() {
       setEstado('activo');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setLoading(false);
+      fetchActivo.current = false; // Liberar el lock porque no entra al finally
       return;
     }
 
@@ -275,42 +276,33 @@ export default function SimuladorPage() {
     setEstado('cargando');
     setRespuestaSeleccionada(null);
 
-    setPreguntasRespondidasDeMateriaActual(prevRespondidas => {
-      const nuevasRespondidas = prevRespondidas + 1;
+    const nuevasRespondidas = preguntasRespondidasDeMateriaActual + 1;
+    let siguienteMateriaIndex = materiaActualIndex;
+    let buscarSiguienteMateria = false;
 
-      setMateriaActualIndex(prevMateriaIndex => {
-        let siguienteMateriaIndex = prevMateriaIndex;
-        let buscarSiguienteMateria = false;
+    if (nuevasRespondidas >= ESTRUCTURA_EXAMEN[materiaActualIndex].cantidad) {
+      siguienteMateriaIndex = materiaActualIndex + 1;
+      buscarSiguienteMateria = true;
+    }
 
-        if (nuevasRespondidas >= ESTRUCTURA_EXAMEN[prevMateriaIndex].cantidad) {
-          siguienteMateriaIndex = prevMateriaIndex + 1;
-          buscarSiguienteMateria = true;
-        }
+    const nuevaGlobal = preguntaActualGlobal + 1;
 
-        setPreguntaActualGlobal(prevGlobal => {
-          const nuevaGlobal = prevGlobal + 1;
+    if (nuevaGlobal > TOTAL_PREGUNTAS) {
+      setEstado('finalizado');
+      return;
+    }
 
-          if (nuevaGlobal > TOTAL_PREGUNTAS) {
-            setEstado('finalizado');
-            return prevGlobal;
-          }
+    setPreguntaActualGlobal(nuevaGlobal);
+    setMateriaActualIndex(siguienteMateriaIndex);
 
-          if (buscarSiguienteMateria) {
-            setBufferPreguntas([]); // Purgar el buffer de la materia anterior
-            setTimeout(() => setPreguntasRespondidasDeMateriaActual(0), 0);
-            obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
-          } else {
-            obtenerPregunta(ESTRUCTURA_EXAMEN[prevMateriaIndex].id);
-          }
-
-          return nuevaGlobal;
-        });
-
-        return siguienteMateriaIndex;
-      });
-
-      return nuevasRespondidas;
-    });
+    if (buscarSiguienteMateria) {
+      setPreguntasRespondidasDeMateriaActual(0);
+      setBufferPreguntas([]); // Purgar el buffer
+      obtenerPregunta(ESTRUCTURA_EXAMEN[siguienteMateriaIndex].id);
+    } else {
+      setPreguntasRespondidasDeMateriaActual(nuevasRespondidas);
+      obtenerPregunta(ESTRUCTURA_EXAMEN[materiaActualIndex].id);
+    }
   };
 
   const continuarDespuesRetroalimentacion = () => {

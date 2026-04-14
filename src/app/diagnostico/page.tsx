@@ -117,17 +117,16 @@ export default function DiagnosticoPage() {
     setPregunta(null);
     setPantalla('cargando');
 
-    setIndiceMateria(prevIndice => {
-      const siguienteIndice = prevIndice + 1;
-      if (siguienteIndice >= totalMaterias) {
-        setPantalla('resultados');
-        guardarProgresoDiagnostico(resultados);
-        return prevIndice;
-      }
-      // Extracción segura del siguiente ID
-      fetchPregunta(materiasDelArea[siguienteIndice]?.id);
-      return siguienteIndice;
-    });
+    const siguienteIndice = indiceMateria + 1;
+
+    if (siguienteIndice >= totalMaterias) {
+      setPantalla('resultados');
+      guardarProgresoDiagnostico(resultados);
+      return;
+    }
+
+    setIndiceMateria(siguienteIndice);
+    fetchPregunta(materiasDelArea[siguienteIndice]?.id);
   };
 
   const guardarProgresoDiagnostico = async (resultadosFinales: Resultado[]) => {
