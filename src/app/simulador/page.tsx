@@ -36,6 +36,7 @@ export default function SimuladorPage() {
   const [bufferPreguntas, setBufferPreguntas] = useState<PreguntaGenerada[]>([]);
   const [areaSeleccionada, setAreaSeleccionada] = useState<AreaKey>('area3');
   const [respuestaSeleccionada, setRespuestaSeleccionada] = useState<string | null>(null);
+  const [temasUsados, setTemasUsados] = useState<Record<string, string[]>>({});
 
   // PROTECCIÓN 1: Evitar que el área sea undefined
   const areaActual = TEMARIO_UNAM[areaSeleccionada] || TEMARIO_UNAM['area3'];
@@ -114,20 +115,33 @@ export default function SimuladorPage() {
     }
 
     try {
+      const temasExcluidos = temasUsados[materiaId] || [];
       const res = await fetch('/api/generar-pregunta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id_materia: materiaId,
-          area: areaActual.nombre
+          area: areaActual.nombre,
+          temas_excluidos: temasExcluidos
         }),
       });
       const data = await res.json();
 
       if (data.success && data.data && data.data.length > 0) {
         const preguntasNuevas: PreguntaGenerada[] = data.data;
-        setPregunta(preguntasNuevas[0]);
+        const nuevaPreg = preguntasNuevas[0];
+        setPregunta(nuevaPreg);
         setBufferPreguntas(preguntasNuevas.slice(1));
+        
+        // Registrar tema usado
+        if (nuevaPreg.tema_usado) {
+          const temasPrev = temasUsados[materiaId] || [];
+          setTemasUsados({
+            ...temasUsados,
+            [materiaId]: [...temasPrev, nuevaPreg.tema_usado]
+          });
+        }
+        
         setEstado('activo');
       } else {
         setErrorApi(data.error || 'La IA está saturada por peticiones rápidas.');
@@ -137,7 +151,7 @@ export default function SimuladorPage() {
     } finally {
       setLoading(false);
     }
-  }, [bufferPreguntas, areaActual.nombre]);
+  }, [bufferPreguntas, areaActual.nombre, temasUsados]);
 
   const iniciarExamen = () => {
     setBufferPreguntas([]);
@@ -150,6 +164,7 @@ export default function SimuladorPage() {
     setPausado(false);
     setResultadosPorMateria(inicializarResultadosPorMateria());
     setRespuestaSeleccionada(null);
+    setTemasUsados({});
     setEstado('cargando');
     obtenerPregunta(ESTRUCTURA_EXAMEN[0].id);
   };

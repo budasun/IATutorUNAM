@@ -11,7 +11,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
   try {
     const body: SolicitudGenerarPregunta = await request.json();
     
-    const { id_materia, area, model } = body;
+    const { id_materia, area, model, temas_excluidos } = body;
     const modeloAI = model || 'llama-3.1-8b-instant';
     
     if (!id_materia || typeof id_materia !== 'string') {
@@ -35,7 +35,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
       );
     }
 
-    const temaAleatorio = materia.temas[Math.floor(Math.random() * materia.temas.length)];
+    // Filtrar temas ya usados
+    const temasDisponibles = materia.temas.filter((t: string) => !temas_excluidos?.includes(t));
+    
+    // Si se agotaron, reiniciar
+    const temasParaElegir = temasDisponibles.length > 0 ? temasDisponibles : materia.temas;
+    
+    const temaAleatorio = temasParaElegir[Math.floor(Math.random() * temasParaElegir.length)];
     
     const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
     const cantidad = esLectura ? 3 : 1;
@@ -234,7 +240,10 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   ]
 }`
 
-    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
+    const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
+    const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
+    
+    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Usa superíndices Unicode (x², x³) y NO uses el símbolo caret (^x).`;
 
     const MODELOS_FALLBACK = [
       'meta-llama/llama-4-scout-17b-16e-instruct',
@@ -329,6 +338,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         respuestaCorrecta: respuestaCorrectaRaw,
         explicacion: explicacionFinal,
         textoLectura: textoLecturaRaw,
+        tema_usado: temaAleatorio,
       };
     });
 
