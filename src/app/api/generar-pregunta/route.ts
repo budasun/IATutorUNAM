@@ -92,6 +92,7 @@ REGLA DE COMPRENSIÓN LECTORA (OBLIGATORIA)
 - Usa un lenguaje rico y estructurado con argumentos sólidos.
 - Después del texto, genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
 - IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de 3 preguntas generadas.
+- ¡ALERTA!: Prioriza la longitud del campo "textoLectura" sobre cualquier otro campo. Es preferible que la explicación sea breve a que el texto de lectura sea corto.
 
 ================================================================================
 TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)` : `
@@ -311,26 +312,17 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     // ============================================================================
     let instruccionesEspeciales = '';
     if (esEspanol) {
-      instruccionesEspeciales = `¡REGLA ABSOLUTA PARA ESPAÑOL (COMPRENSIÓN LECTORA UNAM)!
-1) ESTRUCTURA DE 6 PÁRRAFOS (OBLIGATORIA): El texto DEBE seguir este esquema exacto: 
-   - Párrafo 1: Introducción y tesis central.
-   - Párrafo 2: Antecedentes históricos o contexto.
-   - Párrafo 3: Desarrollo argumentativo A.
-   - Párrafo 4: Desarrollo argumentativo B.
-   - Párrafo 5: Perspectivas alternas o críticas.
-   - Párrafo 6: Síntesis y conclusión final.
-2) TEMÁTICA: Ensayo académico complejo (Ciencias, Humanidades o Epistemología).
-3) PREGUNTAS: Evalúa inferencias y tesis. PROHIBIDO preguntas literales o distractores absurdos.`;
+      instruccionesEspeciales = `¡REGLA DE HIERRO PARA EL MODELO (LECTURA CRÍTICA)!
+1) EXTENSIÓN OBLIGATORIA: El texto DEBE tener 6 PÁRRAFOS de al menos 80 palabras cada uno. 
+2) ESTRUCTURA VISUAL: Debes numerar cada párrafo internamente como (Párrafo I, Párrafo II, etc.) para asegurar la extensión.
+3) RIGOR: Usa un lenguaje académico denso. PROHIBIDO resumir o dar textos de menos de 500 palabras en total. Si el texto es corto, el JSON será rechazado.
+4) TEMÁTICA: Ensayo sobre filosofía de la ciencia, sociología o historia universal.`;
     } else if (esLiteratura) {
-      instruccionesEspeciales = `¡REGLA ABSOLUTA PARA LITERATURA UNAM!
-1) ESTRUCTURA DE 5 PÁRRAFOS (OBLIGATORIA): 
-   - Párrafo 1: Contexto de la corriente literaria o biografía del autor.
-   - Párrafo 2: Análisis de la estética, estilo y recursos predominantes.
-   - Párrafo 3: Fragmento representativo de una obra o poema (OBLIGATORIO).
-   - Párrafo 4: Interpretación técnica y simbólica del fragmento anterior.
-   - Párrafo 5: Legado, trascendencia e influencia en la literatura.
-2) TEMÁTICA: Estrictamente Corrientes Literarias, Autores Clásicos o Análisis de Géneros.
-3) PREGUNTAS: Analiza figuras retóricas y valor estético. Distractores de alta dificultad.`;
+      instruccionesEspeciales = `¡REGLA DE HIERRO PARA EL MODELO (ANÁLISIS LITERARIO)!
+1) EXTENSIÓN OBLIGATORIA: Genera 5 PÁRRAFOS extensos. 
+2) CONTENIDO OBLIGATORIO: Debes incluir un fragmento de una obra clásica (mínimo 10 líneas) incrustado en el Párrafo 3.
+3) ANÁLISIS: Los párrafos 4 y 5 deben ser un análisis técnico-estético de la obra, mencionando figuras retóricas y contexto histórico. 
+4) PROHIBICIÓN: No uses textos de biología o ciencia; enfócate en el valor artístico y literario.`;
     } else if (!esMatesFisicaQuimica) {
       instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
     } else {
