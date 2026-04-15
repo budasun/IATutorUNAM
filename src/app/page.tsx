@@ -7,6 +7,8 @@ import { getSupabase } from '@/lib/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 import InstallPWA from '@/components/InstallPWA';
 
+export const dynamic = 'force-static';
+
 const materias = [
   "Historia",
   "Literatura",
