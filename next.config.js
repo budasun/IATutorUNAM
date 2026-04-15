@@ -2,71 +2,43 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  scope: '/',
-  sw: 'service-worker.js',
-  publicDirectory: true,
+  skipWaiting: true,
   runtimeCaching: [
     {
-      urlPattern: /^(?!\/_next\/static).+/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'app-shell-cache',
-        expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 }
-      }
-    },
-    {
-      urlPattern: /^\/_next\/static/,
+      urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
       handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-cache',
-        expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 }
-      }
+      options: { cacheName: 'google-fonts', expiration: { maxEntries: 4, maxAgeSeconds: 365 * 24 * 60 * 60 } }
     },
     {
-      urlPattern: /^\/$/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'home-page',
-        expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 }
-      }
-    },
-    {
-      urlPattern: /\.(js|css|woff2|woff|ttf|eot)$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-assets',
-        expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 }
-      }
-    },
-    {
-      urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'images-cache',
-        expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 }
-      }
-    },
-    {
-      urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+      urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
       handler: 'StaleWhileRevalidate',
-      options: { cacheName: 'google-fonts-stylesheets' }
+      options: { cacheName: 'static-font-assets', expiration: { maxEntries: 4, maxAgeSeconds: 7 * 24 * 60 * 60 } }
     },
     {
-      urlPattern: /^https:\/\/fonts\.gstatic\.com/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'google-fonts-webfonts',
-        expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 }
-      }
+      urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+      handler: 'StaleWhileRevalidate',
+      options: { cacheName: 'static-image-assets', expiration: { maxEntries: 64, maxAgeSeconds: 24 * 60 * 60 } }
+    },
+    {
+      urlPattern: /\/_next\/static\/.*/i,
+      handler: 'StaleWhileRevalidate',
+      options: { cacheName: 'next-static', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
+    },
+    {
+      urlPattern: /\.(?:js)$/i,
+      handler: 'StaleWhileRevalidate',
+      options: { cacheName: 'static-js-assets', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
+    },
+    {
+      urlPattern: /\/$/i,
+      handler: 'NetworkFirst',
+      options: { cacheName: 'pages', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
     }
   ]
 });
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = withPWA({
   reactStrictMode: true,
   webpack: (config) => config,
   turbopack: {},
-};
-
-module.exports = withPWA(nextConfig);
+});

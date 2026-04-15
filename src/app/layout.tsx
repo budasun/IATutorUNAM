@@ -6,6 +6,9 @@ import BottomNavBar from "@/components/layout/BottomNavBar";
 // 1. VIEWPORT (Solo una vez)
 export const viewport: Viewport = {
   themeColor: '#002B5C',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 // 2. METADATA (Solo una vez y con todo integrado)
