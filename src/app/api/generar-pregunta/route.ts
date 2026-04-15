@@ -278,7 +278,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       "pregunta": "Texto de la pregunta",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
       "respuestaCorrecta": "Opción correcta exacta",
-      "explicacion": "Todo el contenido pedagógico en un solo campo usando el template forzado"
+      "explicacion": "### ✅ El Concepto Clave\\n(Tu explicación obligatoria según la materia)\\n\\n### 🔍 Análisis de Distractores\\n(Tu análisis con viñetas)\\n\\n### 💡 Tip Pro\\n(Tu consejo)"
       ${esLectura ? ', "textoLectura": "Aquí va el texto completo..."' : ''}
     }
   ]
@@ -286,8 +286,13 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
     const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
-
-    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.`;
+    
+    const esMatesFisicaQuimica = id_materia.toLowerCase().match(/(matemática|física|química)/);
+    
+    const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. 
+    ${!esMatesFisicaQuimica 
+      ? '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser una pregunta 100% teórica, conceptual y cualitativa.' 
+      : 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.'}`;
 
     const MODELOS_FALLBACK = [
       'llama-3.1-8b-instant',
