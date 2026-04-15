@@ -3,6 +3,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
+  reloadOnOnline: false,
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
@@ -25,13 +26,18 @@ const withPWA = require('@ducanh2912/next-pwa').default({
       options: { cacheName: 'next-static', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
     },
     {
+      urlPattern: /\/_next\/data\/.*/i,
+      handler: 'StaleWhileRevalidate',
+      options: { cacheName: 'next-data', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
+    },
+    {
       urlPattern: /\.(?:js)$/i,
       handler: 'StaleWhileRevalidate',
       options: { cacheName: 'static-js-assets', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
     },
     {
       urlPattern: /\/$/i,
-      handler: 'NetworkFirst',
+      handler: 'StaleWhileRevalidate',
       options: { cacheName: 'pages', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
     }
   ]

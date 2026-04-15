@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     title: 'TIAUNAM',
     statusBarStyle: 'black-translucent',
   },
+  other: {
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
   openGraph: {
     title: 'TIAUNAM | Asegura tu lugar en la UNAM',
     description: 'Entrena con el único simulador guiado por IA que detecta tus debilidades.',
