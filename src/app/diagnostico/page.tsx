@@ -304,9 +304,9 @@ export default function DiagnosticoPage() {
             <strong className="text-white">Materia:</strong> {materiaActualObj?.nombre || 'Desconocida'}
           </p>
           {!fueCorrecta && (
-            <div className="bg-white/5 rounded-xl p-4 mb-4">
-              <p className="text-white font-medium mb-2">Tu respuesta:</p>
-              <MathMarkdown content={respuestaSeleccionada || ''} className="text-white font-bold" />
+            <div className="bg-red-500/10 rounded-lg p-4 mb-4 border border-red-500/30">
+              <p className="text-red-400 text-sm mb-2">Tu respuesta:</p>
+              <MathMarkdown content={respuestaSeleccionada || ''} className="text-red-400 font-medium" />
             </div>
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
