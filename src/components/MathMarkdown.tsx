@@ -18,6 +18,7 @@ export default function MathMarkdown({ content, className = '' }: MathMarkdownPr
     .replace(/rac{/g, '\\frac{')
     .replace(/imes/g, '\\times ')
     .replace(/\x0C/g, '\\frac')
+    .replace(/\\frac\\frac/g, '\\frac')
     .replace(/\\n/g, '\n');
 
   return (

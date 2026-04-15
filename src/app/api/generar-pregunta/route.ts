@@ -60,6 +60,7 @@ PROTOCOLO ANTI-ALUCINACIONES Y RESOLUCIÓN OBLIGATORIA
 1. RESOLUCIÓN MENTAL PREVIA: Antes de elegir la "respuestaCorrecta", DEBES resolver el problema paso a paso. El resultado de tu cálculo debe ser exactamente la "respuestaCorrecta".
 2. PROHIBICIÓN DE META-COMENTARIOS: Jamás menciones tus propios errores, dudas o correcciones internas. Sé una fuente de verdad absoluta.
 3. CERO SUPOSICIONES: Como este texto se genera ANTES de que el alumno responda, TIENES PROHIBIDO usar frases como "Tu opción", "Si elegiste esta", o "Te equivocaste". Sé 100% objetivo.
+4. PROHIBICIÓN DE MATEMÁTICAS INVENTADAS: Si la materia es BIOLOGÍA, HISTORIA, GEOGRAFÍA o LITERATURA, TIENES ESTRICTAMENTE PROHIBIDO generar problemas de cálculo matemático complejo (como integrales, derivadas, o crecimiento exponencial). Limítate a teoría, conceptos, genética básica (cuadros de Punnett) y análisis de sistemas.
 
 ${esLectura ? `
 ================================================================================
