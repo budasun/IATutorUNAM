@@ -300,10 +300,18 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     
     const esMatesFisicaQuimica = id_materia.toLowerCase().match(/(matemática|física|química)/);
     
+    let instruccionesEspeciales = '';
+    if (esLectura) {
+      instruccionesEspeciales = '¡REGLA ABSOLUTA LITERARIA: 1) El textoLectura DEBE estar 100% en Español perfecto. Tienes ESTRICTAMENTE PROHIBIDO usar caracteres chinos, kanjis, o palabras en inglés. 2) El textoLectura DEBE ser un ensayo largo de MÍNIMO 6 PÁRRAFOS extensos. Si escribes solo 1 o 2 párrafos, reprobarás la evaluación.';
+    } else if (!esMatesFisicaQuimica) {
+      instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
+    } else {
+      instruccionesEspeciales = 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.';
+    }
+
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. 
-    ${!esMatesFisicaQuimica 
-      ? '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser una pregunta 100% teórica, conceptual y cualitativa.' 
-      : 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.'}`;
+
+${instruccionesEspeciales}`;
 
     const MODELOS_FALLBACK = [
       'llama-3.1-8b-instant',
