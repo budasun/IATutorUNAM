@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { groqClient } from '@/lib/groq/client';
-import { METODOLOGIA_UNAM, TEMARIO_UNAM } from '@/data/unam_temario';
+import { TEMARIO_UNAM } from '@/data/unam_temario';
 import type {
   SolicitudGenerarPregunta,
   RespuestaGenerarPregunta,
@@ -46,285 +46,211 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
 
     // ============================================================================
-    // CLASIFICADOR CENTRAL DE MATERIAS (¡Cero duplicados!)
+    // CLASIFICADOR CENTRAL DE MATERIAS
     // ============================================================================
     const materiaLower = id_materia.toLowerCase();
     const esEspanol = materiaLower.includes('espanol');
     const esLiteratura = materiaLower.includes('literatura');
     const esLectura = esEspanol || esLiteratura;
     const esBiologia = materiaLower.includes('biologia') || materiaLower.includes('biología');
-    const esQuimica = materiaLower.includes('quimica') || materiaLower.includes('química');
+    const esHistoria = materiaLower.includes('historia');
+    const esGeografia = materiaLower.includes('geografia') || materiaLower.includes('geografía');
+    const esFilosofia = materiaLower.includes('filosofia') || materiaLower.includes('filosofía');
+    const esPsicologia = materiaLower.includes('psicologia') || materiaLower.includes('psicología');
+    const esSociologia = materiaLower.includes('sociologia') || materiaLower.includes('sociología');
+    const esEtica = materiaLower.includes('etica') || materiaLower.includes('ética');
+    const esEconomia = materiaLower.includes('economia') || materiaLower.includes('economía');
+    const esCienciaTeorica = esBiologia || esHistoria || esGeografia || esFilosofia || esPsicologia || esSociologia || esEtica || esEconomia;
     const esMatesFisicaQuimica = materiaLower.match(/(matemáticas?|matematica|física|fisica|química|quimica)/);
     const cantidad = esLectura ? 3 : 1;
 
     // ============================================================================
-    // PLANTILLAS DINÁMICAS (Inyectadas en el ejemplo JSON)
+    // SELECCIÓN DE ESTRUCTURA PEDAGÓGICA
     // ============================================================================
-    let templateExplicacion = "### ✅ El Concepto Clave\n(Tu explicación detallada)\n\n### 🔍 Análisis de Distractores\n(Viñetas)\n\n### 💡 Tip Pro\n(Consejo)";
+    let estructuraExplicacion = '';
 
     if (esMatesFisicaQuimica) {
-      templateExplicacion = "### ✅ El Concepto Clave\n**1. Anclaje:** [Concepto físico/matemático]\n**2. Datos:** [Lista de variables con unidades]\n**3. Fórmula:** [Ecuación en LaTeX con \\\\\\\\ (doble escape)]\n**4. Desarrollo:** [Sustitución y pasos finales]\n\n### 🔍 Análisis de Distractores\n(Explica el error matemático de las otras opciones)\n\n### 💡 Tip Pro\n(Truco para el examen)";
-    } else if (esBiologia) {
-      templateExplicacion = "### ✅ El Concepto Clave\n**Ubicación:** [Dónde ocurre]\n**Proceso:** [Explicación detallada. Si es genética, incluye genotipos correctos. OJO: Las enfermedades recesivas requieren dos padres portadores]\n**Impacto Vital:** [Importancia]\n\n### 🔍 Análisis de Distractores\n(Viñetas)\n\n### 💡 Tip Pro\n(Consejo)";
+      // ESTRUCTURA A: Ciencias Exactas
+      estructuraExplicacion = `
+**✅ Anclaje:** [Una línea explicando el fenómeno físico, químico o lógico]
+
+**📊 Datos:**
+- Variable 1 = valor
+- Variable 2 = valor
+
+**📐 Fórmula:** $[Ecuación original en LaTeX]$
+
+**🔄 Desarrollo:**
+[Paso 1: Sustitución]
+
+[Paso 2: Simplificación]
+
+[Paso 3: Resultado Final]
+
+**🔍 Análisis de Errores Comunes:**
+- Trampa 1: [Error específico, ej: "Error de signos al despejar"]
+- Trampa 2: [Error específico, ej: "Olvidar elevar al cuadrado"]
+
+**💡 Tip Pro:** [Consejo rápido y accionable]`;
+    } else if (esCienciaTeorica) {
+      // ESTRUCTURA B: Ciencias Teóricas
+      estructuraExplicacion = `
+**✅ Anclaje Conceptual:** [Define el concepto principal en una frase contundente]
+
+**🧬 Desglose/Mecanismo:**
+- [Característica o fase 1]
+- [Característica o fase 2]
+- [Característica o fase 3]
+
+**🔗 Palabra Clave / Nexo:** [La palabra en la pregunta que da la respuesta inmediatamente]
+
+**🔍 Análisis de Errores Comunes:**
+- [Por qué el distractor más lógico es falso]
+- [Confusión común entre conceptos similares]
+
+**💡 Tip Pro:** [Mnemotecnia, truco de memoria o asociación rápida]`;
+    } else {
+      // ESTRUCTURA C: Lectura de Comprensión (default para Español/Literatura)
+      estructuraExplicacion = `
+**✅ Tipo de Pregunta:** [Ej: "Pregunta de Inferencia", "Idea Principal", "Tono del autor"]
+
+**📖 Evidencia en el Texto:** "[Cita textual exacta del fragmento donde reside la respuesta]"
+
+**🧠 Análisis Lógico:** [Cómo conectar la evidencia con la respuesta correcta]
+
+**🔍 Análisis de Errores Comunes:**
+- Opción X: [Por qué es incorrecta, ej: "Es demasiado general"]
+- Opción Y: [Por qué es incorrecta, ej: "Es cierta en la realidad pero NO se menciona en el texto"]
+
+**💡 Tip Pro:** [Estrategia de lectura rápida]`;
     }
 
     const systemPrompt = `
 ================================================================================
-ROL Y OBJETIVO
+ROL Y MISIÓN
 ================================================================================
-Actúa como un Diseñador Instruccional Senior y Experto Evaluador de la UNAM.
-Tu tarea es generar ${cantidad} pregunta(s) de opción múltiple con una calidad pedagógica "Imperial".
-La retroalimentación debe ser una "Masterclass" en miniatura: constructiva, detallada, con refuerzo positivo y sin asumir las acciones del usuario.
+Eres el Tutor Experto Definitivo y Auditor Forense del simulador IATutorUNAM.
+Tu misión es generar ${cantidad} pregunta(s) de opción múltiple con calidad pedagógica "Imperial" y explicaciones que funcionen como una Masterclass en miniatura.
 
 ================================================================================
-PROTOCOLO ANTI-ALUCINACIONES Y RESOLUCIÓN OBLIGATORIA
+REGLA CRÍTICA CERO (ANTI-ALUCINACIONES)
 ================================================================================
-1. RESOLUCIÓN MENTAL PREVIA: Antes de elegir la "respuestaCorrecta", DEBES resolver el problema paso a paso. El resultado de tu cálculo debe ser exactamente la "respuestaCorrecta".
-2. PROHIBICIÓN DE META-COMENTARIOS: Jamás menciones tus propios errores, dudas o correcciones internas. Sé una fuente de verdad absoluta.
-3. CERO SUPOSICIONES: Como este texto se genera ANTES de que el alumno responda, TIENES PROHIBIDO usar frases como "Tu opción", "Si elegiste esta", o "Te equivocaste". Sé 100% objetivo.
-4. PROHIBICIÓN DE MATEMÁTICAS INVENTADAS: Si la materia es BIOLOGÍA, HISTORIA, GEOGRAFÍA o LITERATURA, TIENES ESTRICTAMENTE PROHIBIDO generar problemas de cálculo matemático complejo (como integrales, derivadas, o crecimiento exponencial). Limítate a teoría, conceptos, genética básica (cuadros de Punnett) y análisis de sistemas.
-5. REGLA DE ORO DE RESPUESTA: El campo "respuestaCorrecta" DEBE contener el texto íntegro de la opción, exactamente como aparece en el arreglo de "opciones". Está ESTRICTAMENTE PROHIBIDO poner solo la letra (A, B, C, D) o frases como "Opción B".
+1. RESOLUCIÓN MENTAL PREVIA: Antes de elegir la "respuestaCorrecta", DEBES resolver el problema paso a paso internamente. El resultado de tu cálculo TIENE que ser exactamente la "respuestaCorrecta".
+2. Si hay discrepancia entre tu cálculo y la opción, REGENERA las opciones. NUNCA justifiques una respuesta que no coincida con la aritmética.
+3. PROHIBICIÓN DE META-COMENTARIOS: Jamás menciones tus errores internos, dudas o correcciones. Sé una fuente de verdad absoluta.
+4. CERO SUPOSICIONES SOBRE EL USUARIO: Este texto se genera ANTES de que el alumno responda. PROHIBIDO usar frases como "Tu opción", "Si elegiste", "Te equivocaste". Sé 100% objetivo.
+5. REGLA DE ORO: El campo "respuestaCorrecta" DEBE contener el texto ÍNTEGRO de la opción, exactamente como aparece en el arreglo de "opciones". PROHIBIDO poner solo la letra (A, B, C, D).
+
+${esBiologia || esHistoria || esGeografia ? `
+================================================================================
+PROHIBICIÓN PARA ${materia.nombre.toUpperCase()}
+================================================================================
+PROHIBIDO generar problemas de cálculo matemático complejo (integrales, derivadas, crecimiento exponencial). Limítate a teoría, conceptos, genética básica (cuadros de Punnett con viñetas, NO tablas) y análisis de sistemas.
+` : ''}
 
 ${esLectura ? `
 ================================================================================
 REGLA DE COMPRENSIÓN LECTORA (OBLIGATORIA)
 ================================================================================
-- Tienes PROHIBIDO escribir textos cortos. Debes escribir un ensayo o artículo original, de nivel universitario.
-- Usa un lenguaje rico y estructurado con argumentos sólidos.
-- Después del texto, genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
-- IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de 3 preguntas generadas.
-- ¡ALERTA!: Prioriza la longitud del campo "textoLectura" sobre cualquier otro campo. Es preferible que la explicación sea breve a que el texto de lectura sea corto.
+- PROHIBIDO escribir textos cortos. Debes escribir un ensayo o artículo original de nivel universitario.
+- Usa lenguaje rico y estructurado con argumentos sólidos. MÍNIMO 500 palabras.
+- Genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
+- IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de las 3 preguntas.
+- Prioriza la longitud de "textoLectura" sobre cualquier otro campo.
+` : ''}
 
 ================================================================================
-TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)` : `
+ESTRUCTURA DE EXPLICACIÓN (¡REGLA DE HIERRO!)
 ================================================================================
-TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)`}
-================================================================================
-El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAMENTE esta estructura de 3 bloques. 
-¡PROHIBIDO HACER RESÚMENES O EXPLICACIONES CORTAS!
+El campo "explicacion" DEBE ser UN ÚNICO STRING en formato Markdown siguiendo EXACTAMENTE la estructura correspondiente a esta materia (${materia.nombre}).
+PROHIBIDO enviar un objeto JSON anidado. Concatena todo con saltos de línea \\n\\n.
 
-================================================================================
-CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
-================================================================================
-- PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado.
-- PROHIBICIÓN DE TABLAS: ¡NUNCA uses tablas Markdown (con | y -). Usa SOLO listas con viñetas para explicar datos o cruces genéticos!
-
-### ✅ El Concepto Clave
-[ADAPTA ESTE BLOQUE A LA MATERIA ASÍ:]
-
-PARA MATEMÁTICAS Y FÍSICA:
-- SI ES CÁLCULO: 1. Anclaje, 2. Datos, 3. Fórmula, 4. Desarrollo (cada paso en línea nueva).
-- SI ES ANÁLISIS/TABLAS: Escribe: 1. Patrón observado, 2. Comprobación matemática, 3. Conclusión.
-- SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
-
-PARA QUÍMICA (LUPA MOLECULAR):
-- SI ES CÁLCULO: Mismo formato que Matemáticas.
-- SI ES TEÓRICO: Usa estos 3 subtítulos en negritas: **Visión Microscópica:**, **Ecuación/Estructura:**, **Contraste:**.
-
-PARA BIOLOGÍA (ENFOQUE SISTÉMICO):
-- Usa ESTRICTAMENTE estos 3 subtítulos en negritas:
-  **Ubicación:** [Dónde ocurre celular o anatómicamente]
-  **Proceso:** [Qué ocurre biológicamente paso a paso. NUNCA uses tablas de Punnett, explícalo con texto y viñetas]
-  **Impacto Vital:** [Por qué es esencial]
-
-PARA LAS DEMÁS MATERIAS:
-- Explica a detalle en 2-3 párrafos estructurados.
+${esMatesFisicaQuimica ? `
+=== ESTRUCTURA A: CIENCIAS EXACTAS ===
+Debes usar EXACTAMENTE estos 6 bloques en este orden:
+1. **✅ Anclaje:** - Una línea con el fenómeno/concepto
+2. **📊 Datos:** - Lista de variables conocidas con viñetas
+3. **📐 Fórmula:** - Ecuación en LaTeX entre $...$
+4. **🔄 Desarrollo:** - OBLIGATORIO: cada paso en línea separada (Sustitución \\n\\n Simplificación \\n\\n Resultado)
+5. **🔍 Análisis de Errores Comunes:** - 2 trampas específicas del problema
+6. **💡 Tip Pro:** - Consejo rápido
+` : esCienciaTeorica ? `
+=== ESTRUCTURA B: CIENCIAS TEÓRICAS ===
+Debes usar EXACTAMENTE estos 5 bloques en este orden:
+1. **✅ Anclaje Conceptual:** - Definición contundente en 1 frase
+2. **🧬 Desglose/Mecanismo:** - 3 viñetas con proceso/características
+3. **🔗 Palabra Clave / Nexo:** - La palabra de la pregunta que revela la respuesta
+4. **🔍 Análisis de Errores Comunes:** - Por qué los distractores fallan
+5. **💡 Tip Pro:** - Mnemotecnia o truco de memoria
+` : `
+=== ESTRUCTURA C: LECTURA DE COMPRENSIÓN ===
+Debes usar EXACTAMENTE estos 5 bloques en este orden:
+1. **✅ Tipo de Pregunta:** - Clasificación (Inferencia, Idea Principal, Tono, etc.)
+2. **📖 Evidencia en el Texto:** - Cita textual EXACTA entre comillas
+3. **🧠 Análisis Lógico:** - Conexión evidencia → respuesta
+4. **🔍 Análisis de Errores Comunes:** - Desmonte de distractores
+5. **💡 Tip Pro:** - Estrategia de lectura rápida
+`}
 
 ================================================================================
-REGLA DE SEPARACIÓN ABSOLUTA Y ENCABEZADOS (¡CRÍTICO!)
+REGLAS DE FORMATO LaTeX (CRÍTICO PARA RENDERIZADO)
 ================================================================================
-Tu explicación DEBE tener EXACTAMENTE 3 bloques separados por saltos de línea (\\n\\n). 
-Tienes PROHIBIDO fusionarlos. DEBES usar estos textos literales:
-
-### ✅ El Concepto Clave
-(Tu explicación principal adaptada a la materia)
-
-### 🔍 Análisis de Distractores
-(Explica con viñetas por qué fallan las otras 3 opciones)
-
-### 💡 Tip Pro
-(Un consejo rápido)
+1. REGLA ANTI-DÓLAR: Números simples como "158", "-2", "x = 5" van en texto plano SIN $. Solo usa $...$ para fórmulas complejas ($\\frac{a}{b}$, $\\sqrt{}$, $\\pi$).
+2. DOBLE ESCAPE EN JSON: Como tu respuesta es JSON, TODOS los comandos LaTeX necesitan doble barra: \\\\frac, \\\\int, \\\\sqrt, \\\\pi, \\\\text.
+3. PROHIBIDO $$...$$ (doble dólar/block math).
+4. UNIDADES DE MEDIDA: Ponlas AFUERA de $ como texto plano. CORRECTO: $v = 19.6$ m/s. INCORRECTO: $v = 19.6 \\text{m/s}$.
+5. PROHIBIDO USAR TABLAS MARKDOWN (con | y -). Usa SOLO listas con viñetas.
 
 ================================================================================
-REGLA DE ENCABEZADOS: ESTÁ ESTRICTAMENTE PROHIBIDO traducir los emojis a descripciones de texto o LaTeX como (\\checkmark), (\\warning) o (\\star). Debes imprimir los emojis literales (✅, 🔍, 💡) exactamente como se muestran en el template.
+CALIDAD DE DISTRACTORES
+================================================================================
+Las opciones incorrectas DEBEN representar errores reales de estudiantes:
+- Error de signo (ej: sumar en lugar de restar)
+- Confusión de fórmulas (ej: perímetro en lugar de área)
+- Error en jerarquía de operaciones
+- Omisión de pasos
+NO pueden ser números al azar.
 
 ================================================================================
-REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
+FORMATO DE RESPUESTA JSON
 ================================================================================
-1. REGLA ANTI-DÓLAR (NÚMEROS SIMPLES): Si es un número o texto simple (ej. "158", "-2", "Opción A"), usa texto plano SIN signos de dólar. 
-2. REGLA MATEMÁTICA: Solo usa "$...$" (dólar simple) para fórmulas complejas.Toda fórmula matemática DEBE estar dentro de$: $\\frac{a}{b}$, $\\int$, $\\sqrt{}$, $\\pi$.
-
-3. DOBLE ESCAPE DE BACKSLASHES EN JSON (CRÍTICO):
-**Como tu respuesta es un objeto JSON, TODOS los comandos de LaTeX deben tener doble barra invertida (\\\\). Si usas una sola, el JSON se rompe al parsearse.**
-
-❌ MAL: \\frac{a}{b}, \\int, \\sqrt, \\pi
-
-✅ BIEN: \\\frac{a}{b}, \\\int, \\\sqrt, \\\pi
-
-Además, RECUERDA que toda fórmula matemática o fracción DEBE ir estrictamente dentro de signos de dólar simples ($ ... $). Si no pones los dólares, la plataforma no dibujará la ecuación.
-
-- Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
-- Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
-CUALQUIER discrepancia = FALLO CRÍTICO.
-
-¡ERROR CRÍTICO DETECTADO!: Si escribes \text{m/s} el sistema fallará. DEBES ESCRIBIR \\text{m/s} (CON DOBLE BARRA). Todo comando de LaTeX (\\frac, \\lambda, \\text, \\sqrt) DEBE llevar dos barras invertidas obligatoriamente para no romper el JSON.
-
-3. ESTÁNDAR PEDAGÓGICO "ANTI-FLOJERA":
-Prohibido usar frases circulares como:
-- "La opción X es incorrecta porque no es la solución"
-- "La opción X es incorrecta porque no se utilizó la sustitución correcta"
-
-La justificacionDescarte debe explicar el ERROR LÓGICO real del alumno:
-- Error de signo (ej: sumar cuando debería restar)
-- Confusión de fórmulas (ej: usar fórmula de perímetro en lugar de área)
-- Error en jerarquía de operaciones (ej: resolver antes de paréntesis)
-- Omisión de unidades o pasos
-
-4. TEMPLATE FORZADO (OBLIGATORIO - USA ESTE EXACTO):
-
-Tu respuesta DEBE seguir este esquema EXACTO. NO puedes omitir ningún bloque ni cambiar el orden:
-
-### ✅ El Concepto Clave
-[Aquí explicas la respuesta correcta: conceptos clave, fórmulas, desarrollo si hay.
-Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na** es menor que la del **Cl**, por eso el **Na** cede electrones y se forma **NaCl**"]
-
-### 🔍 Análisis de Distractores
-[Explica brevemente los errores lógicos o matemáticos de las 3 opciones incorrectas generadas.
-**REGLA ESTRICTA:** NUNCA uses frases como "Tu opción", "Si elegiste esta", o asumas lo que el usuario respondió, porque este texto se genera ANTES de que el usuario interactúe. Simplemente analiza las opciones de forma objetiva:
-- **Opción incorrecta 1:** [Error - ej. "Asume que la pendiente es negativa cuando es positiva"]
-- **Opción incorrecta 2:** [Error - ej. "Omite la constante de integración"]
-- **Opción incorrecta 3:** [Error - ej. "Aplica mal la jerarquía de operaciones"]]
-
-### 💡 Tip Pro
-[Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
-
-**REGLA DE HIERRO:** - PRIMERO ENSEÑAS, LUEGO CORRIGES
-- PROHIBIDO empezar analizando opciones A, B, C o D
-- Usa EXACTAMENTE los encabezados: ### ✅, ### 🔍, ### 💡
-
-**REGLAS ANTI-ALUCINACIÓN (PROHIBIDO TOTAL):**
-
-1. PROHIBICIÓN DE META-COMENTARIOS:
-- ❌ PROHIBIDO mencionar: "mi cálculo anterior estaba mal", "el error fue...", "debería corregir..."
-- ❌ PROHIBIDO discutir fallos internos del modelo
-- ✅ La explicación debe ser DIRECTA, ASERTIVA y FINAL
-
-2. CÁLCULO PREVIO MANDATORIO:
-- ✅ El valor de respuestaCorrecta DEBE derivarse del cálculo final
-- ✅ Si el cálculo da 10, la respuestaCorrecta DEBE ser "10" o "x = 10"
-- ✅ NO puedes elegir una opción y luego justificar/ajustar el cálculo
-
-3. AUTOCENSURA DE RAZONAMIENTO:
-- ✅ El razonamiento paso a paso solo building la respuesta
-- ✅ NO incluir discusiones sobre fallos del modelo en la explicación
-- ✅ La explicación es SOLO para el alumno
-
-4. REVISIÓN DE CONSISTENCIA:
-- ✅ Si el valor calculado NO está en las opciones generadas, REGENERA las opciones
-- ✅ NO intentes justificar errores en la explicación
-- ✅ COHERENCIA: respuestaCorrecta = cálculo final
-
-5. REGLAS DE FORMATEO (CRÍTICO):
-- Negritas para términos clave: **Agua Neutra**, **Producto Iónico**
-- Viñetas para cada opción incorrecta (NO párrafos largos)
-
-6. REGLA ANTI-DÓLAR (CRÍTICO - PROHBE ERRORES COMUNES):
-
-**NÚMEROS SIMPLES (texto plano - SIN $):**
-- Para opciones como: "158", "-2", "x = 5", "Opción A", "3.14"
-- USA texto plano, SIN signos de dólar
-- MAL: ["$$158$$"] o ["\$158"] - BIEN: ["158"]
-
-**MATEMÁTICAS COMPLEJAS (SÍ usa $):**
-- Solo usa $...$ para fórmulas con:
-  - Radicales: $\sqrt{x}$, $\sqrt{b^2-4ac}$
-  - Fracciones: $\frac{a}{b}$, $\frac{-b \pm \sqrt{D}}{2a}$
-  - Exponentes: $x^2$, $e^{-x}$
-  - Símbolos especiales: $\pi$, $\theta$, $\alpha$, $\beta$
-  - Notación química: $\mathrm{H_2O}$, $\mathrm{NaCl}$
-
-**PROHIBIDO ABSOLUTO:**
-- ❌ NO uses $$...$$ (doble dólar/block)
-- ❌ NO uses \$ escapado
-- ❌ NO pongas $ alredeor de números simples: NO "$\frac{1}{2}$" cuando es solo "1/2"
-
-4. REGLA DE UNIDADES DE MEDIDA: NUNCA uses el comando \\text{} dentro de una fórmula matemática, ya que rompe el formato JSON. Si necesitas escribir unidades de medida (como m/s, kg, N), ponlas AFUERA de los signos de dólar como texto plano.
-- Ej. CORRECTO: $v = 19.6$ m/s
-- Ej. INCORRECTO: $v = 19.6 \text{m/s}$
-
-8. REGLA DE INTEGRALES Y DIFERENCIALES:
-**Símbolo DE integral DEBE ser \\\\int (CON DOBLE barra invertida, NO \int)**
-
-**FORMATO CORRECTO de integrales:**
-- MAL: $\int_{0}^{2} 3x^{2},dx$ (con coma + coma extra)
-- MAL: $(\int_{0}^{2} 3x^{2} dx)$ (paréntesis innecesario)  
-- BIEN: $\int_{0}^{2} 3x^{2}\ dx$ (sin coma, con espacio, $dx$ fuera)
-- BIEN: $\int_{a}^{b} f(x)\ dx$
-- BIEN: $\int_{0}^{3} (2x+1)\ dx$
-
-**REGLAS ESPECÍFICAS:**
-- USA SIEMPRE \\int para integrales (NO solo "int")
-- NUNCA uses coma antes del diferencial: NO ",$dx$", usa "$dx$"
-- NO uses coma antes de "$dx$" o cualquier diferencial
-- El diferencial VA FUERA del integrando: $\int f(x)\ dx$, NO $\int f(x),dx$
-- USA espacio entre integrando y diferencial: $x^2\ dx$ (con espacio escaping: \\)
-- NO uses paréntesis a menos que sea operación compuesta: $\int (x+1)\ dx$ es OK, $\int x\ dx$ debe ser $\int x\ dx$
-
-7. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
-Las opciones incorrectas NO deben ser números al azar.
-Deben ser errores comunes reales:
-- Si la respuesta es "x = 5", genera "x = -5" (error de signo)
-- Si es "9 + 6 = 15", genera "9 + 6 = 3" (error de operación)
-- Si el área es "25π", genera "50π" (olvidar π) o "25π/2" (dividir por 2)
-- Si es "2a + 3b", genera "5ab" (multiplicar términos distintos)
-
-================================================================================
-FIN DEL PROTOCOLO ANTI-ALUCINACIONES
-================================================================================
-
-REGLA DE FORMATO MATEMÁTICO (CRÍTICO): 
-- Para TODO (matemáticas, química, física) USA SIMPRE $\mathrm{H_2O}$, $\mathrm{CO_2}$, $\mathrm{NaCl}$
-
-IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}$:
-- $...$ para fórmulas en línea
-- $$...$$ para fórmulas centradas
-- El JSON debe ser compatible con renderizador KaTeX (no escapes barras invertidas incorrectamente)
-
-IMPORTANTE: El campo "explicacion" DEBE SER UN ÚNICO STRING de texto plano. ESTÁ ESTRICTAMENTE PROHIBIDO enviar un objeto JSON anidado (ej. NO hagas {"concepto": "...", "tip": "..."}). Concatena todo con saltos de línea \\n\\n en una sola cadena.
-
-Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
+Responde SOLO con JSON válido sin texto adicional:
 {
   "preguntas": [
     {
       "pregunta": "Texto de la pregunta",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
-      "respuestaCorrecta": "Opción correcta exacta",
-      "explicacion": "${templateExplicacion}"
-      ${esLectura ? ', "textoLectura": "Aquí va el texto completo..."' : ''}
+      "respuestaCorrecta": "Texto íntegro de la opción correcta",
+      "explicacion": "${estructuraExplicacion.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+      ${esLectura ? ', "textoLectura": "Texto completo del ensayo/artículo..."' : ''}
     }
   ]
-}`
+}`;
 
     // ============================================================================
     // INSTRUCCIONES ESPECÍFICAS DE MATERIA
     // ============================================================================
     let instruccionesEspeciales = '';
     if (esEspanol) {
-      instruccionesEspeciales = `¡REGLA DE HIERRO PARA EL MODELO (LECTURA CRÍTICA)!
-1) EXTENSIÓN OBLIGATORIA: El texto DEBE tener 6 PÁRRAFOS de al menos 80 palabras cada uno. 
-2) ESTRUCTURA VISUAL: Debes numerar cada párrafo internamente como (Párrafo I, Párrafo II, etc.) para asegurar la extensión.
-3) RIGOR: Usa un lenguaje académico denso. PROHIBIDO resumir o dar textos de menos de 500 palabras en total. Si el texto es corto, el JSON será rechazado.
-4) TEMÁTICA: Ensayo sobre filosofía de la ciencia, sociología o historia universal.`;
+      instruccionesEspeciales = `¡REGLA DE HIERRO PARA LECTURA CRÍTICA!
+1) EXTENSIÓN OBLIGATORIA: El texto DEBE tener 6 PÁRRAFOS de al menos 80 palabras cada uno.
+2) ESTRUCTURA VISUAL: Numera cada párrafo (Párrafo I, II, etc.).
+3) RIGOR: Lenguaje académico denso. PROHIBIDO textos de menos de 500 palabras.
+4) TEMÁTICA: Ensayo sobre filosofía de la ciencia, sociología o historia universal.
+5) EXPLICACIÓN: Usa ESTRUCTURA C (Tipo de Pregunta → Evidencia → Análisis Lógico → Errores → Tip).`;
     } else if (esLiteratura) {
-      instruccionesEspeciales = `¡REGLA DE HIERRO PARA EL MODELO (ANÁLISIS LITERARIO)!
-1) EXTENSIÓN OBLIGATORIA: Genera 5 PÁRRAFOS extensos. 
-2) CONTENIDO OBLIGATORIO: Debes incluir un fragmento de una obra clásica (mínimo 10 líneas) incrustado en el Párrafo 3.
-3) ANÁLISIS: Los párrafos 4 y 5 deben ser un análisis técnico-estético de la obra, mencionando figuras retóricas y contexto histórico. 
-4) PROHIBICIÓN: No uses textos de biología o ciencia; enfócate en el valor artístico y literario.`;
-    } else if (!esMatesFisicaQuimica) {
-      instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
-    } else {
-      instruccionesEspeciales = 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para LaTeX.';
+      instruccionesEspeciales = `¡REGLA DE HIERRO PARA ANÁLISIS LITERARIO!
+1) EXTENSIÓN OBLIGATORIA: 5 PÁRRAFOS extensos.
+2) CONTENIDO: Incluye un fragmento de obra clásica (mínimo 10 líneas) en el Párrafo 3.
+3) ANÁLISIS: Párrafos 4-5 con análisis técnico-estético, figuras retóricas y contexto histórico.
+4) PROHIBIDO textos de ciencia. Enfócate en valor artístico y literario.
+5) EXPLICACIÓN: Usa ESTRUCTURA C.`;
+    } else if (esCienciaTeorica) {
+      instruccionesEspeciales = `REGLA ABSOLUTA: PROHIBIDO incluir cálculos matemáticos complejos. Debe ser teórica y cualitativa.
+EXPLICACIÓN: Usa ESTRUCTURA B (Anclaje Conceptual → Desglose → Palabra Clave → Errores → Tip).`;
+    } else if (esMatesFisicaQuimica) {
+      instruccionesEspeciales = `OBLIGATORIO: Toda fórmula entre $...$ para LaTeX. Debes RESOLVER el problema paso a paso en la explicación.
+EXPLICACIÓN: Usa ESTRUCTURA A (Anclaje → Datos → Fórmula → Desarrollo paso a paso → Errores → Tip).`;
     }
 
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. 
