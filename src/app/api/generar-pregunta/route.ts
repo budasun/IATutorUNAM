@@ -298,19 +298,26 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
     
+    const esEspanol = id_materia.toLowerCase().includes('espanol');
+    const esLiteratura = id_materia.toLowerCase().includes('literatura');
+    const esLectura = esEspanol || esLiteratura;
     const esMatesFisicaQuimica = id_materia.toLowerCase().match(/(matemática|física|química)/);
     
     let instruccionesEspeciales = '';
-    if (esLectura) {
-      instruccionesEspeciales = `¡REGLA ABSOLUTA LITERARIA PARA NIVEL UNAM!
-1) IDIOMA Y EXTENSIÓN: 100% Español perfecto. MÍNIMO 6 párrafos extensos.
-2) ROLEPLAY DE AUTOR (COMPLEJIDAD EXTREMA): Escribe el texto simulando ser un artículo de la revista "Ciencias" o un ensayo filosófico de alto rigor académico (ej. epistemología, neurolingüística, sociología abstracta). Usa vocabulario muy avanzado y sintaxis compleja. ESTÁ PROHIBIDO escribir textos escolares sobre "la importancia de comunicarse".
-3) TIPO DE PREGUNTA (INFERENCIA): La pregunta DEBE evaluar la tesis central implícita, el propósito del autor o inferencias lógicas. ESTÁ PROHIBIDO hacer preguntas literales de búsqueda como "¿Cuál de los siguientes NO es...?".
-4) DISTRACTORES PLAUSIBLES: OBLIGATORIO: Todas las opciones incorrectas deben sonar académicamente correctas y usar vocabulario avanzado, pero representar mal la tesis del autor. ESTÁ ESTRICTAMENTE PROHIBIDO usar distractores infantiles, obvios o cómicos (PROHIBIDO usar cosas como "causar confusión", "hacer ruido", "ser malos").`;
+    if (esEspanol) {
+      instruccionesEspeciales = `¡REGLA ABSOLUTA PARA ESPAÑOL (COMPRENSIÓN LECTORA UNAM)!
+1) EXTENSIÓN FORZADA: El texto DEBE tener EXACTAMENTE 5 PÁRRAFOS separados. Tienes prohibido escribir un solo bloque.
+2) TEMÁTICA: Escribe un artículo de corte científico, histórico o filosófico complejo.
+3) PREGUNTAS: Evalúa el propósito del autor o inferencias. PROHIBIDO preguntas de búsqueda literal y distractores obvios.`;
+    } else if (esLiteratura) {
+      instruccionesEspeciales = `¡REGLA ABSOLUTA PARA LITERATURA UNAM!
+1) EXTENSIÓN Y FORMATO: Debes generar un fragmento de ensayo literario extenso (MÍNIMO 4 PÁRRAFOS) O un poema clásico/fragmento de novela seguido de 3 párrafos de análisis. Tienes prohibido escribir un solo párrafo.
+2) TEMÁTICA: El texto DEBE tratar estrictamente sobre corrientes literarias, análisis de autores, figuras retóricas o géneros literarios. PROHIBIDO usar textos científicos o de biología.
+3) PREGUNTAS: Evalúa recursos literarios, intención estética o contexto de la obra. Distractores académicamente avanzados.`;
     } else if (!esMatesFisicaQuimica) {
-      instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
+      instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
     } else {
-      instruccionesEspeciales = 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.';
+      instruccionesEspeciales = 'IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para LaTeX.';
     }
 
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}". La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. 
