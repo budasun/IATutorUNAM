@@ -12,6 +12,8 @@ interface MathMarkdownProps {
 
 export default function MathMarkdown({ content, className = '' }: MathMarkdownProps) {
   const contentLimpio = content
+    .replace(/\?{2,}/g, '')
+    .replace(/<U\+[A-F0-9]+>/g, '')
     .replace(/\\\\\$/g, '$')
     .replace(/\\\$/g, '$')
     .replace(/\\\\([a-zA-Z])/g, '\\$1')

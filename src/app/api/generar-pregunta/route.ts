@@ -127,6 +127,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 
     const systemPrompt = `
 ================================================================================
+REGLA DE CODIFICACIÓN (CRÍTICA)
+================================================================================
+USA EXCLUSIVAMENTE emojis estándar de Unicode. NO uses representaciones de texto como :emoji_name:. NO uses secuencias de escape. Los emojis deben ser caracteres UTF-8 puros. Ejemplo: ✅ NO :white_check_mark:.
+
+================================================================================
 ROL Y MISIÓN
 ================================================================================
 Eres el Tutor Experto Definitivo y Auditor Forense del simulador IATutorUNAM.
@@ -346,7 +351,7 @@ ${instruccionesEspeciales}`;
         return NextResponse.json({
           success: true,
           data: validatedQuestions,
-        });
+        }, { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
 
       } catch (error: unknown) {
         const err = error as Error & { status?: number; message?: string };
