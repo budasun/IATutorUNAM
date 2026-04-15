@@ -540,7 +540,15 @@ export default function SimuladorPage() {
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
-            <MathMarkdown content={pregunta.respuestaCorrecta} className="text-green-300" />
+            <MathMarkdown content={(function() {
+              const res = pregunta.respuestaCorrecta;
+              if (res.length <= 8 && res.toLowerCase().includes('opción')) {
+                const letra = res.split(' ').pop()?.toUpperCase();
+                const indice = ['A', 'B', 'C', 'D'].indexOf(letra || '');
+                return indice !== -1 ? pregunta.opciones[indice] : res;
+              }
+              return res;
+            })()} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
             <p className="text-[#D4AF37] font-semibold mb-3">📖 Explicación Completa</p>
