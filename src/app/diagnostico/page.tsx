@@ -254,7 +254,7 @@ export default function DiagnosticoPage() {
     const regexTip = /(?:###\s*)?(?:💡|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?Tip Pro/i;
 
     let conceptoClave = explicacionCompleta;
-    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
+    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave\s*:?\s*/i, '').trim();
     let analisis = '';
     let tip = '';
 
