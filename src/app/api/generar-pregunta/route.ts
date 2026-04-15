@@ -95,7 +95,11 @@ PARA MATEMÁTICAS Y FÍSICA:
 - SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
 
 PARA QUÍMICA (MÉTODO DE LA LUPA MOLECULAR):
-- SI ES ESTEQUIOMETRÍA/CÁLCULO: Usa el formato de Matemáticas (Datos, Fórmula, Desarrollo).
+- SI ES ESTEQUIOMETRÍA/CÁLCULO: DEBES incluir EXACTAMENTE estos 4 subtítulos en negritas sin omitir NINGUNO:
+  **Anclaje:** [Concepto breve]
+  **Datos:** [Variables conocidas en viñetas]
+  **Fórmula:** [Ecuación a usar]
+  **Desarrollo:** [Sustitución y cálculo paso a paso, en líneas separadas. ¡ESTÁ ESTRICTAMENTE PROHIBIDO OMITIR EL DESARROLLO!]
 - SI ES TEÓRICO O ENLACES: DEBES incluir EXACTAMENTE estos 3 subtítulos sin omitir NINGUNO:
   **Visión Microscópica:** [Explica a nivel de átomos y electrones]
   **Ecuación/Estructura:** [Fórmula en LaTeX OBLIGATORIA. Si no hay reacción, pon al menos la fórmula molecular de la que hablas. Ej: $\mathrm{H_2O}$]
