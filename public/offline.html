@@ -8,7 +8,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #002B5C;
+      background: linear-gradient(to bottom, #002B5C, #001a3d, #000);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -19,9 +19,22 @@
       padding: 20px;
       text-align: center;
     }
-    h1 { font-size: 24px; color: #D4AF37; margin-bottom: 16px; }
-    p { font-size: 16px; color: #c0c0c0; margin-bottom: 32px; }
-    a {
+    .icon {
+      width: 80px;
+      height: 80px;
+      background: #D4AF37;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 28px; color: #D4AF37; margin-bottom: 12px; }
+    p { font-size: 16px; color: #c0c0c0; margin-bottom: 8px; max-width: 320px; }
+    .sub { font-size: 13px; color: #888; margin-bottom: 32px; }
+    .buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
+    a, button {
       background: transparent;
       border: 2px solid #D4AF37;
       color: #D4AF37;
@@ -30,12 +43,30 @@
       font-size: 16px;
       font-weight: bold;
       text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    a:hover, button:hover {
+      background: rgba(212, 175, 55, 0.15);
+    }
+    .primary {
+      background: #D4AF37;
+      color: #002B5C;
+    }
+    .primary:hover {
+      background: #e5c349;
     }
   </style>
 </head>
 <body>
-  <h1>TIAUNAM</h1>
-  <p>Estás en modo offline, pero tus conocimientos están a salvo.</p>
-  <a href="/temario">Ir a mis guías guardadas</a>
+  <div class="icon">📚</div>
+  <h1>Modo Sin Conexión</h1>
+  <p>No te preocupes, puedes seguir estudiando con las guías que ya descargaste.</p>
+  <p class="sub">Las funciones que requieren IA (simulador, diagnóstico) estarán disponibles cuando recuperes la conexión.</p>
+  <div class="buttons">
+    <a href="/temario" class="primary">📖 Ir al Temario</a>
+    <button onclick="window.location.reload()">🔄 Reintentar Conexión</button>
+    <a href="/">🏠 Intentar Inicio</a>
+  </div>
 </body>
 </html>
