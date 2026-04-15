@@ -302,7 +302,11 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     
     let instruccionesEspeciales = '';
     if (esLectura) {
-      instruccionesEspeciales = '¡REGLA ABSOLUTA LITERARIA: 1) El textoLectura DEBE estar 100% en Español perfecto (CERO caracteres chinos o idiomas extranjeros). 2) DEBE ser un ensayo de MÍNIMO 6 PÁRRAFOS extensos. 3) NIVEL EXAMEN UNAM (ALTA DIFICULTAD): El texto debe ser de corte académico, científico, histórico o filosófico complejo. PROHIBIDO textos básicos o infantiles. 4) PREGUNTAS ANALÍTICAS: Las preguntas deben evaluar inferencias, propósito del autor o síntesis. PROHIBIDO hacer preguntas literales de "búsqueda de palabras" y ESTRICTAMENTE PROHIBIDO usar distractores absurdos, obvios o cómicos.';
+      instruccionesEspeciales = `¡REGLA ABSOLUTA LITERARIA PARA NIVEL UNAM!
+1) IDIOMA Y EXTENSIÓN: 100% Español perfecto. MÍNIMO 6 párrafos extensos.
+2) ROLEPLAY DE AUTOR (COMPLEJIDAD EXTREMA): Escribe el texto simulando ser un artículo de la revista "Ciencias" o un ensayo filosófico de alto rigor académico (ej. epistemología, neurolingüística, sociología abstracta). Usa vocabulario muy avanzado y sintaxis compleja. ESTÁ PROHIBIDO escribir textos escolares sobre "la importancia de comunicarse".
+3) TIPO DE PREGUNTA (INFERENCIA): La pregunta DEBE evaluar la tesis central implícita, el propósito del autor o inferencias lógicas. ESTÁ PROHIBIDO hacer preguntas literales de búsqueda como "¿Cuál de los siguientes NO es...?".
+4) DISTRACTORES PLAUSIBLES: OBLIGATORIO: Todas las opciones incorrectas deben sonar académicamente correctas y usar vocabulario avanzado, pero representar mal la tesis del autor. ESTÁ ESTRICTAMENTE PROHIBIDO usar distractores infantiles, obvios o cómicos (PROHIBIDO usar cosas como "causar confusión", "hacer ruido", "ser malos").`;
     } else if (!esMatesFisicaQuimica) {
       instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
     } else {
