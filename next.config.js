@@ -5,7 +5,7 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   register: true,
   skipWaiting: true,
   reloadOnOnline: false,
-  fallbacks: { document: '/' },
+  fallbacks: { document: '/offline.html' },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
