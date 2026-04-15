@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { groqClient } from '@/lib/groq/client';
 import { METODOLOGIA_UNAM, TEMARIO_UNAM } from '@/data/unam_temario';
-import type { 
-  SolicitudGenerarPregunta, 
+import type {
+  SolicitudGenerarPregunta,
   RespuestaGenerarPregunta,
-  PreguntaGenerada 
+  PreguntaGenerada
 } from '@/types/ia';
 
 export async function POST(request: NextRequest): Promise<NextResponse<RespuestaGenerarPregunta>> {
   try {
     const body: SolicitudGenerarPregunta = await request.json();
-    
+
     const { id_materia, area, model, temas_excluidos } = body;
     const modeloAI = model || 'llama-3.1-8b-instant';
-    
+
     if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
         { success: false, error: 'El campo "id_materia" es requerido y debe ser un string' },
@@ -22,12 +22,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     }
 
     const areaMatch = area?.match(/Áreas? (\d)/);
-    const areaKey: keyof typeof TEMARIO_UNAM = areaMatch 
-      ? (`area${areaMatch[1]}` as keyof typeof TEMARIO_UNAM) 
+    const areaKey: keyof typeof TEMARIO_UNAM = areaMatch
+      ? (`area${areaMatch[1]}` as keyof typeof TEMARIO_UNAM)
       : 'area3';
     const areaData = TEMARIO_UNAM[areaKey];
     const materia = areaData.materias.find((m: { id: string }) => m.id === id_materia);
-    
+
     if (!materia) {
       return NextResponse.json(
         { success: false, error: `Materia "${id_materia}" no encontrada en el área seleccionada` },
@@ -37,12 +37,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 
     // Filtrar temas ya usados
     const temasDisponibles = materia.temas.filter((t: string) => !temas_excluidos?.includes(t));
-    
+
     // Si se agotaron, reiniciar
     const temasParaElegir = temasDisponibles.length > 0 ? temasDisponibles : materia.temas;
-    
+
     const temaAleatorio = temasParaElegir[Math.floor(Math.random() * temasParaElegir.length)];
-    
+
     const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
     const cantidad = esLectura ? 3 : 1;
 
@@ -80,7 +80,6 @@ El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAME
 ¡PROHIBIDO HACER RESÚMENES O EXPLICACIONES CORTAS!
 
 ================================================================================
-================================================================================
 CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
 ================================================================================
 - PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
@@ -90,20 +89,23 @@ CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
 [DEBES INICIAR TU EXPLICACIÓN SIEMPRE CON ESTE TÍTULO EXACTO Y ADAPTARLA A LA MATERIA ASÍ:]
 
 PARA MATEMÁTICAS Y FÍSICA:
-- SI ES CÁLCULO DIRECTO: Escribe hacia abajo: 1. Anclaje (concepto breve), 2. Datos (con viñetas), 3. Fórmula, 4. Desarrollo (cada paso matemático en una línea nueva con saltos \\n\\n. ¡PROHIBIDO amontonar ecuaciones!).
+- SI ES CÁLCULO DIRECTO: Escribe hacia abajo en texto plano Markdown: 1. Anclaje (concepto breve), 2. Datos (con viñetas), 3. Fórmula, 4. Desarrollo (cada paso matemático en una línea nueva con saltos \\n\\n. ¡PROHIBIDO amontonar ecuaciones!).
 - SI ES ANÁLISIS/TABLAS: Escribe: 1. Patrón observado, 2. Comprobación matemática, 3. Conclusión.
 - SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
 
 PARA QUÍMICA (MÉTODO DE LA LUPA MOLECULAR):
-- SI ES ESTEQUIOMETRÍA/CÁLCULO: DEBES incluir EXACTAMENTE estos 4 subtítulos en negritas sin omitir NINGUNO:
+- SI ES ESTEQUIOMETRÍA/CÁLCULO (Escribe en texto plano Markdown, NO en formato JSON anidado):
   **Anclaje:** [Concepto breve]
   **Datos:** [Variables conocidas en viñetas]
   **Fórmula:** [Ecuación a usar]
   **Desarrollo:** [Sustitución y cálculo paso a paso, en líneas separadas. ¡ESTÁ ESTRICTAMENTE PROHIBIDO OMITIR EL DESARROLLO!]
-- SI ES TEÓRICO O ENLACES: DEBES incluir EXACTAMENTE estos 3 subtítulos sin omitir NINGUNO:
+- SI ES TEÓRICO O ENLACES (Escribe en texto plano Markdown, NO en formato JSON anidado):
   **Visión Microscópica:** [Explica a nivel de átomos y electrones]
-  **Ecuación/Estructura:** [Fórmula en LaTeX OBLIGATORIA. Si no hay reacción, pon al menos la fórmula molecular de la que hablas. Ej: $\mathrm{H_2O}$]
+  **Ecuación/Estructura:** [Fórmula en LaTeX OBLIGATORIA. Si no hay reacción, pon al menos la fórmula molecular de la que hablas. Ej: $\\mathrm{H_2O}$]
   **Contraste:** [Compara por qué funciona vs por qué la opción trampa no funciona]
+
+PARA TODAS LAS DEMÁS MATERIAS (Biología, Español, Geografía, etc.):
+- Explica a detalle la respuesta correcta, definiendo los conceptos y justificando por qué es la verdad absoluta.
 
 ### 🔍 Análisis de Distractores
 [Explica detalladamente y de forma objetiva por qué las otras 3 opciones son incorrectas. Usa viñetas. Ej: 
@@ -130,12 +132,7 @@ REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
 ✅ BIEN: \\\frac{a}{b}, \\\int, \\\sqrt, \\\pi
 
 Además, RECUERDA que toda fórmula matemática o fracción DEBE ir estrictamente dentro de signos de dólar simples ($ ... $). Si no pones los dólares, la plataforma no dibujará la ecuación.
-</think>
 
-Error al editar: oldString no se encuentra en el archivo. Necesito buscar el texto exacto.
-<minimax:tool_call>
-<invoke name="read">
-<parameter name="filePath">C:\Users\JAQ\Desktop\IATutorUNAM\src\app\api\generar-pregunta\route.ts
 - Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
 - Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
 CUALQUIER discrepancia = FALLO CRÍTICO.
@@ -169,8 +166,7 @@ Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na
 ### 💡 Tip Pro
 [Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
 
-**REGLA DE HIERRO:** 
-- PRIMERO ENSEÑAS, LUEGO CORRIGES
+**REGLA DE HIERRO:** - PRIMERO ENSEÑAS, LUEGO CORRIGES
 - PROHIBIDO empezar analizando opciones A, B, C o D
 - Usa EXACTAMENTE los encabezados: ### ✅, ### 🔍, ### 💡
 
@@ -220,7 +216,7 @@ Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na
 - ❌ NO uses \$ escapado
 - ❌ NO pongas $ alredeor de números simples: NO "$\frac{1}{2}$" cuando es solo "1/2"
 
-4. REGLA DE UNIDADES DE MEDIDA: NUNCA uses el comando \text{} dentro de una fórmula matemática, ya que rompe el formato JSON. Si necesitas escribir unidades de medida (como m/s, kg, N), ponlas AFUERA de los signos de dólar como texto plano.
+4. REGLA DE UNIDADES DE MEDIDA: NUNCA uses el comando \\text{} dentro de una fórmula matemática, ya que rompe el formato JSON. Si necesitas escribir unidades de medida (como m/s, kg, N), ponlas AFUERA de los signos de dólar como texto plano.
 - Ej. CORRECTO: $v = 19.6$ m/s
 - Ej. INCORRECTO: $v = 19.6 \text{m/s}$
 
@@ -235,11 +231,11 @@ Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na
 - BIEN: $\int_{0}^{3} (2x+1)\ dx$
 
 **REGLAS ESPECÍFICAS:**
-- USA SIEMPRE \int para integrales (NO solo "int")
+- USA SIEMPRE \\int para integrales (NO solo "int")
 - NUNCA uses coma antes del diferencial: NO ",$dx$", usa "$dx$"
 - NO uses coma antes de "$dx$" o cualquier diferencial
 - El diferencial VA FUERA del integrando: $\int f(x)\ dx$, NO $\int f(x),dx$
-- USA espacio entre integrando y diferencial: $x^2\ dx$ (con espacio escaping: \)
+- USA espacio entre integrando y diferencial: $x^2\ dx$ (con espacio escaping: \\)
 - NO uses paréntesis a menos que sea operación compuesta: $\int (x+1)\ dx$ es OK, $\int x\ dx$ debe ser $\int x\ dx$
 
 7. CALIDAD DE DISTRACTORES (OPCIONES INCORRECTAS):
@@ -267,7 +263,7 @@ IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}
 - $$...$$ para fórmulas centradas
 - El JSON debe ser compatible con renderizador KaTeX (no escapes barras invertidas incorrectamente)
 
-IMPORTANTE: El campo "explicacion" DEBE SER UN ÚNICO STRING de texto plano. ESTÁ ESTRICTAMENTE PROHIBIDO enviar un objeto JSON anidado (ej. NO hagas {"concepto": "...", "tip": "..."}). Concatena todo con saltos de línea \n\n en una sola cadena.
+IMPORTANTE: El campo "explicacion" DEBE SER UN ÚNICO STRING de texto plano. ESTÁ ESTRICTAMENTE PROHIBIDO enviar un objeto JSON anidado (ej. NO hagas {"concepto": "...", "tip": "..."}). Concatena todo con saltos de línea \\n\\n en una sola cadena.
 
 Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exacto:
 {
@@ -284,7 +280,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
     const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
-    
+
     const userPrompt = `Genera ${esLectura ? '3 preguntas basadas en un texto de comprensión lectora' : 'una pregunta'} sobre el tema: "${temaAleatorio}". El enfoque de la pregunta debe ser estrictamente de tipo "${enfoqueAleatorio}" para garantizar variedad. La pregunta debe ser exclusivamente sobre este tema de ${materia.nombre}. IMPORTANTE: Toda fórmula, ecuación o expresión matemática debe ir OBLIGATORIAMENTE entre signos de dólar simple ($...$) para que se renderice correctamente en LaTeX.`;
 
     const MODELOS_FALLBACK = [
@@ -326,20 +322,30 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         }
 
         console.log(`Pregunta generada con modelo: ${modelo}`);
-        
+
         const validatedQuestions: PreguntaGenerada[] = preguntasRaw.map((q: Record<string, unknown>) => {
           const preguntaRaw = String(q.pregunta || '');
           const opcionesRaw = q.opciones;
           const respuestaCorrectaRaw = String(q.respuestaCorrecta || '');
-          
+
           let explicacionFinal = '';
           if (typeof q.explicacion === 'object' && q.explicacion !== null) {
             const obj = q.explicacion as Record<string, unknown>;
-            explicacionFinal = `${obj.concepto || obj.conceptoClave || ''}\n\n${obj.analisis || obj.analisisDistractores || ''}\n\n${obj.tip || obj.tipPro || ''}`;
+            // PARCHE ANTI-JSON ANIDADO: Extrae TODO el texto sin importar cómo nombre las llaves el modelo
+            explicacionFinal = Object.entries(obj)
+              .map(([k, v]) => {
+                const strVal = String(v);
+                // Si el modelo usó las llaves como títulos (ej. "Anclaje"), las reconstruimos visualmente en negritas
+                if (k.length < 25 && !strVal.toLowerCase().includes(k.toLowerCase())) {
+                  return `**${k}:** ${strVal}`;
+                }
+                return strVal;
+              })
+              .join('\n\n');
           } else {
             explicacionFinal = String(q.explicacion || '');
           }
-          
+
           const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
           if (!preguntaRaw || !Array.isArray(opcionesRaw) || opcionesRaw.length !== 4 || !respuestaCorrectaRaw || !explicacionFinal || explicacionFinal === '[object Object]') {
@@ -365,7 +371,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
         const err = error as Error & { status?: number; message?: string };
         console.warn(`Fallo con modelo ${modelo}: ${err.message || err.status}, intentando siguiente...`);
         ultimoError = err.message || String(err);
-        
+
         if (err.status === 429 || err.status === 503) {
           continue;
         }
@@ -379,9 +385,9 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
   } catch (error) {
     console.error('Error en /api/generar-pregunta:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Error interno del servidor';
-    
+
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
