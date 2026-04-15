@@ -16,6 +16,7 @@ export default function MathMarkdown({ content, className = '' }: MathMarkdownPr
     .replace(/\\\$/g, '$')
     .replace(/\\\\([a-zA-Z])/g, '\\$1')
     .replace(/rac{/g, '\\frac{')
+    .replace(/imes/g, '\\times ')
     .replace(/\\n/g, '\n');
 
   return (

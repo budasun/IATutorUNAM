@@ -331,13 +331,21 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
           let explicacionFinal = '';
           if (typeof q.explicacion === 'object' && q.explicacion !== null) {
             const obj = q.explicacion as Record<string, unknown>;
-            // PARCHE ANTI-JSON ANIDADO: Extrae TODO el texto sin importar cómo nombre las llaves el modelo
+            // PARCHE ANTI-JSON ANIDADO REFORZADO
             explicacionFinal = Object.entries(obj)
               .map(([k, v]) => {
-                const strVal = String(v);
-                // Si el modelo usó las llaves como títulos (ej. "Anclaje"), las reconstruimos visualmente en negritas
+                let strVal = '';
+                if (typeof v === 'object' && v !== null) {
+                  strVal = JSON.stringify(v, null, 2)
+                    .replace(/[{}[\]"]/g, '')
+                    .trim();
+                } else {
+                  strVal = String(v);
+                }
+                
                 if (k.length < 25 && !strVal.toLowerCase().includes(k.toLowerCase())) {
-                  return `**${k}:** ${strVal}`;
+                  const cleanKey = k.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').trim();
+                  return `**${cleanKey}:** ${strVal}`;
                 }
                 return strVal;
               })
