@@ -1,9 +1,11 @@
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
+  cacheOnFrontEndNav: true,
   register: true,
   skipWaiting: true,
   reloadOnOnline: false,
+  fallbacks: { document: '/' },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\/.*/i,
@@ -36,9 +38,13 @@ const withPWA = require('@ducanh2912/next-pwa').default({
       options: { cacheName: 'static-js-assets', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
     },
     {
-      urlPattern: /\/$/i,
-      handler: 'StaleWhileRevalidate',
-      options: { cacheName: 'pages', expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 } }
+      urlPattern: ({ request }) => request.mode === 'navigate',
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages',
+        networkTimeoutSeconds: 3,
+        expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 }
+      }
     }
   ]
 });
