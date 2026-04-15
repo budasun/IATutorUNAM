@@ -40,22 +40,30 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
 
     // Si se agotaron, reiniciar
     const temasParaElegir = temasDisponibles.length > 0 ? temasDisponibles : materia.temas;
-
     const temaAleatorio = temasParaElegir[Math.floor(Math.random() * temasParaElegir.length)];
 
-    const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
-    const esBiologia = id_materia.toLowerCase().includes('biologia') || id_materia.toLowerCase().includes('biología');
-    const esQuimica = id_materia.toLowerCase().includes('quimica') || id_materia.toLowerCase().includes('química');
-    
+    // ============================================================================
+    // CLASIFICADOR CENTRAL DE MATERIAS (Evita variables duplicadas)
+    // ============================================================================
+    const materiaLower = id_materia.toLowerCase();
+    const esEspanol = materiaLower.includes('espanol');
+    const esLiteratura = materiaLower.includes('literatura');
+    const esLectura = esEspanol || esLiteratura;
+    const esBiologia = materiaLower.includes('biologia') || materiaLower.includes('biología');
+    const esQuimica = materiaLower.includes('quimica') || materiaLower.includes('química');
+    const esMatesFisicaQuimica = materiaLower.match(/(matemática|física|química)/);
+    const cantidad = esLectura ? 3 : 1;
+
+    // ============================================================================
+    // PLANTILLAS DINÁMICAS (Inyectadas en el ejemplo JSON)
+    // ============================================================================
     let templateExplicacion = "### ✅ El Concepto Clave\\n(Tu explicación detallada)\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
-    
+
     if (esBiologia) {
       templateExplicacion = "### ✅ El Concepto Clave\\n**Ubicación:** [Dónde ocurre]\\n**Proceso:** [Explicación detallada. Si es genética, incluye genotipos correctos. OJO: Las enfermedades recesivas requieren dos padres portadores]\\n**Impacto Vital:** [Importancia]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
     } else if (esQuimica) {
       templateExplicacion = "### ✅ El Concepto Clave\\n**Visión Microscópica:** [Átomos y moléculas]\\n**Ecuación/Estructura:** [LaTeX]\\n**Contraste:** [Diferencia clave]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
     }
-    
-    const cantidad = esLectura ? 3 : 1;
 
     const systemPrompt = `
 ================================================================================
@@ -78,7 +86,6 @@ ${esLectura ? `
 REGLA DE COMPRENSIÓN LECTORA (OBLIGATORIA)
 ================================================================================
 - Tienes PROHIBIDO escribir textos cortos. Debes escribir un ensayo o artículo original, de nivel universitario.
-- El texto debe contener MÍNIMO 6 PÁRRAFOS extensos y complejos.
 - Usa un lenguaje rico y estructurado con argumentos sólidos.
 - Después del texto, genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
 - IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de las 3 preguntas generadas.
@@ -295,14 +302,9 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
   ]
 }`
 
-    const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
-    const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
-    
-    const esEspanol = id_materia.toLowerCase().includes('espanol');
-    const esLiteratura = id_materia.toLowerCase().includes('literatura');
-    const esLectura = esEspanol || esLiteratura;
-    const esMatesFisicaQuimica = id_materia.toLowerCase().match(/(matemática|física|química)/);
-    
+    // ============================================================================
+    // INSTRUCCIONES ESPECÍFICAS DE MATERIA (Injectadas en el User Prompt)
+    // ============================================================================
     let instruccionesEspeciales = '';
     if (esEspanol) {
       instruccionesEspeciales = `¡REGLA ABSOLUTA PARA ESPAÑOL (COMPRENSIÓN LECTORA UNAM)!
@@ -383,7 +385,7 @@ ${instruccionesEspeciales}`;
                 } else {
                   strVal = String(v);
                 }
-                
+
                 if (k.length < 25 && !strVal.toLowerCase().includes(k.toLowerCase())) {
                   const cleanKey = k.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').trim();
                   return `**${cleanKey}:** ${strVal}`;
