@@ -260,7 +260,7 @@ export default function DiagnosticoPage() {
 
     if (regexAnalisis.test(explicacionCompleta)) {
       const partes = explicacionCompleta.split(regexAnalisis);
-      conceptoClave = partes[0];
+      conceptoClave = partes[0].replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
       const resto = partes[1];
       
       if (regexTip.test(resto)) {
