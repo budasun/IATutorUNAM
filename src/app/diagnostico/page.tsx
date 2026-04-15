@@ -519,7 +519,7 @@ export default function DiagnosticoPage() {
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D4AF37]/30 text-[#D4AF37] font-bold mr-3">
               {String.fromCharCode(65 + index)}
             </span>
-            {opcion}
+            <MathMarkdown content={opcion} />
           </button>
         ))}
       </div>

@@ -60,12 +60,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     // ============================================================================
     // PLANTILLAS DINÁMICAS (Inyectadas en el ejemplo JSON)
     // ============================================================================
-    let templateExplicacion = "### ✅ El Concepto Clave\\n(Tu explicación detallada)\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
+    let templateExplicacion = "### ✅ El Concepto Clave\n(Tu explicación detallada)\n\n### 🔍 Análisis de Distractores\n(Viñetas)\n\n### 💡 Tip Pro\n(Consejo)";
 
-    if (esBiologia) {
-      templateExplicacion = "### ✅ El Concepto Clave\\n**Ubicación:** [Dónde ocurre]\\n**Proceso:** [Explicación detallada. Si es genética, incluye genotipos correctos. OJO: Las enfermedades recesivas requieren dos padres portadores]\\n**Impacto Vital:** [Importancia]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
-    } else if (esQuimica) {
-      templateExplicacion = "### ✅ El Concepto Clave\\n**Visión Microscópica:** [Átomos y moléculas]\\n**Ecuación/Estructura:** [LaTeX]\\n**Contraste:** [Diferencia clave]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
+    if (esMatesFisicaQuimica) {
+      templateExplicacion = "### ✅ El Concepto Clave\n**1. Anclaje:** [Concepto físico/matemático]\n**2. Datos:** [Lista de variables con unidades]\n**3. Fórmula:** [Ecuación en LaTeX con \\\\\\\\ (doble escape)]\n**4. Desarrollo:** [Sustitución y pasos finales]\n\n### 🔍 Análisis de Distractores\n(Explica el error matemático de las otras opciones)\n\n### 💡 Tip Pro\n(Truco para el examen)";
+    } else if (esBiologia) {
+      templateExplicacion = "### ✅ El Concepto Clave\n**Ubicación:** [Dónde ocurre]\n**Proceso:** [Explicación detallada. Si es genética, incluye genotipos correctos. OJO: Las enfermedades recesivas requieren dos padres portadores]\n**Impacto Vital:** [Importancia]\n\n### 🔍 Análisis de Distractores\n(Viñetas)\n\n### 💡 Tip Pro\n(Consejo)";
     }
 
     const systemPrompt = `
@@ -166,6 +166,8 @@ Además, RECUERDA que toda fórmula matemática o fracción DEBE ir estrictament
 - Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
 - Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
 CUALQUIER discrepancia = FALLO CRÍTICO.
+
+¡ERROR CRÍTICO DETECTADO!: Si escribes \text{m/s} el sistema fallará. DEBES ESCRIBIR \\text{m/s} (CON DOBLE BARRA). Todo comando de LaTeX (\\frac, \\lambda, \\text, \\sqrt) DEBE llevar dos barras invertidas obligatoriamente para no romper el JSON.
 
 3. ESTÁNDAR PEDAGÓGICO "ANTI-FLOJERA":
 Prohibido usar frases circulares como:
@@ -281,11 +283,6 @@ FIN DEL PROTOCOLO ANTI-ALUCINACIONES
 ================================================================================
 
 REGLA DE FORMATO MATEMÁTICO (CRÍTICO): 
-- Está ESTRICTAMENTE PROHIBIDO usar el símbolo '^' para exponentes.
-- DEBES usar caracteres Unicode para superíndices.
-- Ejemplos CORRECTOS vs INCORRECTOS:
-  * Correcto: x², y³, z⁴, 2ⁿ, eˣ
-  * Incorrecto: x^2, y^3, z^4, 2^n, e^x
 - Para TODO (matemáticas, química, física) USA SIMPRE $\mathrm{H_2O}$, $\mathrm{CO_2}$, $\mathrm{NaCl}$
 
 IMPORTANTE: Para fórmulas matemáticas y químicas, USA SIEMPRE $\mathrm{LaTeX}$:
