@@ -80,24 +80,26 @@ El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAME
 ¡PROHIBIDO HACER RESÚMENES O EXPLICACIONES CORTAS!
 
 ================================================================================
-CANDADO DE EXTENSIÓN (OBLIGATORIO - ESTÁ PROHIBIDO ABREVIAR)
 ================================================================================
-PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
+CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
+================================================================================
+- PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
+- En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Da el contexto histórico completo.
 
-En Matemáticas/Física: ESTÁ PROHIBIDO saltarse pasos algebraicos o aritméticos (ej. si multiplicas 3 * 2x, muéstralo). ESTÁ PROHIBIDO escribir la resolución como un solo párrafo. DEBES usar saltos de línea (\\n\\n) para poner cada paso de la ecuación en una línea nueva hacia abajo. Asegúrate de usar los nombres correctos de los teoremas (ej. Regla de la Potencia, no del Producto para polinomios simples).
+### ✅ El Concepto Clave
+[DEBES INICIAR TU EXPLICACIÓN SIEMPRE CON ESTE TÍTULO EXACTO Y ADAPTARLA A LA MATERIA ASÍ:]
 
-En QUÍMICA - MÉTODO DE LA LUPA MOLECULAR: Para QUÍMICA, el bloque [✅ El Concepto Clave] DEBE estructurarse de la siguiente manera según el tipo de problema:
-- SI ES ESTEQUIOMETRÍA O CÁLCULO: Usa el mismo formato D.F.S.R. (Datos, Fórmula, Desarrollo).
-- SI ES TEÓRICO O CONCEPTUAL (ej. enlaces, propiedades, reacciones): Usa ESTRICTAMENTE esta estructura de 3 pasos hacia abajo: 1. Visión Microscópica: Explica el fenómeno a nivel de átomos, electrones o moléculas de forma sencilla. 2. Ecuación / Fórmula: SIEMPRE que sea posible, representa el fenómeno con una ecuación química en LaTeX (ej. $NaCl \rightarrow Na^+ + Cl^-$). 3. Contraste: Compara rápidamente por qué la respuesta correcta funciona y el distractor más común (la trampa lógica) no lo hace (Ej: "A diferencia del azúcar, que se disuelve pero no forma iones...").
+PARA MATEMÁTICAS Y FÍSICA:
+- SI ES CÁLCULO DIRECTO: Escribe hacia abajo: 1. Anclaje (concepto breve), 2. Datos (con viñetas), 3. Fórmula, 4. Desarrollo (cada paso matemático en una línea nueva con saltos \\n\\n. ¡PROHIBIDO amontonar ecuaciones!).
+- SI ES ANÁLISIS/TABLAS: Escribe: 1. Patrón observado, 2. Comprobación matemática, 3. Conclusión.
+- SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
 
-En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Debes dar el contexto histórico completo (causas, desarrollo y consecuencias) o definir el concepto a fondo antes de pasar al análisis de distractores.
-
-### ✅ El Concepto Clave (o Procedimiento Correcto)
-Para Matemáticas y Física, adapta tu explicación al TIPO de problema. NUNCA omitas el título "### ✅ El Concepto Clave":
-- SI ES CÁLCULO DIRECTO: Usa el formato de 4 pasos hacia abajo (1. Anclaje, 2. Datos, 3. Fórmula, 4. Desarrollo). ¡Cada paso matemático en una línea nueva!
-- SI ES ANÁLISIS DE TABLAS/GRÁFICAS: Estructura en 3 pasos: 1. Patrón observado (ej. "Vemos que al doble de peso, el alargamiento se cuadruplica"), 2. Comprobación matemática (prueba los puntos de la tabla), 3. Conclusión del modelo.
-- SI ES TEÓRICO: Ignora los pasos estructurados y explica la ley o principio en 2 párrafos claros.
-PARA QUÍMICA: Usa el "MÉTODO DE LA LUPA MOLECULAR" detallado arriba.
+PARA QUÍMICA (MÉTODO DE LA LUPA MOLECULAR):
+- SI ES ESTEQUIOMETRÍA/CÁLCULO: Usa el formato de Matemáticas (Datos, Fórmula, Desarrollo).
+- SI ES TEÓRICO O ENLACES: Usa ESTRICTAMENTE estos 3 subtítulos en negritas:
+  **Visión Microscópica:** [Explica a nivel de átomos y electrones]
+  **Ecuación/Estructura:** [Usa LaTeX para la fórmula, reacción o distribución. Ej: $\\mathrm{CH_4}$]
+  **Contraste:** [Compara por qué funciona vs por qué la opción trampa no funciona]
 
 ### 🔍 Análisis de Distractores
 [Explica detalladamente y de forma objetiva por qué las otras 3 opciones son incorrectas. Usa viñetas. Ej: 
