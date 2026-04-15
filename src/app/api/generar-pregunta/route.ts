@@ -96,9 +96,9 @@ PARA MATEMÁTICAS Y FÍSICA:
 
 PARA QUÍMICA (MÉTODO DE LA LUPA MOLECULAR):
 - SI ES ESTEQUIOMETRÍA/CÁLCULO: Usa el formato de Matemáticas (Datos, Fórmula, Desarrollo).
-- SI ES TEÓRICO O ENLACES: Usa ESTRICTAMENTE estos 3 subtítulos en negritas:
+- SI ES TEÓRICO O ENLACES: DEBES incluir EXACTAMENTE estos 3 subtítulos sin omitir NINGUNO:
   **Visión Microscópica:** [Explica a nivel de átomos y electrones]
-  **Ecuación/Estructura:** [Usa LaTeX para la fórmula, reacción o distribución. Ej: $\\mathrm{CH_4}$]
+  **Ecuación/Estructura:** [Fórmula en LaTeX OBLIGATORIA. Si no hay reacción, pon al menos la fórmula molecular de la que hablas. Ej: $\mathrm{H_2O}$]
   **Contraste:** [Compara por qué funciona vs por qué la opción trampa no funciona]
 
 ### 🔍 Análisis de Distractores
