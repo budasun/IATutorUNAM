@@ -89,7 +89,23 @@ En Matemáticas/Física/Química: ESTÁ PROHIBIDO saltarse pasos algebraicos o a
 En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Debes dar el contexto histórico completo (causas, desarrollo y consecuencias) o definir el concepto a fondo antes de pasar al análisis de distractores.
 
 ### ✅ El Concepto Clave (o Procedimiento Correcto)
-[Obligatorio: Enseña el tema. Si es matemáticas/física/química, desarrolla la ecuación paso a paso desde la fórmula hasta el resultado. Si es humanidades, explica el contexto histórico o definición completa. Usa **negritas** para conceptos clave.]
+Para Matemáticas, Física y Química, el bloque [✅ El Concepto Clave] DEBE estructurarse ESTRICTAMENTE con este formato de 4 pasos hacia abajo:
+1. Anclaje: Una línea explicando el fenómeno físico o lógico (Ej: "En el punto más alto de un tiro parabólico, la velocidad vertical es cero").
+2. Datos: Una lista con viñetas de las variables conocidas.
+3. Fórmula: La ecuación original a utilizar.
+4. Desarrollo: La sustitución y cálculo paso a paso. ¡OBLIGATORIO! Cada paso matemático DEBE ir en una línea nueva separada por saltos de línea (\\n\\n). ¡PROHIBIDO amontonar el despeje en un solo párrafo!
+Ejemplo de Estructura Exacta Esperada:
+Para encontrar la altura máxima, evaluamos el momento en que la pelota deja de subir.
+Datos:
+* $v_0 = 19.6$ m/s
+* $\theta = 30^\circ$
+* $g = 9.8$ m/s²
+Fórmula:
+* $h = \frac{v_0^2 \sin^2\theta}{2g}$
+Desarrollo:
+* $h = \frac{(19.6)^2 \sin^2(30)}{2(9.8)}$
+* $h = \frac{384.16 \cdot 0.25}{19.6}$
+* $h = 4.9$ m
 
 ### 🔍 Análisis de Distractores
 [Explica detalladamente y de forma objetiva por qué las otras 3 opciones son incorrectas. Usa viñetas. Ej: 
