@@ -46,7 +46,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
 
     // ============================================================================
-    // CLASIFICADOR CENTRAL DE MATERIAS
+    // CLASIFICADOR CENTRAL DE MATERIAS (¡Cero duplicados!)
     // ============================================================================
     const materiaLower = id_materia.toLowerCase();
     const esEspanol = materiaLower.includes('espanol');
@@ -54,7 +54,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const esLectura = esEspanol || esLiteratura;
     const esBiologia = materiaLower.includes('biologia') || materiaLower.includes('biología');
     const esQuimica = materiaLower.includes('quimica') || materiaLower.includes('química');
-    // Regex a prueba de fallos (con y sin tildes)
     const esMatesFisicaQuimica = materiaLower.match(/(matemáticas?|matematica|física|fisica|química|quimica)/);
     const cantidad = esLectura ? 3 : 1;
 
@@ -308,7 +307,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 }`
 
     // ============================================================================
-    // INSTRUCCIONES ESPECÍFICAS DE MATERIA (Inyectadas al final para evitar Amnesia)
+    // INSTRUCCIONES ESPECÍFICAS DE MATERIA
     // ============================================================================
     let instruccionesEspeciales = '';
     if (esEspanol) {
