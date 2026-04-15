@@ -302,7 +302,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     
     let instruccionesEspeciales = '';
     if (esLectura) {
-      instruccionesEspeciales = '¡REGLA ABSOLUTA LITERARIA: 1) El textoLectura DEBE estar 100% en Español perfecto. Tienes ESTRICTAMENTE PROHIBIDO usar caracteres chinos, kanjis, o palabras en inglés. 2) El textoLectura DEBE ser un ensayo largo de MÍNIMO 6 PÁRRAFOS extensos. Si escribes solo 1 o 2 párrafos, reprobarás la evaluación.';
+      instruccionesEspeciales = '¡REGLA ABSOLUTA LITERARIA: 1) El textoLectura DEBE estar 100% en Español perfecto (CERO caracteres chinos o idiomas extranjeros). 2) DEBE ser un ensayo de MÍNIMO 6 PÁRRAFOS extensos. 3) NIVEL EXAMEN UNAM (ALTA DIFICULTAD): El texto debe ser de corte académico, científico, histórico o filosófico complejo. PROHIBIDO textos básicos o infantiles. 4) PREGUNTAS ANALÍTICAS: Las preguntas deben evaluar inferencias, propósito del autor o síntesis. PROHIBIDO hacer preguntas literales de "búsqueda de palabras" y ESTRICTAMENTE PROHIBIDO usar distractores absurdos, obvios o cómicos.';
     } else if (!esMatesFisicaQuimica) {
       instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, PORCENTAJES, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
     } else {
