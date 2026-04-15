@@ -82,47 +82,43 @@ El campo "explicacion" DEBE ser un string en formato Markdown siguiendo EXACTAME
 ================================================================================
 CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
 ================================================================================
-- PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado y exhaustivo.
-- En Historia/Ciencias Sociales: ESTÁ PROHIBIDO responder con una sola oración. Da el contexto histórico completo.
+- PROHIBICIÓN DE EXPLICACIONES CORTAS: El bloque [✅ El Concepto Clave] DEBE ser detallado.
+- PROHIBICIÓN DE TABLAS: ¡NUNCA uses tablas Markdown (con | y -). Usa SOLO listas con viñetas para explicar datos o cruces genéticos!
 
 ### ✅ El Concepto Clave
-[DEBES INICIAR TU EXPLICACIÓN SIEMPRE CON ESTE TÍTULO EXACTO Y ADAPTARLA A LA MATERIA ASÍ:]
+[ADAPTA ESTE BLOQUE A LA MATERIA ASÍ:]
 
 PARA MATEMÁTICAS Y FÍSICA:
-- SI ES CÁLCULO DIRECTO: Escribe hacia abajo en texto plano Markdown: 1. Anclaje (concepto breve), 2. Datos (con viñetas), 3. Fórmula, 4. Desarrollo (cada paso matemático en una línea nueva con saltos \\n\\n. ¡PROHIBIDO amontonar ecuaciones!).
-- SI ES ANÁLISIS/TABLAS: Escribe: 1. Patrón observado, 2. Comprobación matemática, 3. Conclusión.
+- SI ES CÁLCULO: 1. Anclaje, 2. Datos, 3. Fórmula, 4. Desarrollo (cada paso en línea nueva).
 - SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
 
-PARA QUÍMICA (MÉTODO DE LA LUPA MOLECULAR):
-- SI ES ESTEQUIOMETRÍA/CÁLCULO (Escribe en texto plano Markdown, NO en formato JSON anidado):
-  **Anclaje:** [Concepto breve]
-  **Datos:** [Variables conocidas en viñetas]
-  **Fórmula:** [Ecuación a usar]
-  **Desarrollo:** [Sustitución y cálculo paso a paso, en líneas separadas. ¡ESTÁ ESTRICTAMENTE PROHIBIDO OMITIR EL DESARROLLO!]
-- SI ES TEÓRICO O ENLACES (Escribe en texto plano Markdown, NO en formato JSON anidado):
-  **Visión Microscópica:** [Explica a nivel de átomos y electrones]
-  **Ecuación/Estructura:** [Fórmula en LaTeX OBLIGATORIA. Si no hay reacción, pon al menos la fórmula molecular de la que hablas. Ej: $\\mathrm{H_2O}$]
-  **Contraste:** [Compara por qué funciona vs por qué la opción trampa no funciona]
+PARA QUÍMICA (LUPA MOLECULAR):
+- SI ES CÁLCULO: Mismo formato que Matemáticas.
+- SI ES TEÓRICO: Usa estos 3 subtítulos en negritas: **Visión Microscópica:**, **Ecuación/Estructura:**, **Contraste:**.
 
 PARA BIOLOGÍA (ENFOQUE SISTÉMICO):
-Escribe en texto plano Markdown usando ESTRICTAMENTE estos 3 subtítulos en negritas:
-**Ubicación:** [Dónde ocurre celular o anatómicamente. Ej: En la matriz mitocondrial]
-**Proceso:** [Qué ocurre biológicamente paso a paso]
-**Impacto Vital:** [Por qué este proceso es esencial para la vida o el ecosistema]
+- Usa ESTRICTAMENTE estos 3 subtítulos en negritas:
+  **Ubicación:** [Dónde ocurre celular o anatómicamente]
+  **Proceso:** [Qué ocurre biológicamente paso a paso. NUNCA uses tablas de Punnett, explícalo con texto y viñetas]
+  **Impacto Vital:** [Por qué es esencial]
 
-PARA TODAS LAS DEMÁS MATERIAS (Español, Geografía, Historia, etc.):
-- Explica a detalle la respuesta correcta en 2-3 párrafos claros y estructurados.
+PARA LAS DEMÁS MATERIAS:
+- Explica a detalle en 2-3 párrafos estructurados.
 
 ================================================================================
-REGLA DE SEPARACIÓN ABSOLUTA (¡CRÍTICO PARA LA INTERFAZ!):
+REGLA DE SEPARACIÓN ABSOLUTA Y ENCABEZADOS (¡CRÍTICO!)
 ================================================================================
-Tu respuesta DEBE tener EXACTAMENTE estos 3 bloques separados. ¡ESTÁ ESTRICTAMENTE PROHIBIDO METER EL ANÁLISIS DE DISTRACTORES O EL TIP PRO DENTRO DEL CONCEPTO CLAVE!
+Tu explicación DEBE tener EXACTAMENTE 3 bloques separados por saltos de línea (\\n\\n). 
+Tienes PROHIBIDO fusionarlos. DEBES usar estos textos literales:
+
+### ✅ El Concepto Clave
+(Tu explicación principal adaptada a la materia)
 
 ### 🔍 Análisis de Distractores
-[OBLIGATORIO: Aquí debes explicar por qué fallan las otras 3 opciones. Usa viñetas.]
+(Explica con viñetas por qué fallan las otras 3 opciones)
 
 ### 💡 Tip Pro
-[OBLIGATORIO: Un consejo rápido de 1-2 líneas para el examen.]
+(Un consejo rápido)
 
 ================================================================================
 REGLA DE ENCABEZADOS: ESTÁ ESTRICTAMENTE PROHIBIDO traducir los emojis a descripciones de texto o LaTeX como (\\checkmark), (\\warning) o (\\star). Debes imprimir los emojis literales (✅, 🔍, 💡) exactamente como se muestran en el template.
