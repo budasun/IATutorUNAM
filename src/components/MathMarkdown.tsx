@@ -12,15 +12,17 @@ interface MathMarkdownProps {
 
 export default function MathMarkdown({ content, className = '' }: MathMarkdownProps) {
   const contentLimpio = content
-    .replace(/\\\\/g, '')
-    .replace(/\\n/g, '\n')
-    .replace(/\\([a-zA-Z])/g, '\\$1');
+    .replace(/\\\\\$/g, '$')
+    .replace(/\\\$/g, '$')
+    .replace(/\\\\([a-zA-Z])/g, '\\$1')
+    .replace(/rac{/g, '\\frac{')
+    .replace(/\\n/g, '\n');
 
   return (
     <div className={`math-content ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[[rehypeKatex, { errorColor: '#ffffff', strict: false }]]}
         components={{
           p: ({ children }) => <p className="mb-2">{children}</p>,
         }}
