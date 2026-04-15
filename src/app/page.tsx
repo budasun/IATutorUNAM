@@ -92,7 +92,7 @@ export default function Home() {
             ¡Bienvenido, futuro Puma!
           </h1>
           <p className="text-lg text-gray-300">
-            Prepárate para el examen de Área 3 (Ciencias Sociales) con inteligencia artificial
+            Prepárate para el examen de la UNAM con Inteligencia Artificial
           </p>
         </header>
 
