@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { TEMARIO_UNAM } from '@/data/unam_temario';
+import { db } from '@/lib/db';
 
 interface Guia {
   titulo: string;
@@ -31,6 +32,13 @@ export default function TemarioPage() {
     setMateriaActiva(materia);
 
     try {
+      const guiaExistente = await db.guias.where({ materia, tema }).first();
+      if (guiaExistente) {
+        setGuia(guiaExistente);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch('/api/generar-guia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,11 +47,12 @@ export default function TemarioPage() {
       const data = await res.json();
       if (data.success && data.data) {
         setGuia(data.data);
+        await db.guias.add({ ...data.data, materia, tema, fechaGuardado: Date.now() });
       } else {
         setErrorApi(data.error || 'Error al generar la guía');
       }
     } catch (error) {
-      setErrorApi('Error de conexión');
+      setErrorApi('No tienes conexión a internet y esta guía no ha sido descargada previamente.');
     } finally {
       setLoading(false);
     }
