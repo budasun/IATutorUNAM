@@ -42,8 +42,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const temasParaElegir = temasDisponibles.length > 0 ? temasDisponibles : materia.temas;
     const temaAleatorio = temasParaElegir[Math.floor(Math.random() * temasParaElegir.length)];
 
+    const enfoques = ['teórico', 'aplicación práctica', 'identificación de excepciones', 'análisis de un caso', 'resolución directa'];
+    const enfoqueAleatorio = enfoques[Math.floor(Math.random() * enfoques.length)];
+
     // ============================================================================
-    // CLASIFICADOR CENTRAL DE MATERIAS (Evita variables duplicadas)
+    // CLASIFICADOR CENTRAL DE MATERIAS
     // ============================================================================
     const materiaLower = id_materia.toLowerCase();
     const esEspanol = materiaLower.includes('espanol');
@@ -51,7 +54,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const esLectura = esEspanol || esLiteratura;
     const esBiologia = materiaLower.includes('biologia') || materiaLower.includes('biología');
     const esQuimica = materiaLower.includes('quimica') || materiaLower.includes('química');
-    const esMatesFisicaQuimica = materiaLower.match(/(matemática|física|química)/);
+    // Regex a prueba de fallos (con y sin tildes)
+    const esMatesFisicaQuimica = materiaLower.match(/(matemáticas?|matematica|física|fisica|química|quimica)/);
     const cantidad = esLectura ? 3 : 1;
 
     // ============================================================================
@@ -88,7 +92,7 @@ REGLA DE COMPRENSIÓN LECTORA (OBLIGATORIA)
 - Tienes PROHIBIDO escribir textos cortos. Debes escribir un ensayo o artículo original, de nivel universitario.
 - Usa un lenguaje rico y estructurado con argumentos sólidos.
 - Después del texto, genera EXACTAMENTE 3 preguntas de alto nivel analítico basadas ÚNICAMENTE en esa lectura.
-- IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de las 3 preguntas generadas.
+- IMPORTANTE: Incluye el texto completo en el campo "textoLectura" de cada una de 3 preguntas generadas.
 
 ================================================================================
 TEMPLATE DE EXPLICACIÓN FORZADO (¡REGLA DE HIERRO!)` : `
@@ -109,6 +113,7 @@ CANDADO DE EXTENSIÓN Y FORMATO (OBLIGATORIO)
 
 PARA MATEMÁTICAS Y FÍSICA:
 - SI ES CÁLCULO: 1. Anclaje, 2. Datos, 3. Fórmula, 4. Desarrollo (cada paso en línea nueva).
+- SI ES ANÁLISIS/TABLAS: Escribe: 1. Patrón observado, 2. Comprobación matemática, 3. Conclusión.
 - SI ES TEÓRICO: Explica el principio en 2 párrafos claros.
 
 PARA QUÍMICA (LUPA MOLECULAR):
@@ -303,7 +308,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 }`
 
     // ============================================================================
-    // INSTRUCCIONES ESPECÍFICAS DE MATERIA (Injectadas en el User Prompt)
+    // INSTRUCCIONES ESPECÍFICAS DE MATERIA (Inyectadas al final para evitar Amnesia)
     // ============================================================================
     let instruccionesEspeciales = '';
     if (esEspanol) {
@@ -374,7 +379,6 @@ ${instruccionesEspeciales}`;
           let explicacionFinal = '';
           if (typeof q.explicacion === 'object' && q.explicacion !== null) {
             const obj = q.explicacion as Record<string, unknown>;
-            // PARCHE ANTI-JSON ANIDADO REFORZADO
             explicacionFinal = Object.entries(obj)
               .map(([k, v]) => {
                 let strVal = '';
