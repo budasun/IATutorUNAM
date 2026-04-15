@@ -312,14 +312,25 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
     let instruccionesEspeciales = '';
     if (esEspanol) {
       instruccionesEspeciales = `¡REGLA ABSOLUTA PARA ESPAÑOL (COMPRENSIÓN LECTORA UNAM)!
-1) EXTENSIÓN FORZADA: El texto DEBE tener EXACTAMENTE 5 PÁRRAFOS separados. Tienes prohibido escribir un solo bloque.
-2) TEMÁTICA: Escribe un artículo de corte científico, histórico o filosófico complejo.
-3) PREGUNTAS: Evalúa el propósito del autor o inferencias. PROHIBIDO preguntas de búsqueda literal y distractores obvios.`;
+1) ESTRUCTURA DE 6 PÁRRAFOS (OBLIGATORIA): El texto DEBE seguir este esquema exacto: 
+   - Párrafo 1: Introducción y tesis central.
+   - Párrafo 2: Antecedentes históricos o contexto.
+   - Párrafo 3: Desarrollo argumentativo A.
+   - Párrafo 4: Desarrollo argumentativo B.
+   - Párrafo 5: Perspectivas alternas o críticas.
+   - Párrafo 6: Síntesis y conclusión final.
+2) TEMÁTICA: Ensayo académico complejo (Ciencias, Humanidades o Epistemología).
+3) PREGUNTAS: Evalúa inferencias y tesis. PROHIBIDO preguntas literales o distractores absurdos.`;
     } else if (esLiteratura) {
       instruccionesEspeciales = `¡REGLA ABSOLUTA PARA LITERATURA UNAM!
-1) EXTENSIÓN Y FORMATO: Debes generar un fragmento de ensayo literario extenso (MÍNIMO 4 PÁRRAFOS) O un poema clásico/fragmento de novela seguido de 3 párrafos de análisis. Tienes prohibido escribir un solo párrafo.
-2) TEMÁTICA: El texto DEBE tratar estrictamente sobre corrientes literarias, análisis de autores, figuras retóricas o géneros literarios. PROHIBIDO usar textos científicos o de biología.
-3) PREGUNTAS: Evalúa recursos literarios, intención estética o contexto de la obra. Distractores académicamente avanzados.`;
+1) ESTRUCTURA DE 5 PÁRRAFOS (OBLIGATORIA): 
+   - Párrafo 1: Contexto de la corriente literaria o biografía del autor.
+   - Párrafo 2: Análisis de la estética, estilo y recursos predominantes.
+   - Párrafo 3: Fragmento representativo de una obra o poema (OBLIGATORIO).
+   - Párrafo 4: Interpretación técnica y simbólica del fragmento anterior.
+   - Párrafo 5: Legado, trascendencia e influencia en la literatura.
+2) TEMÁTICA: Estrictamente Corrientes Literarias, Autores Clásicos o Análisis de Géneros.
+3) PREGUNTAS: Analiza figuras retóricas y valor estético. Distractores de alta dificultad.`;
     } else if (!esMatesFisicaQuimica) {
       instruccionesEspeciales = '¡REGLA ABSOLUTA: ESTÁ ESTRICTAMENTE PROHIBIDO INCLUIR NÚMEROS, CÁLCULOS O FÓRMULAS EN ESTA PREGUNTA O EN SUS OPCIONES! Debe ser teórica y cualitativa.';
     } else {
