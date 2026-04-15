@@ -44,6 +44,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const temaAleatorio = temasParaElegir[Math.floor(Math.random() * temasParaElegir.length)];
 
     const esLectura = id_materia.toLowerCase().includes('espanol') || id_materia.toLowerCase().includes('literatura');
+    const esBiologia = id_materia.toLowerCase().includes('biologia') || id_materia.toLowerCase().includes('biología');
+    const esQuimica = id_materia.toLowerCase().includes('quimica') || id_materia.toLowerCase().includes('química');
+    
+    let templateExplicacion = "### ✅ El Concepto Clave\\n(Tu explicación detallada)\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
+    
+    if (esBiologia) {
+      templateExplicacion = "### ✅ El Concepto Clave\\n**Ubicación:** [Dónde ocurre]\\n**Proceso:** [Explicación detallada. Si es genética, incluye genotipos correctos. OJO: Las enfermedades recesivas requieren dos padres portadores]\\n**Impacto Vital:** [Importancia]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
+    } else if (esQuimica) {
+      templateExplicacion = "### ✅ El Concepto Clave\\n**Visión Microscópica:** [Átomos y moléculas]\\n**Ecuación/Estructura:** [LaTeX]\\n**Contraste:** [Diferencia clave]\\n\\n### 🔍 Análisis de Distractores\\n(Viñetas)\\n\\n### 💡 Tip Pro\\n(Consejo)";
+    }
+    
     const cantidad = esLectura ? 3 : 1;
 
     const systemPrompt = `
@@ -278,7 +289,7 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
       "pregunta": "Texto de la pregunta",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
       "respuestaCorrecta": "Opción correcta exacta",
-      "explicacion": "### ✅ El Concepto Clave\\n(Tu explicación obligatoria según la materia)\\n\\n### 🔍 Análisis de Distractores\\n(Tu análisis con viñetas)\\n\\n### 💡 Tip Pro\\n(Tu consejo)"
+      "explicacion": "${templateExplicacion}"
       ${esLectura ? ', "textoLectura": "Aquí va el texto completo..."' : ''}
     }
   ]
