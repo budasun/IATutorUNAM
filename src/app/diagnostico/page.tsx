@@ -250,17 +250,17 @@ export default function DiagnosticoPage() {
     const materiaActualObj = materiasDelArea[indiceMateria] || materiasDelArea[0];
 
     const explicacionCompleta = pregunta.explicacion || '';
-    const regexAnalisis = /(?:###\s*)?(?:🔍|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?An[aá]lisis de Distractores/i;
-    const regexTip = /(?:###\s*)?(?:💡|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?Tip Pro/i;
+    const regexAnalisis = /(?:###\s*)?(?:\[ANÁLISIS\]|🔍|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?An[aá]lisis de Distractores/i;
+    const regexTip = /(?:###\s*)?(?:\[TIP\]|💡|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?Tip Pro/i;
 
     let conceptoClave = explicacionCompleta;
-    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave\s*:?\s*/i, '').trim();
+    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:\[CORRECTO\]|✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave\s*:?\s*/i, '').trim();
     let analisis = '';
     let tip = '';
 
     if (regexAnalisis.test(explicacionCompleta)) {
       const partes = explicacionCompleta.split(regexAnalisis);
-      conceptoClave = partes[0].replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
+      conceptoClave = partes[0].replace(/(?:###\s*)?(?:\[CORRECTO\]|✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
       const resto = partes[1];
 
       if (regexTip.test(resto)) {

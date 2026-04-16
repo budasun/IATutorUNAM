@@ -144,10 +144,14 @@ Tienes PROHIBIDO fusionarlos. DEBES usar estos textos literales:
 DEBES analizar las opciones incorrectas una por una con este formato exacto:
 
 Opción [Letra]: [Explicación técnica del error específico cometido en esta opción].
-
+Opción [Letra]: [Análisis del error].
 Opción [Letra]: [Análisis del error].
 
-Opción [Letra]: [Análisis del error].
+PROHIBICIÓN ABSOLUTA: Tienes terminantemente prohibido usar frases como "No coincide con el cálculo", "Es incorrecta", "No es la respuesta correcta" o simplemente repetir la respuesta correcta. Debes explicar el ERROR LÓGICO real del estudiante.
+
+OBLIGACIÓN DE ERROR LÓGICO: Para cada opción incorrecta, DEBES inventar un error humano plausible (ej. "Opción B: El alumno olvidó cambiar el signo al pasar al otro lado", "Opción C: Se utilizó la derivada en lugar de la integral").
+
+REGLA DE BARRAS: CUALQUIER comando de LaTeX en el análisis DEBE llevar cuatro barras invertidas (ej. \\int, \\frac). Si escribes int sin barras, el sistema fallará.
 
 ### [TIP] Tip Pro
 (Un consejo rápido)
@@ -194,17 +198,18 @@ Usa **negritas** para términos importantes. Ej: "La electronegatividad del **Na
 
 ### [ANÁLISIS] Análisis de Distractores
 [Explica brevemente los errores lógicos o matemáticos de las 3 opciones incorrectas generadas.
-**REGLA ESTRICTA:** NUNCA uses frases como "Tu opción", "Si elegiste esta", o asumas lo que el usuario respondió, porque este texto se genera ANTES de que el usuario interactúe. Simplemente analiza las opciones de forma objetiva:
-- **Opción incorrecta 1:** [Error - ej. "Asume que la pendiente es negativa cuando es positiva"]
-- **Opción incorrecta 2:** [Error - ej. "Omite la constante de integración"]
-- **Opción incorrecta 3:** [Error - ej. "Aplica mal la jerarquía de operaciones"]]
+**REGLA ESTRICTA:** NUNCA uses frases como "Tu opción", "Si elegiste esta", o asumas lo que el usuario respondió.
+PROHIBICIÓN ABSOLUTA: NO uses frases como "No coincide con el cálculo", "Es incorrecta". Debes explicar el ERROR LÓGICO real.
+- **Opción A:** [Error - ej. "Asume que la pendiente es negativa cuando es positiva"]
+- **Opción B:** [Error - ej. "Omite la constante de integración"]
+- **Opción C:** [Error - ej. "Aplica mal la jerarquía de operaciones"]]
 
-### 💡 Tip Pro
+### [TIP] Tip Pro
 [Regla de oro en 1-2 líneas: "Metal + No Metal = Iónico", "En integrales,dx va FUERA"]
 
 **REGLA DE HIERRO:** - PRIMERO ENSEÑAS, LUEGO CORRIGES
 - PROHIBIDO empezar analizando opciones A, B, C o D
-- Usa EXACTAMENTE los encabezados: ### ✅, ### 🔍, ### 💡
+- Usa EXACTAMENTE los encabezados: ### [CORRECTO], ### [ANÁLISIS], ### [TIP]
 
 **REGLAS ANTI-ALUCINACIÓN (PROHIBIDO TOTAL):**
 
