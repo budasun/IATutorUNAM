@@ -217,21 +217,22 @@ Debes usar EXACTAMENTE estos 5 bloques en este orden:
 ================================================================================
 ANÁLISIS DE DISTRACTORES (OBLIGATORIO)
 ================================================================================
-PROHIBIDO SER GENÉRICO: Tienes estrictamente prohibido dar una lista de "posibles errores". Debes analizar las opciones específicas que generaste.
+REGLA DE IDENTIDAD: El bloque de "Análisis de Errores Comunes" DEBE analizar las 3 opciones incorrectas una por una, mencionando su letra Y su contenido exacto.
 
-ANÁLISIS POR OPCIÓN: El bloque [ANÁLISIS] DEBE analizar las 3 opciones incorrectas una por una.
+FORMATO DE LISTA ESTRICTO: Prohibido usar párrafos largos o consejos genéricos como "Trampa 1". Usa este formato exacto:
 
-FORMATO OBLIGATORIO (dentro del bloque [ANÁLISIS]):
-Opción [Letra]: [Explicación de por qué este valor específico es un error]
-Opción [Letra]: [Explicación del error lógico]
-Opción [Letra]: [Explicación del error conceptual]
+Opción [Letra]: [Aquí explicas por qué esta opción es falsa, qué error de cálculo o confusión de concepto llevó a este resultado específico]
+Opción [Letra]: [Análisis del error]
+Opción [Letra]: [Análisis del error]
+
+CONEXIÓN LÓGICA: El error descrito DEBE coincidir exactamente con el valor de la opción. Si la opción es "-5", la explicación debe decir por qué dio "-5" (ej: "Confusión al despejar el signo").
 
 Ejemplo de formato correcto:
 Opción B: Es el resultado de $\\\\frac{1}{2}$ (error de no invertir la fracción)
 Opción C: Confunde perímetro con área
 Opción D: Omite la raíz cuadrada
 
-Recuerda: Usa $\\\\frac{1}{2}$ para renderizar fracciones en el análisis también.
+IMPORTANTE: Usa $\\\\frac{1}{2}$ para renderizar fracciones. El bloque [ANÁLISIS] debe analizar las opciones específicas que aparecieron en el array "opciones".
 
 ================================================================================
 REGLAS DE FORMATO LaTeX (CRÍTICO PARA RENDERIZADO)
