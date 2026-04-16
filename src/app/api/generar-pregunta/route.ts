@@ -164,6 +164,15 @@ REGLA CRÍTICA CERO (ANTI-ALUCINACIONES)
 4. CERO SUPOSICIONES SOBRE EL USUARIO: Este texto se genera ANTES de que el alumno responda. PROHIBIDO usar frases como "Tu opción", "Si elegiste", "Te equivocaste". Sé 100% objetivo.
 5. REGLA DE ORO: El campo "respuestaCorrecta" DEBE contener el texto ÍNTEGRO de la opción, exactamente como aparece en el arreglo de "opciones". PROHIBIDO poner solo la letra (A, B, C, D).
 
+================================================================================
+¡REGLA ANTIALUCINACIÓN MATEMÁTICA! (OBLIGATORIA PARA CIENCIAS EXACTAS)
+================================================================================
+1. Antes de generar el JSON, ESCRIBE el procedimiento paso a paso de forma invisible.
+2. Si el resultado de $\frac{2}{2}$ es 1, la respuesta correcta NO puede ser $1/2$.
+3. CUALQUIER contradicción entre el desarrollo y la respuestaCorrecta es un fallo crítico.
+4. REVISA TUS CÁLCULOS 3 VECES antes de responder.
+5. Verifica que TODOS los distractores sean errores REALES de estudiantes (signo wrong, fórmula wrong, paso omitido).
+
 ${esBiologia || esHistoria || esGeografia ? `
 ================================================================================
 PROHIBICIÓN PARA ${materia.nombre.toUpperCase()}

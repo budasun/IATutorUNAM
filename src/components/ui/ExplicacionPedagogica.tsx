@@ -16,31 +16,43 @@ interface SeccionExplicacion {
 /**
  * Parsea la explicación de la IA en secciones estructuradas.
  * Soporta las 3 estructuras:
- *   A) Ciencias Exactas: ✅ Anclaje → 📊 Datos → 📐 Fórmula → 🔄 Desarrollo → 🔍 Errores → 💡 Tip
- *   B) Ciencias Teóricas: ✅ Anclaje Conceptual → 🧬 Desglose → 🔗 Palabra Clave → 🔍 Errores → 💡 Tip
- *   C) Lectura: ✅ Tipo de Pregunta → 📖 Evidencia → 🧠 Análisis Lógico → 🔍 Errores → 💡 Tip
+ *   A) Ciencias Exactas: [CORRECTO] Anclaje → [DATOS] Datos → [FÓRMULA] Fórmula → [DESARROLLO] Desarrollo → [ANÁLISIS] Errores → [TIP] Tip
+ *   B) Ciencias Teóricas: [CORRECTO] Anclaje Conceptual → [DESGLOSE] Desglose → 🔗 Palabra Clave → [ANÁLISIS] Errores → [TIP] Tip
+ *   C) Lectura: [CORRECTO] Tipo de Pregunta → 📖 Evidencia → 🧠 Análisis Lógico → [ANÁLISIS] Errores → [TIP] Tip
  * También soporta el formato legacy (✅ El Concepto Clave → 🔍 Análisis de Distractores → 💡 Tip Pro)
  */
 function parseSecciones(explicacion: string): SeccionExplicacion[] {
   const secciones: SeccionExplicacion[] = [];
 
-  // Patrón universal: detecta encabezados en negritas con emoji
-  const regex = /\*\*([✅📊📐🔄🔍💡🧬🔗📖🧠])\s*([^*]+?):\*\*/g;
+  // Patrón nuevo: etiquetas de texto [CORRECTO], [ANÁLISIS], [TIP], etc.
+  const regex = /\*\*\[([A-ZÁÉÍÓÚÑ]+)\]\s*([^*]+?):\*\*/g;
   const matches: { emoji: string; titulo: string; start: number; end: number }[] = [];
 
   let match;
   while ((match = regex.exec(explicacion)) !== null) {
+    const etiqueta = match[1].toUpperCase();
+    let emoji = '';
+    switch (etiqueta) {
+      case 'CORRECTO': emoji = '✅'; break;
+      case 'ANÁLISIS': emoji = '🔎'; break;
+      case 'TIP': emoji = '💡'; break;
+      case 'DATOS': emoji = '📊'; break;
+      case 'FÓRMULA': emoji = '📐'; break;
+      case 'DESARROLLO': emoji = '🔄'; break;
+      case 'DESGLOSE': emoji = '🧬'; break;
+      default: emoji = '📌';
+    }
     matches.push({
-      emoji: match[1],
+      emoji,
       titulo: match[2].trim(),
       start: match.index,
       end: match.index + match[0].length,
     });
   }
 
-  // Si no encontramos el formato nuevo, intentamos el formato legacy con ###
+  // Si no encontramos el formato nuevo, intentamos con emojis antiguos
   if (matches.length === 0) {
-    const regexLegacy = /###\s*([✅🔍💡])\s*(.+?)(?:\n|$)/g;
+    const regexLegacy = /\*\*([✅📊📐🔄🔍💡🧬🔗📖🧠])\s*([^*]+?):\*\*/g;
     while ((match = regexLegacy.exec(explicacion)) !== null) {
       matches.push({
         emoji: match[1],
@@ -52,6 +64,18 @@ function parseSecciones(explicacion: string): SeccionExplicacion[] {
   }
 
   // Si no hay ningún patrón reconocido, devolver todo como una sola sección
+  if (matches.length === 0) {
+    const regexLegacy2 = /###\s*([✅🔍💡])\s*(.+?)(?:\n|$)/g;
+    while ((match = regexLegacy2.exec(explicacion)) !== null) {
+      matches.push({
+        emoji: match[1],
+        titulo: match[2].trim(),
+        start: match.index,
+        end: match.index + match[0].length,
+      });
+    }
+  }
+
   if (matches.length === 0) {
     return [{
       emoji: '📖',
@@ -68,7 +92,7 @@ function parseSecciones(explicacion: string): SeccionExplicacion[] {
     const contenido = explicacion.slice(current.end, nextStart).trim();
 
     let tipo: SeccionExplicacion['tipo'] = 'principal';
-    if (current.emoji === '🔍') tipo = 'errores';
+    if (current.emoji === '🔎' || current.emoji === '🔍') tipo = 'errores';
     if (current.emoji === '💡') tipo = 'tip';
 
     secciones.push({
@@ -132,7 +156,7 @@ export default function ExplicacionPedagogica({ explicacion }: ExplicacionPedago
         // Sección principal → contenido normal
         return (
           <div key={index}>
-            <p className="text-white/80 font-semibold mb-2 flex items-center gap-2 text-sm">
+            <p className="text-[#D4AF37] font-bold mb-2 flex items-center gap-2 text-sm uppercase tracking-wide">
               {seccion.emoji} {seccion.titulo}
             </p>
             <MathMarkdown
