@@ -6,7 +6,6 @@ import { TEMARIO_UNAM } from '@/data/unam_temario';
 import { PreguntaGenerada } from '@/types/ia';
 import { getSupabase } from '@/lib/supabase/client';
 import MathMarkdown from '@/components/MathMarkdown';
-import ExplicacionPedagogica from '@/components/ui/ExplicacionPedagogica';
 
 type Pantalla = 'bienvenida' | 'cargando' | 'examen' | 'retroalimentacion' | 'resultados';
 type AreaKey = keyof typeof TEMARIO_UNAM;
@@ -37,7 +36,7 @@ export default function DiagnosticoPage() {
   const fetchPregunta = useCallback(async (materiaId: string) => {
     if (fetchActivo.current) return;
     fetchActivo.current = true;
-    
+
     setLoading(true);
     setErrorApi(null);
     try {
@@ -250,6 +249,29 @@ export default function DiagnosticoPage() {
   if (pantalla === 'retroalimentacion' && pregunta) {
     const materiaActualObj = materiasDelArea[indiceMateria] || materiasDelArea[0];
 
+    const explicacionCompleta = pregunta.explicacion || '';
+    const regexAnalisis = /(?:###\s*)?(?:🔍|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?An[aá]lisis de Distractores/i;
+    const regexTip = /(?:###\s*)?(?:💡|\\?\(?\s*\\[a-zA-Z]+\s*\\?\)?\s*)?Tip Pro/i;
+
+    let conceptoClave = explicacionCompleta;
+    conceptoClave = conceptoClave.replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave\s*:?\s*/i, '').trim();
+    let analisis = '';
+    let tip = '';
+
+    if (regexAnalisis.test(explicacionCompleta)) {
+      const partes = explicacionCompleta.split(regexAnalisis);
+      conceptoClave = partes[0].replace(/(?:###\s*)?(?:✅|\\?\(?\s*\\checkmark\s*\\?\)?\s*)?El Concepto Clave/i, '').trim();
+      const resto = partes[1];
+
+      if (regexTip.test(resto)) {
+        const partesTip = resto.split(regexTip);
+        analisis = partesTip[0];
+        tip = partesTip[1];
+      } else {
+        analisis = resto;
+      }
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002B5C] via-[#001a3d] to-black text-white p-4 flex flex-col">
         <div className="bg-[#002B5C] border border-white/10 rounded-xl p-5 mb-6 shadow-md">
@@ -257,8 +279,8 @@ export default function DiagnosticoPage() {
           <MathMarkdown content={pregunta.pregunta} className="text-lg font-medium text-white leading-relaxed" />
         </div>
         <div className={`rounded-2xl p-6 mb-6 ${fueCorrecta
-            ? 'bg-green-500/20 border border-green-500/50'
-            : 'bg-yellow-500/20 border border-yellow-500/50'
+          ? 'bg-green-500/20 border border-green-500/50'
+          : 'bg-yellow-500/20 border border-yellow-500/50'
           }`}>
           <div className={`flex items-center gap-3 font-bold text-xl mb-4 ${fueCorrecta ? 'text-green-400' : 'text-yellow-400'
             }`}>
@@ -289,7 +311,7 @@ export default function DiagnosticoPage() {
           )}
           <div className="bg-green-500/10 rounded-xl p-4 mb-4">
             <p className="text-green-400 font-medium mb-2">Respuesta correcta:</p>
-            <MathMarkdown content={(function() {
+            <MathMarkdown content={(function () {
               const res = pregunta.respuestaCorrecta;
               if (res.length <= 8 && res.toLowerCase().includes('opción')) {
                 const letra = res.split(' ').pop()?.toUpperCase();
@@ -300,7 +322,27 @@ export default function DiagnosticoPage() {
             })()} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
-            <ExplicacionPedagogica explicacion={pregunta.explicacion || ''} />
+            <p className="text-[#D4AF37] font-semibold mb-3">📖 Explicación Completa</p>
+
+            <MathMarkdown content={conceptoClave} className="text-gray-300 text-sm leading-relaxed mb-4" />
+
+            {analisis && (
+              <details className="group mb-4 bg-black/20 rounded-xl border border-white/10 overflow-hidden">
+                <summary className="cursor-pointer p-4 font-semibold text-blue-300 list-none flex justify-between items-center hover:bg-white/5 transition">
+                  <span className="flex items-center gap-2">🔍 Ver Análisis de Errores Comunes</span>
+                  <span className="group-open:rotate-180 transition-transform duration-300">▼</span>
+                </summary>
+                <div className="p-4 pt-0">
+                  <MathMarkdown content={analisis} className="text-gray-300 text-sm leading-relaxed" />
+                </div>
+              </details>
+            )}
+
+            {tip && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <MathMarkdown content={`### 💡 Tip Pro\n${tip}`} className="text-[#D4AF37] text-sm leading-relaxed" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -357,8 +399,8 @@ export default function DiagnosticoPage() {
               <div
                 key={index}
                 className={`rounded-xl p-4 border ${resultado.acierto
-                    ? 'bg-green-500/20 border-green-500/50'
-                    : 'bg-red-500/20 border-red-500/50'
+                  ? 'bg-green-500/20 border-green-500/50'
+                  : 'bg-red-500/20 border-red-500/50'
                   }`}
               >
                 <div className="flex justify-between items-center mb-2">
@@ -369,8 +411,8 @@ export default function DiagnosticoPage() {
                 </div>
                 <span
                   className={`text-xs font-bold px-3 py-1 rounded-full ${resultado.acierto
-                      ? 'bg-green-500/30 text-green-300'
-                      : 'bg-red-500/30 text-red-300'
+                    ? 'bg-green-500/30 text-green-300'
+                    : 'bg-red-500/30 text-red-300'
                     }`}
                 >
                   {resultado.acierto ? 'Dominado' : 'Por repasar'}
