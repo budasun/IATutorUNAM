@@ -530,7 +530,6 @@ export default function SimuladorPage() {
             })()} className="text-green-300" />
           </div>
           <div className="bg-[#002B5C]/50 rounded-xl p-4">
-            <p className="text-[#D4AF37] font-semibold mb-3">📖 Explicación Completa</p>
             <ExplicacionPedagogica explicacion={pregunta.explicacion || ''} />
           </div>
         </div>

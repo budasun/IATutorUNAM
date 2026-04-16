@@ -72,37 +72,29 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     if (esMatesFisicaQuimica) {
       // ESTRUCTURA A: Ciencias Exactas
       estructuraExplicacion = `
-**[CORRECTO] Anclaje:** [Una línea explicando el fenómeno físico, químico o lógico]
+**[ANCLAJE]** [Una línea explicando el fenómeno físico, químico o lógico]
 
-**[DATOS] Datos:**
-- Variable 1 = valor
-- Variable 2 = valor
+**[DATOS]** [Variables y valores]
 
-**[FÓRMULA] Fórmula:** $[Ecuación original en LaTeX]$
+**[FÓRMULA]** $[Ecuación original en LaTeX]$
 
-**[DESARROLLO] Desarrollo:**
-[Paso 1: Sustitución]
+**[DESARROLLO]** [Paso a paso: Sustitución → Simplificación → Resultado]
 
-[Paso 2: Simplificación]
+**[ANÁLISIS]** [Errores comunes y trampas del problema]
 
-[Paso 3: Resultado Final]
-
-**[ANÁLISIS] Análisis de Errores Comunes:**
-- Trampa 1: [Error específico, ej: "Error de signos al despejar"]
-- Trampa 2: [Error específico, ej: "Olvidar elevar al cuadrado"]
-
-**[TIP] Tip Pro:** [Consejo rápido y accionable]`;
+**[TIP]** [Consejo rápido y accionable]`;
     } else if (esCienciaTeorica) {
       // ESTRUCTURA B: Ciencias Teóricas
       estructuraExplicacion = `
-**[CORRECTO] Anclaje Conceptual:** [Define el concepto principal en una frase contundente]
+**[ANCLAJE]** [Define el concepto principal en una frase contundente]
 
-**[DESGLOSE] Desglose/Mecanismo:**
-- [Característica o fase 1]
-- [Característica o fase 2]
-- [Característica o fase 3]
+**[DESGLOSE]** [3 características o fases del proceso]
 
-**🔗 Palabra Clave / Nexo:** [La palabra en la pregunta que da la respuesta inmediatamente]
+**🔗 Palabra Clave / Nexo:** [La palabra de la pregunta que revela la respuesta]
+
+**[ANÁLISIS]** [Por qué los distractores fallan]
+
+**[TIP]** [Mnemotecnia o truco de memoria]`;
 
 **[ANÁLISIS] Análisis de Errores Comunes:**
 - [Por qué el distractor más lógico es falso]
@@ -112,17 +104,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     } else {
       // ESTRUCTURA C: Lectura de Comprensión (default para Español/Literatura)
       estructuraExplicacion = `
-**[CORRECTO] Tipo de Pregunta:** [Ej: "Pregunta de Inferencia", "Idea Principal", "Tono del autor"]
+**[ANCLAJE]** [Tipo de pregunta: Inferencia, Idea Principal, Tono, etc.]
 
-**📖 Evidencia en el Texto:** "[Cita textual exacta del fragmento donde reside la respuesta]"
+**📖 Evidencia:** "[Cita textual exacta del fragmento]"
 
-**🧠 Análisis Lógico:** [Cómo conectar la evidencia con la respuesta correcta]
+**🧠 Análisis:** [Conexión evidencia → respuesta]
 
-**[ANÁLISIS] Análisis de Errores Comunes:**
-- Opción X: [Por qué es incorrecta, ej: "Es demasiado general"]
-- Opción Y: [Por qué es incorrecta, ej: "Es cierta en la realidad pero NO se menciona en el texto"]
+**[ANÁLISIS]** [Desmonte de distractores]
 
-**[TIP] Tip Pro:** [Estrategia de lectura rápida]`;
+**[TIP]** [Estrategia de lectura rápida]`;
     }
 
     const systemPrompt = `
@@ -132,12 +122,12 @@ REGLA DE CODIFICACIÓN (CRÍTICA)
 USA EXCLUSIVAMENTE emojis estándar de Unicode. NO uses representaciones de texto como :emoji_name:. NO uses secuencias de escape. Los emojis deben ser caracteres UTF-8 puros. Ejemplo: ✅ NO :white_check_mark:.
 
 PARA ANDROID/ROMPIMIENTO: Usa alternativas más seguras:
-- ✅ → [CORRECTO] o ✔️
+- ✅ → [ANCLAJE] o ✔
 - 🔍 → [ANÁLISIS] o 🔎
-- 💡 → [TIP] o ✨
+- 💡 → [TIP]
 - 📊 → [DATOS]
 - 📐 → [FÓRMULA]
-- 🔄 → [DESARROLLO]
+- ⚙ → [DESARROLLO]
 - 🧬 → [DESGLOSE]
 
 ================================================================================
@@ -200,28 +190,28 @@ PROHIBIDO enviar un objeto JSON anidado. Concatena todo con saltos de línea \\n
 ${esMatesFisicaQuimica ? `
 === ESTRUCTURA A: CIENCIAS EXACTAS ===
 Debes usar EXACTAMENTE estos 6 bloques en este orden:
-1. **[CORRECTO] Anclaje:** - Una línea con el fenómeno/concepto
-2. **[DATOS] Datos:** - Lista de variables conocidas con viñetas
-3. **[FÓRMULA] Fórmula:** - Ecuación en LaTeX entre $...$
-4. **[DESARROLLO] Desarrollo:** - OBLIGATORIO: cada paso en línea separada (Sustitución \\n\\n Simplificación \\n\\n Resultado)
-5. **[ANÁLISIS] Análisis de Errores Comunes:** - 2 trampas específicas del problema
-6. **[TIP] Tip Pro:** - Consejo rápido
+1. **[ANCLAJE]** - Una línea con el fenómeno/concepto
+2. **[DATOS]** - Lista de variables conocidas
+3. **[FÓRMULA]** - Ecuación en LaTeX entre $...$
+4. **[DESARROLLO]** - Cada paso en línea separada
+5. **[ANÁLISIS]** - 2 trampas específicas del problema
+6. **[TIP]** - Consejo rápido
 ` : esCienciaTeorica ? `
 === ESTRUCTURA B: CIENCIAS TEÓRICAS ===
 Debes usar EXACTAMENTE estos 5 bloques en este orden:
-1. **[CORRECTO] Anclaje Conceptual:** - Definición contundente en 1 frase
-2. **[DESGLOSE] Desglose/Mecanismo:** - 3 viñetas con proceso/características
+1. **[ANCLAJE]** - Definición contundente en 1 frase
+2. **[DESGLOSE]** - 3 viñetas con proceso/características
 3. **🔗 Palabra Clave / Nexo:** - La palabra de la pregunta que revela la respuesta
-4. **[ANÁLISIS] Análisis de Errores Comunes:** - Por qué los distractores fallan
-5. **[TIP] Tip Pro:** - Mnemotecnia o truco de memoria
+4. **[ANÁLISIS]** - Por qué los distractores fallan
+5. **[TIP]** - Mnemotecnia o truco de memoria
 ` : `
 === ESTRUCTURA C: LECTURA DE COMPRENSIÓN ===
 Debes usar EXACTAMENTE estos 5 bloques en este orden:
-1. **[CORRECTO] Tipo de Pregunta:** - Clasificación (Inferencia, Idea Principal, Tono, etc.)
-2. **📖 Evidencia en el Texto:** - Cita textual EXACTA entre comillas
-3. **🧠 Análisis Lógico:** - Conexión evidencia → respuesta
-4. **[ANÁLISIS] Análisis de Errores Comunes:** - Desmonte de distractores
-5. **[TIP] Tip Pro:** - Estrategia de lectura rápida
+1. **[ANCLAJE]** - Tipo de pregunta (Inferencia, Idea Principal, Tono, etc.)
+2. **📖 Evidencia:** - Cita textual EXACTA entre comillas
+3. **🧠 Análisis:** - Conexión evidencia → respuesta
+4. **[ANÁLISIS]** - Desmonte de distractores
+5. **[TIP]** - Estrategia de lectura rápida
 `}
 
 ================================================================================
@@ -229,10 +219,12 @@ REGLAS DE FORMATO LaTeX (CRÍTICO PARA RENDERIZADO)
 ================================================================================
 1. EXPONENTES: PROHIBIDO usar ^, ², ³, ⁿ. Usa SIEMPRE $x^{2}$, $y^{3}$, $e^{x}$ dentro de $.
 2. REGLA ANTI-DÓLAR: Números simples como "158", "-2", "x = 5" van en texto plano SIN $. Solo usa $...$ para fórmulas complejas ($\frac{a}{b}$, $\sqrt{}$, $\pi$, $x^{n}$).
-3. DOBLE ESCAPE EN JSON: Como tu respuesta es JSON, TODOS los comandos LaTeX necesitan doble barra: \\frac, \\int, \\sqrt, \\pi, \\text, ^{}.
-4. PROHIBIDO $$...$$ (doble dólar/block math).
-5. UNIDADES DE MEDIDA: Ponlas AFUERA de $ como texto plano. CORRECTO: $v = 19.6$ m/s. INCORRECTO: $v = 19.6 \text{m/s}$.
-6. PROHIBIDO USAR TABLAS MARKDOWN (con | y -). Usa SOLO listas con viñetas.
+3. REGLA DE ORO DE BACKSLASHES: Todo comando LaTeX DEBE llevar cuatro barras invertidas en el prompt para que lleguen como dos al JSON. Si envías lambda sin barras, el estudiante no verá la fórmula. Ejemplo: $\\\\lambda$, $\\\\pi$, $\\\\alpha$, $\\\\cdot$, $\\\\frac$, $\\\\sqrt{}$.
+4. PROHIBICIÓN ABSOLUTA: Prohibido escribir palabras como lambda, pi, alpha, theta, sigma en texto plano. ÚSALAS SIEMPRE en formato LaTeX: $\\\\lambda$, $\\\\pi$, $\\\\alpha$, $\\\\theta$, $\\\\sigma$.
+5. DOBLE ESCAPE EN JSON: Como tu respuesta es JSON, TODOS los comandos LaTeX necesitan doble barra: \\\\frac, \\\\int, \\\\sqrt, \\\\pi, \\\\text, ^{}, \\\\lambda, \\\\cdot.
+6. PROHIBIDO $$...$$ (doble dólar/block math).
+7. UNIDADES DE MEDIDA: Ponlas AFUERA de $ como texto plano. CORRECTO: $v = 19.6$ m/s. INCORRECTO: $v = 19.6 \\text{m/s}$.
+8. PROHIBIDO USAR TABLAS MARKDOWN (con | y -). Usa SOLO listas con viñetas.
 
 ================================================================================
 CALIDAD DE DISTRACTORES

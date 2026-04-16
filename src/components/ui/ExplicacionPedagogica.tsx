@@ -16,35 +16,35 @@ interface SeccionExplicacion {
 /**
  * Parsea la explicación de la IA en secciones estructuradas.
  * Soporta las 3 estructuras:
- *   A) Ciencias Exactas: [CORRECTO] Anclaje → [DATOS] Datos → [FÓRMULA] Fórmula → [DESARROLLO] Desarrollo → [ANÁLISIS] Errores → [TIP] Tip
- *   B) Ciencias Teóricas: [CORRECTO] Anclaje Conceptual → [DESGLOSE] Desglose → 🔗 Palabra Clave → [ANÁLISIS] Errores → [TIP] Tip
- *   C) Lectura: [CORRECTO] Tipo de Pregunta → 📖 Evidencia → 🧠 Análisis Lógico → [ANÁLISIS] Errores → [TIP] Tip
- * También soporta el formato legacy (✅ El Concepto Clave → 🔍 Análisis de Distractores → 💡 Tip Pro)
+ *   A) Ciencias Exactas: [ANCLAJE] → [DATOS] → [FÓRMULA] → [DESARROLLO] → [ANÁLISIS] → [TIP]
+ *   B) Ciencias Teóricas: [ANCLAJE] → [DESGLOSE] → 🔗 → [ANÁLISIS] → [TIP]
+ *   C) Lectura: [ANCLAJE] → 📖 → 🧠 → [ANÁLISIS] → [TIP]
  */
 function parseSecciones(explicacion: string): SeccionExplicacion[] {
   const secciones: SeccionExplicacion[] = [];
 
-  // Patrón nuevo: etiquetas de texto [CORRECTO], [ANÁLISIS], [TIP], etc.
-  const regex = /\*\*\[([A-ZÁÉÍÓÚÑ]+)\]\s*([^*]+?):\*\*/g;
+  // Patrón nuevo: etiquetas de texto [ANCLAJE], [ANÁLISIS], [TIP], etc.
+  const regex = /\*\*\[([A-ZÁÉÍÓÚÑ]+)\]\*?/g;
   const matches: { emoji: string; titulo: string; start: number; end: number }[] = [];
 
   let match;
   while ((match = regex.exec(explicacion)) !== null) {
     const etiqueta = match[1].toUpperCase();
     let emoji = '';
+    let titulo = '';
     switch (etiqueta) {
-      case 'CORRECTO': emoji = '✅'; break;
-      case 'ANÁLISIS': emoji = '🔎'; break;
-      case 'TIP': emoji = '💡'; break;
-      case 'DATOS': emoji = '📊'; break;
-      case 'FÓRMULA': emoji = '📐'; break;
-      case 'DESARROLLO': emoji = '🔄'; break;
-      case 'DESGLOSE': emoji = '🧬'; break;
-      default: emoji = '📌';
+      case 'ANCLAJE': emoji = '✔'; titulo = 'Anclaje'; break;
+      case 'ANÁLISIS': emoji = '🔎'; titulo = 'Análisis de Errores'; break;
+      case 'TIP': emoji = '💡'; titulo = 'Tip Pro'; break;
+      case 'DATOS': emoji = '📊'; titulo = 'Datos'; break;
+      case 'FÓRMULA': emoji = '📐'; titulo = 'Fórmula'; break;
+      case 'DESARROLLO': emoji = '⚙'; titulo = 'Desarrollo'; break;
+      case 'DESGLOSE': emoji = '🧬'; titulo = 'Desglose'; break;
+      default: emoji = '📌'; titulo = etiqueta;
     }
     matches.push({
       emoji,
-      titulo: match[2].trim(),
+      titulo,
       start: match.index,
       end: match.index + match[0].length,
     });
@@ -64,18 +64,6 @@ function parseSecciones(explicacion: string): SeccionExplicacion[] {
   }
 
   // Si no hay ningún patrón reconocido, devolver todo como una sola sección
-  if (matches.length === 0) {
-    const regexLegacy2 = /###\s*([✅🔍💡])\s*(.+?)(?:\n|$)/g;
-    while ((match = regexLegacy2.exec(explicacion)) !== null) {
-      matches.push({
-        emoji: match[1],
-        titulo: match[2].trim(),
-        start: match.index,
-        end: match.index + match[0].length,
-      });
-    }
-  }
-
   if (matches.length === 0) {
     return [{
       emoji: '📖',
