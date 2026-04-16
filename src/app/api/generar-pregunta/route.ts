@@ -7,6 +7,27 @@ import type {
   PreguntaGenerada
 } from '@/types/ia';
 
+// ============================================================================
+// SANITIZADOR: Elimina iteraciones visibles de cálculo en el campo explicacion
+// Ocurre cuando modelos pequeños externalisan su chain-of-thought en la respuesta
+// ============================================================================
+function sanitizarExplicacion(texto: string): string {
+  const patronesIteracion = [
+    /Sin embargo,?\s+evaluando correctamente[^\n]*/gi,
+    /Reevaluando con mayor precisi[oó]n[^\n]*/gi,
+    /[Pp]ero,?\s+reevaluando[^\n]*/gi,
+    /[Cc]orrigiendo mi c[aá]lculo[^\n]*/gi,
+    /[Aa]l recalcular[^\n]*/gi,
+    /[Mm]i c[aá]lculo anterior[^\n]*/gi,
+    /[Ll]a respuesta correcta es en realidad[^\n]*/gi,
+  ];
+  let resultado = texto;
+  for (const patron of patronesIteracion) {
+    resultado = resultado.replace(patron, '');
+  }
+  return resultado.replace(/\n{3,}/g, '\n\n').trim();
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<RespuestaGenerarPregunta>> {
   try {
     const body: SolicitudGenerarPregunta = await request.json();
@@ -85,6 +106,11 @@ PROTOCOLO ANTI-ALUCINACIONES Y RESOLUCIÓN OBLIGATORIA
 3. CERO SUPOSICIONES: Como este texto se genera ANTES de que el alumno responda, TIENES PROHIBIDO usar frases como "Tu opción", "Si elegiste esta", o "Te equivocaste". Sé 100% objetivo.
 4. PROHIBICIÓN DE MATEMÁTICAS INVENTADAS: Si la materia es BIOLOGÍA, HISTORIA, GEOGRAFÍA o LITERATURA, TIENES ESTRICTAMENTE PROHIBIDO generar problemas de cálculo matemático complejo (como integrales, derivadas, o crecimiento exponencial). Limítate a teoría, conceptos, genética básica (cuadros de Punnett) y análisis de sistemas.
 5. REGLA DE ORO DE RESPUESTA: El campo "respuestaCorrecta" DEBE contener el texto íntegro de la opción, exactamente como aparece en el arreglo de "opciones". Está ESTRICTAMENTE PROHIBIDO poner solo la letra (A, B, C, D) o frases como "Opción B".
+6. PROHIBICIÓN DE ITERACIONES VISIBLES (CRÍTICO): El campo "explicacion" es una Masterclass directa y definitiva. TIENES TERMINANTEMENTE PROHIBIDO incluir frases de revisión interna como: "Sin embargo, evaluando correctamente...", "Reevaluando con mayor precisión...", "Corrigiendo mi cálculo anterior...", "Al recalcular...", "La respuesta correcta es en realidad...", "Pero, reevaluando...". El cálculo se hace UNA SOLA VEZ y se presenta como verdad absoluta.
+7. VERDAD MATEMÁTICA ABSOLUTA: Tu cálculo interno produce un resultado R. La respuestaCorrecta DEBE ser R. Si R no está entre las opciones que generaste, RE-GENERA las opciones para incluir R. TIENES TERMINANTEMENTE PROHIBIDO realizar "simplificaciones mágicas" para forzar que un resultado incorrecto parezca correcto (ej. decir "$8/3 = 4$, simplificando" es un FALLO CRÍTICO). La matemática NO se negocia.
+8. REGLA DE ESCAPE JSON PARA LaTeX (EJEMPLO OBLIGATORIO): Dentro de un string JSON, todo comando LaTeX DEBE llevar DOBLE barra invertida. Ejemplo concreto de un JSON correcto:
+   {"pregunta": "Calcula $\\\\tan(30^\\\\circ)$", "opciones": ["$\\\\frac{\\\\sqrt{3}}{3}$", "$\\\\sqrt{3}$", "1", "$\\\\frac{1}{2}$"], "respuestaCorrecta": "$\\\\frac{\\\\sqrt{3}}{3}$"}
+   Si escribes \\tan en lugar de \\\\tan, el frontend mostrará "an" en lugar de "tan". Si escribes \\text, mostrará "ext". Es un error CRÍTICO.
 
 ${esLectura ? `
 ================================================================================
@@ -163,19 +189,28 @@ REGLAS DE FORMATO Y LaTeX (CRÍTICO PARA EL RENDERIZADO)
 2. REGLA MATEMÁTICA: Solo usa "$...$" (dólar simple) para fórmulas complejas.Toda fórmula matemática DEBE estar dentro de$: $\frac{a}{b}$, $\int$, $\sqrt{}$, $\pi$.
 
 3. DOBLE ESCAPE DE BACKSLASHES EN JSON (CRÍTICO):
-**Como tu respuesta es un objeto JSON, TODOS los comandos de LaTeX deben tener CUATRO barras invertidas en este archivo para que el JSON reciba 2 barras. Si usas menos, el JSON se rompe al parsearse.**
+Como tu respuesta es un string JSON, todo backslash LaTeX necesita DOBLE ESCAPE:
 
-❌ MAL: \frac{a}{b}, \int, \sqrt, \pi
+❌ INCORRECTO (el frontend mostrará basura):
+  - \frac → aparece como carácter de salto de página + "rac"
+  - \tan → aparece como TAB + "an"
+  - \text → aparece como TAB + "ext"
+  - \beta → aparece como BACKSPACE + "eta"
 
-✅ BIEN: \\frac{a}{b}, \\int, \\sqrt, \\pi
+✅ CORRECTO (el frontend renderiza LaTeX):
+  - \\frac{a}{b}  → se ve como fracción
+  - \\tan(x)      → se ve como tangente
+  - \\text{cm}    → se ve como texto "cm"
+  - \\beta        → se ve como β
 
-Además, RECUERDA que toda fórmula matemática o fracción DEBE ir estrictamente dentro de signos de dólar simples ($ ... $). Si no pones los dólares, la plataforma no dibujará la ecuación.
+EJEMPLO DE JSON COMPLETO CORRECTO:
+{"pregunta": "Calcula $\\\\tan(30^\\\\circ)$", "opciones": ["$\\\\frac{\\\\sqrt{3}}{3}$"]}
+
+Toda fórmula matemática DEBE ir dentro de signos de dólar simples ($...$).
 
 - Si en la explicación dices "el resultado es 14", la respuestaCorrecta debe contener "14".
 - Si dices "x = 5", la respuestaCorrecta debe ser exactamente "x = 5" o "5".
 CUALQUIER discrepancia = FALLO CRÍTICO.
-
-¡ERROR CRÍTICO DETECTADO!: Si escribes \text{m/s} el sistema fallará. DEBES ESCRIBIR \\text{m/s} (CON CUATRO BARRAS en este archivo). Todo comando de LaTeX (\\frac, \\lambda, \\text, \\sqrt) DEBE llevar cuatro barras invertidas obligatoriamente para no romper el JSON.
 
 3. ESTÁNDAR PEDAGÓGICO "ANTI-FLOJERA":
 Prohibido usar frases circulares como:
@@ -340,11 +375,18 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
 ${instruccionesEspeciales}`;
 
-    const MODELOS_FALLBACK = [
+    // Para matemáticas/física/química se usa primero el modelo 70B que tiene
+    // mayor capacidad de razonamiento y respeta mejor las instrucciones de cálculo silencioso
+    const MODELOS_FALLBACK = esMatesFisicaQuimica ? [
+      'llama-3.3-70b-versatile',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+      'moonshotai/kimi-k2-instruct',
+      'llama-3.1-8b-instant',
+    ] : [
       'llama-3.1-8b-instant',
       'meta-llama/llama-4-scout-17b-16e-instruct',
       'moonshotai/kimi-k2-instruct',
-      'llama-3.3-70b-versatile'
+      'llama-3.3-70b-versatile',
     ];
 
     let modeloUsado = '';
@@ -409,6 +451,8 @@ ${instruccionesEspeciales}`;
           } else {
             explicacionFinal = String(q.explicacion || '');
           }
+          // Sanitizar: eliminar párrafos de revisión interna (chain-of-thought visible)
+          explicacionFinal = sanitizarExplicacion(explicacionFinal);
 
           const textoLecturaRaw = q.textoLectura ? String(q.textoLectura) : undefined;
 
@@ -425,6 +469,20 @@ ${instruccionesEspeciales}`;
             tema_usado: temaAleatorio,
           };
         });
+
+        // ── Validador de consistencia ─────────────────────────────────────
+        // Detecta si respuestaCorrecta no está textualmente en el arreglo
+        // de opciones. Si hay discrepancia, lanza error para que el loop de
+        // fallback reintente con el siguiente modelo.
+        const preguntaInconsistente = validatedQuestions.find(q =>
+          !q.opciones.some(op => op.trim() === q.respuestaCorrecta.trim())
+        );
+        if (preguntaInconsistente) {
+          throw new Error(
+            `Inconsistencia IA: respuestaCorrecta="${preguntaInconsistente.respuestaCorrecta}" no encontrada en opciones: [${preguntaInconsistente.opciones.join(' | ')}]`
+          );
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         return NextResponse.json({
           success: true,
