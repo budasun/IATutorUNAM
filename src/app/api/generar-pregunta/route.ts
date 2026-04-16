@@ -215,6 +215,25 @@ Debes usar EXACTAMENTE estos 5 bloques en este orden:
 `}
 
 ================================================================================
+ANÁLISIS DE DISTRACTORES (OBLIGATORIO)
+================================================================================
+PROHIBIDO SER GENÉRICO: Tienes estrictamente prohibido dar una lista de "posibles errores". Debes analizar las opciones específicas que generaste.
+
+ANÁLISIS POR OPCIÓN: El bloque [ANÁLISIS] DEBE analizar las 3 opciones incorrectas una por una.
+
+FORMATO OBLIGATORIO (dentro del bloque [ANÁLISIS]):
+Opción [Letra]: [Explicación de por qué este valor específico es un error]
+Opción [Letra]: [Explicación del error lógico]
+Opción [Letra]: [Explicación del error conceptual]
+
+Ejemplo de formato correcto:
+Opción B: Es el resultado de $\\\\frac{1}{2}$ (error de no invertir la fracción)
+Opción C: Confunde perímetro con área
+Opción D: Omite la raíz cuadrada
+
+Recuerda: Usa $\\\\frac{1}{2}$ para renderizar fracciones en el análisis también.
+
+================================================================================
 REGLAS DE FORMATO LaTeX (CRÍTICO PARA RENDERIZADO)
 ================================================================================
 1. EXPONENTES: PROHIBIDO usar ^, ², ³, ⁿ. Usa SIEMPRE $x^{2}$, $y^{3}$, $e^{x}$ dentro de $.
