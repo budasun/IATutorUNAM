@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { groqClient } from '@/lib/groq/client';
+import { obtenerModelosFallback, obtenerParametrosModelo, extraerJson } from '@/lib/groq/modelos';
 import { METODOLOGIA_UNAM, TEMARIO_UNAM } from '@/data/unam_temario';
 import type {
   SolicitudGenerarPregunta,
@@ -33,7 +34,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<Respuesta
     const body: SolicitudGenerarPregunta = await request.json();
 
     const { id_materia, area, model, temas_excluidos } = body;
-    const modeloAI = model || 'llama-3.1-8b-instant';
 
     if (!id_materia || typeof id_materia !== 'string') {
       return NextResponse.json(
@@ -375,35 +375,25 @@ Debes responder SOLO con JSON válido, sin texto adicional. Usa este formato exa
 
 ${instruccionesEspeciales}`;
 
-    // Para matemáticas/física/química se usa primero el modelo 70B que tiene
-    // mayor capacidad de razonamiento y respeta mejor las instrucciones de cálculo silencioso
-    const MODELOS_FALLBACK = esMatesFisicaQuimica ? [
-      'llama-3.3-70b-versatile',
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'moonshotai/kimi-k2-instruct',
-      'llama-3.1-8b-instant',
-    ] : [
-      'llama-3.1-8b-instant',
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'moonshotai/kimi-k2-instruct',
-      'llama-3.3-70b-versatile',
-    ];
+    // Para matemáticas/física/química se prioriza el modelo de mayor capacidad
+    // de razonamiento, que respeta mejor las instrucciones de cálculo silencioso
+    const MODELOS_FALLBACK = obtenerModelosFallback({
+      esMatesFisicaQuimica: Boolean(esMatesFisicaQuimica),
+      modeloSolicitado: typeof model === 'string' ? model : undefined,
+    });
 
-    let modeloUsado = '';
     let ultimoError = '';
 
     for (const modelo of MODELOS_FALLBACK) {
       try {
-        modeloUsado = modelo;
         const chatCompletion = await groqClient.chat.completions.create({
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          model: modelo,
+          ...obtenerParametrosModelo(modelo, 4096),
           response_format: { type: 'json_object' },
           temperature: 0.1,
-          max_tokens: 2048,
         });
 
         const responseContent = chatCompletion.choices[0]?.message?.content;
@@ -412,8 +402,8 @@ ${instruccionesEspeciales}`;
           continue;
         }
 
-        const parsedResponse = JSON.parse(responseContent);
-        const preguntasRaw = parsedResponse.preguntas;
+        const parsedResponse = extraerJson(responseContent) as { preguntas?: unknown } | null;
+        const preguntasRaw = parsedResponse?.preguntas;
 
         if (!Array.isArray(preguntasRaw) || preguntasRaw.length === 0) {
           console.warn(`Fallo con modelo ${modelo}, array vacío, intentando siguiente...`);

@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import { groqClient } from '@/lib/groq/client';
+import { obtenerModelosFallback, obtenerParametrosModelo, extraerJson } from '@/lib/groq/modelos';
 
 export async function POST(req: Request) {
   try {
@@ -33,23 +30,20 @@ export async function POST(req: Request) {
       No incluyas markdown adicional fuera del JSON.
     `;
 
-    const MODELOS_FALLBACK = [
-      'llama-3.1-8b-instant',
-      'meta-llama/llama-4-scout-17b-16e-instruct',
-      'moonshotai/kimi-k2-instruct',
-      'llama-3.3-70b-versatile'
-    ];
+    const MODELOS_FALLBACK = obtenerModelosFallback({ esMatesFisicaQuimica: true });
 
     let ultimoError = '';
 
     for (const modelo of MODELOS_FALLBACK) {
       try {
-        const completion = await groq.chat.completions.create({
-          messages: [{ role: 'system', content: promptText }],
-          model: modelo,
-          temperature: 0.3,
+        const completion = await groqClient.chat.completions.create({
+          messages: [
+            { role: 'system', content: promptText },
+            { role: 'user', content: `Genera la píldora de estudio de "${tema}" para la materia ${materia}.` }
+          ],
+          ...obtenerParametrosModelo(modelo, 4096),
           response_format: { type: 'json_object' },
-          max_tokens: 4096,
+          temperature: 0.3,
         });
 
         const respuestaIA = completion.choices[0]?.message?.content;
@@ -58,8 +52,14 @@ export async function POST(req: Request) {
           continue;
         }
 
+        const guia = extraerJson(respuestaIA);
+        if (!guia) {
+          console.warn(`Fallo con modelo ${modelo}, JSON no interpretable, intentando siguiente...`);
+          ultimoError = 'Respuesta no interpretable como JSON';
+          continue;
+        }
+
         console.log(`Guía generada con modelo: ${modelo}`);
-        const guia = JSON.parse(respuestaIA);
         return NextResponse.json({ success: true, data: guia });
 
       } catch (error: unknown) {
